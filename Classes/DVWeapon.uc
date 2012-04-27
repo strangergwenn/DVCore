@@ -18,7 +18,6 @@ var (DVWeapon) array<SoundCue>	WeaponFireSnd;
 var (DVWeapon) SoundCue			WeaponEmptySound;
 
 var (DVWeapon) bool				bUseTargetIllumination;
-var (DVWeapon) bool				bUseBeam;
 var (DVWeapon) float 			ZoomedFOV;
 var (DVWeapon) float			RecoilAngle;
 var (DVWeapon) float 			ZoomSensitivity;
@@ -51,7 +50,7 @@ var const int					MaxAmmo;
 replication
 {
 	if ( bNetDirty )
-		bUseBeam, bZoomed, bBeamActive, BeamPSC;
+		bZoomed;
 }
 
 
@@ -70,8 +69,9 @@ simulated function TimeWeaponEquipping()
 	Mesh.SetHidden(false);
 	PC = DVPlayerController(Instigator.Controller);
 	
-	`log("TimeWeaponEquipping " $ self.class);
-	if (Role == ROLE_Authority && ZP != None)
+	`log("TimeWeaponEquipping " $ self $ "for " $ ZP);
+	//if (Role == ROLE_Authority && ZP != None)
+	if (WorldInfo.NetMode != NM_DedicatedServer && ZP != None)
 	{
 		`log("TimeWeaponEquipping Authority");
 		ZP.CurrentWeaponClass = self.class;
@@ -80,7 +80,7 @@ simulated function TimeWeaponEquipping()
 	ZP.WeaponChanged(self);
 	
 	SetTimer(0.5, false, 'WeaponEquipped');
-	PC.SetDebug2("Equipped : " $ self.class);
+	PC.SetDebug2("Equipped : " $ self);
 }
 
 
@@ -91,7 +91,6 @@ simulated function int AddAmmo(int amount)
 	
 	PreviousAmmo = AmmoCount;
 	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
-	`log("AddAmmo Old="$ PreviousAmmo $" New="$ AmmoCount);
 	return AmmoCount - PreviousAmmo;
 }
 
@@ -132,14 +131,10 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	}
 	
 	// FX : beam
-	if (!bBeamActive)
-	{
-		BeamPSC = new(Outer) class'ParticleSystemComponent';
-		BeamPSC.bAutoActivate = false;
-		BeamPSC.SetTemplate(BeamPSCTemplate);
-		SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
-		bBeamActive = true;
-	}
+	BeamPSC = new(Outer) class'ParticleSystemComponent';
+	BeamPSC.bAutoActivate = false;
+	BeamPSC.SetTemplate(BeamPSCTemplate);
+	SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
 }
 
 
@@ -153,9 +148,9 @@ simulated function DetachFrom( SkeletalMeshComponent MeshCpnt )
 		
 		if (MuzzleFlashLight != None)
 			SkeletalMeshComponent(Mesh).DetachComponent(MuzzleFlashLight);
+		if (MeshCpnt != None)
+			MeshCpnt.DetachComponent(Mesh);
 	}
-	if ( MeshCpnt != None &&  Mesh != None)
-		MeshCpnt.DetachComponent( mesh );
 }
 
 
@@ -199,20 +194,43 @@ simulated function Tick(float DeltaTime)
 	Impact = CalcWeaponFire(SocketLocation, EndTrace);
 	
 	// Laser pointer
-	if (bBeamActive && BeamPSC != None)
+	if (BeamPSC != None)
 	{
-		BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
+		if (UseBeam() && !bBeamActive)
+		{
+			`log("Activating beam");
+			BeamPSC.ActivateSystem();
+			bBeamActive = true;
+		}
+		else if (!UseBeam() && bBeamActive)
+		{
+			`log("Deactivating beam");
+			BeamPSC.DeactivateSystem();
+			bBeamActive = false;
+		}
+		if (bBeamActive)
+		{
+			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
+		}
 	}
+	
+	if (target == None)
+		Destroy();
 }
 
 
-exec function ToggleBeam()
+/*--- Is beam online ---*/
+reliable client simulated function bool UseBeam()
 {
-	bUseBeam = !bUseBeam;
-	if (bUseBeam)
-		BeamPSC.ActivateSystem();
+	local DVPlayerController PC;
+	PC = DVPlayerController(Instigator.Controller);
+	
+	if (PC != None)
+	{
+		return PC.GetBeamStatus();
+	}
 	else
-		BeamPSC.DeactivateSystem();
+		return true;
 }
 
 
@@ -513,9 +531,8 @@ defaultproperties
 	// User settings
 	ZoomedFOV=60
 	ZoomOffset=(X=0,Y=0,Z=1.0)
-	ZoomSocket=Mount1
+	ZoomSocket=Mount2
 	ZoomSensitivity=0.3
-	bUseBeam=false
 	
 	// Effects
 	BeamPSCTemplate=ParticleSystem'Spacegear.FX.PS_LaserBeamEffect'

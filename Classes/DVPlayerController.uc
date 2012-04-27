@@ -12,6 +12,7 @@ class DVPlayerController extends UDKPlayerController;
 	Attributes
 ----------------------------------------------------------*/
 
+var (DVPC) bool						bUseBeam;
 var (DVPC) string					DebugString0;
 var (DVPC) string					DebugString1;
 var (DVPC) string					DebugString2;
@@ -34,7 +35,7 @@ var float 							ScoreLength;
 replication
 {
 	if ( bNetDirty )
-		UserChoiceWeapon, EnnemyTeamInfo, KillCount, DeathCount;
+		bUseBeam, UserChoiceWeapon, EnnemyTeamInfo, KillCount, DeathCount;
 }
 
 
@@ -47,7 +48,7 @@ replication
 simulated event PostBeginPlay()
 {	
 	super.PostBeginPlay();
-	UpdatePawnColor();
+	//UpdatePawnColor();
 }
 
 
@@ -114,15 +115,21 @@ reliable server simulated function UpdatePawnColor()
 /*--- Beam toggle ---*/
 exec function Use()
 {
-	if (Pawn != None)
+	if (Pawn != None && DVWeapon(Pawn.Weapon) != None)
 	{
-		if (DVWeapon(Pawn.Weapon) != None)
-		{
-			DVWeapon(Pawn.Weapon).ToggleBeam();
-		}
+		SetBeamStatus(!bUseBeam);
 	}
 }
 
+reliable server simulated function SetBeamStatus(bool NewStatus)
+{
+	`log("SetBeamStatus " $ NewStatus);
+	bUseBeam = NewStatus;
+}
+reliable client simulated function bool GetBeamStatus()
+{
+	return bUseBeam;
+}
 
 /*--- Camera management  ---*/
 function UpdateRotation( float DeltaTime )
@@ -277,6 +284,8 @@ defaultproperties
 	
 	ScoreLength=3.0
 	bPrintScores=false
+	
+	bUseBeam=false
 	
 	DebugString0=""
 	DebugString1="Unconnected"

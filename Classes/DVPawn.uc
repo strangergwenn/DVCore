@@ -66,7 +66,7 @@ var float						DeathFlickerFrequency;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, TeamMaterial, Killer, UserName, EnemyPC, bWasHS, TeamLight, OffLight;
+		CurrentWeaponClass, Killer, UserName, EnemyPC, bWasHS, TeamLight, OffLight;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -86,7 +86,6 @@ simulated event ReplicatedEvent(name VarName)
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
-
 
 /*--- Initial setup ---*/
 function PostBeginPlay()
@@ -144,6 +143,7 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 	}
 }
 
+
 /*--- Debugging purpose ---*/
 simulated event BecomeViewTarget(PlayerController PC)
 {
@@ -169,12 +169,21 @@ simulated function WeaponClassChanged()
 
 		if (CurrentWeaponClass != None)
 		{
-			`log("Spawned " $ Weapon);
 			Weapon = Spawn(CurrentWeaponClass, self);
 			Weapon.Instigator = self;
+			`log("Spawned " $ Weapon);
 		}
 	}
 }
+
+
+/*--- Replication of the team material ---*
+simulated function NotifyTeamChanged()
+{
+	`log("NotifyTeamChanged " $ self);
+	super.NotifyTeamChanged();
+	//UpdateTeamColor(DVPlayerRepInfo(Controller.PlayerReplicationInfo).Team.TeamIndex);
+}*/
 
 
 /*--- Weapon change ---*/
@@ -191,10 +200,8 @@ simulated function SwitchToWeapon(class<DVWeapon> WpClass)
 /*--- Add ammo ---*/
 simulated function AddWeaponAmmo(int amount)
 {
-	`log("WTF LOL MDR " $ Weapon);
 	if (Weapon != None)
 		Weapon.AddAmmo(amount);
-	`log("WTF LOL MDR " $ DVWeapon(Weapon).AmmoCount);
 }
 
 

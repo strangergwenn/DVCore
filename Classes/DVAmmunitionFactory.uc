@@ -24,23 +24,14 @@ var (Ammunition) int			AmmoRechargeAmount;
 
 auto state Pickup
 {
-	
-	event Touch( Actor Other, PrimitiveComponent OtherComp, vector HitLocation, vector HitNormal )
-	{
-		`log("Touch " $ Other $ " " $ HitLocation);
-		super.Touch(Other, OtherComp, HitLocation, HitNormal);
-	}
-	
 	function SpawnCopyFor( Pawn Recipient )
 	{
 		`log("SpawnCopyFor " $ Recipient);
 		DVPawn(Recipient).AddWeaponAmmo(AmmoRechargeAmount);
-		//super.SpawnCopyFor(Recipient);
 	}
 	
 	function bool ValidTouch( Pawn Other )
 	{
-		`log("ValidTouch " $ Other);
 		if (Other == None)
 		{
 			return false;
@@ -50,7 +41,6 @@ auto state Pickup
 			SetTimer( 0.2, false, nameof(RecheckValidTouch) );
 			return false;
 		}
-		`log("ValidTouch OK " $ Other);
 		return true;
 	}
 	

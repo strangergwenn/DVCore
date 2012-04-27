@@ -36,7 +36,6 @@ function AddDefaultInventory(Pawn PlayerPawn)
 		Choiced = DVPlayerController(PlayerPawn.Controller).UserChoiceWeapon;
 		if (Choiced != None)
 		{
-			`log("Choice : " $ Choiced);
 			PlayerPawn.CreateInventory(Choiced);
 		}
 	}
