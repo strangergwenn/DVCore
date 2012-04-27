@@ -70,14 +70,14 @@ simulated function TimeWeaponEquipping()
 	Mesh.SetHidden(false);
 	PC = DVPlayerController(Instigator.Controller);
 	
-	`log("TimeWeaponEquipping");
+	`log("TimeWeaponEquipping " $ self.class);
 	if (Role == ROLE_Authority && ZP != None)
 	{
 		`log("TimeWeaponEquipping Authority");
-		ZP.CurrentWeaponClass = self.Class;
+		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
-		ZP.WeaponChanged(self);
 	}
+	ZP.WeaponChanged(self);
 	
 	SetTimer(0.5, false, 'WeaponEquipped');
 	PC.SetDebug2("Equipped : " $ self.class);
@@ -419,8 +419,6 @@ simulated function vector GetEffectLocation()
 			`log("GetSocketWorldLocationAndrotation GetEffectLocation failed");
 			SocketLocation = Location;
 		}
-		else
-			`log("GetSocketWorldLocationAndrotation GetEffectLocation " $ SocketLocation);
 	}
 	else
 	{

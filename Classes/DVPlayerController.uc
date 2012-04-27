@@ -12,19 +12,19 @@ class DVPlayerController extends UDKPlayerController;
 	Attributes
 ----------------------------------------------------------*/
 
-var (DVPC) string	DebugString0;
-var (DVPC) string	DebugString1;
-var (DVPC) string	DebugString2;
+var (DVPC) string					DebugString0;
+var (DVPC) string					DebugString1;
+var (DVPC) string					DebugString2;
 
-var (DVPC) array<class<DVWeapon> > 		WeaponList;
+var (DVPC) array<class<DVWeapon> > 	WeaponList;
 
-var repnotify class<DVWeapon> 			UserChoiceWeapon;
-var DVTeamInfo							EnnemyTeamInfo;
+var class<DVWeapon> 				UserChoiceWeapon;
+var DVTeamInfo						EnnemyTeamInfo;
 
-var bool				bPrintScores;
-var int 				KillCount;
-var int					DeathCount;
-var float 				ScoreLength;
+var bool							bPrintScores;
+var int 							KillCount;
+var int								DeathCount;
+var float 							ScoreLength;
 
 
 /*----------------------------------------------------------
@@ -48,8 +48,6 @@ simulated event PostBeginPlay()
 {	
 	super.PostBeginPlay();
 	UpdatePawnColor();
-	
-	WeaponList = DVGame(WorldInfo.Game).DefaultWeaponList;
 }
 
 
@@ -105,7 +103,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	UpdatePawnColor();
 }
 
-simulated function UpdatePawnColor()
+reliable server simulated function UpdatePawnColor()
 {
 	`log("UpdatePawnColor");
 	if (PlayerReplicationInfo != None)
@@ -191,7 +189,7 @@ simulated function string GetPlayerName()
 
 
 /*--- Call this to respawn the player ---*/
-reliable client simulated function HUDRespawn(byte NewWeapon)
+reliable server simulated function HUDRespawn(byte NewWeapon)
 {
 	`log("HUDRespawn choice : " $ WeaponList[NewWeapon]);
 	
@@ -206,6 +204,12 @@ exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
 	SetUserChoice(NewWeapon, false);
 	ServerSetUserChoice(NewWeapon, false);
 }
+
+reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
+{
+	WeaponList = NewList;
+}
+
 
 /* Client weapon switch */
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)

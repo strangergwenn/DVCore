@@ -11,8 +11,14 @@ class DVGame extends UDKGame;
 	Attributes
 ----------------------------------------------------------*/
 
-var class<DVWeapon>						DefaultWeapon;
-var (DVPC) array<class<DVWeapon> > 		DefaultWeaponList;
+var class<DVWeapon>					DefaultWeapon;
+var array<class<DVWeapon> > 		DefaultWeaponList;
+
+replication
+{
+	if ( bNetDirty )
+		DefaultWeapon;
+}
 
 
 /*----------------------------------------------------------
@@ -24,6 +30,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 {
 	local class<DVWeapon> Choiced;
 	
+	`log("AddDefaultInventory for " $ PlayerPawn);
 	if (PlayerPawn.Controller != None)
 	{
 		Choiced = DVPlayerController(PlayerPawn.Controller).UserChoiceWeapon;
@@ -35,7 +42,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 	}
 	else
 	{
-		`log("VERY WRONG - BAD WEAPON SPAWNED");
+		`log("Spawned default weapon, this is wrong.");
 		PlayerPawn.CreateInventory(DefaultWeapon);
 	}
 	PlayerPawn.AddDefaultInventory();

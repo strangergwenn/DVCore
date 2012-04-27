@@ -66,7 +66,7 @@ var float						DeathFlickerFrequency;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, Killer, UserName, EnemyPC, bWasHS, TeamLight, OffLight;
+		CurrentWeaponClass, TeamMaterial, Killer, UserName, EnemyPC, bWasHS, TeamLight, OffLight;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -103,7 +103,7 @@ function PostBeginPlay()
 
 
 /*--- Material setup ---*/
-simulated function UpdateTeamColor(byte TeamIndex)
+reliable server simulated function UpdateTeamColor(byte TeamIndex)
 {
 	if(TeamMaterials[TeamIndex] != None)
 	{
@@ -156,6 +156,7 @@ simulated event BecomeViewTarget(PlayerController PC)
 /*--- Replicated weapon switch ---*/
 simulated function WeaponClassChanged()
 {
+	`log("WeaponClassChanged");
 	if ((Weapon == None || Weapon.Class != CurrentWeaponClass) && Mesh.SkeletalMesh != None)
 	{
 		if (Weapon != None)
