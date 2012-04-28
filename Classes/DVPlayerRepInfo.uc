@@ -24,8 +24,6 @@ var int								DeathCount;
 simulated event ReplicatedEvent(name VarName)
 {
 	local DVPawn DVP;
-	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
-
 	if ( VarName == 'Team' )
 	{
 		foreach WorldInfo.AllPawns(class'DVPawn', DVP)
@@ -51,6 +49,7 @@ simulated function ScorePoint (bool bTeamKill)
 	else
 		KillCount += 1;
 }
+
 simulated function int GetPointCount()
 {
 	return KillCount;
@@ -60,9 +59,9 @@ simulated function int GetPointCount()
 /*--- Death scored ---*/
 simulated function ScoreDeath()
 {
-	`log("ScoreDeath " $ self);
 	DeathCount += 1;
 }
+
 simulated function int GetDeathCount()
 {
 	return DeathCount;
@@ -78,4 +77,3 @@ defaultproperties
 	KillCount=0
 	DeathCount=0
 }
-

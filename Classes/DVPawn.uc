@@ -38,7 +38,7 @@ var AnimNodeBlend 				FeignDeathBlend;
 var repnotify class<DVWeapon> 	CurrentWeaponClass;
 var DynamicLightEnvironmentComponent LightEnvironment;
 
-var LinearColor					TeamLight;
+var repnotify LinearColor		TeamLight;
 var LinearColor					OffLight;
 
 var string						Killer;
@@ -72,9 +72,19 @@ replication
 simulated event ReplicatedEvent(name VarName)
 {
 	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
+	
+	// Weapon class
 	if ( VarName == 'CurrentWeaponClass' )
 	{
 		WeaponClassChanged();
+		return;
+	}
+	
+	// Team color
+	if ( VarName == 'TeamLight' && Controller != None)
+	{
+		if ((Controller.PlayerReplicationInfo != None)
+			UpdateTeamColor(DVPlayerRepInfo(Controller.PlayerReplicationInfo).Team.TeamIndex);
 		return;
 	}
 	else
@@ -103,7 +113,7 @@ function PostBeginPlay()
 
 
 /*--- Material setup ---*/
-reliable server simulated function UpdateTeamColor(byte TeamIndex)
+simulated function UpdateTeamColor(byte TeamIndex)
 {
 	if(TeamMaterials[TeamIndex] != None)
 	{
@@ -296,6 +306,8 @@ simulated function GetWeaponRecoil(float angle)
 {
 	RecoilAngle += angle;
 }
+
+/*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
 {
 	if (RecoilAngle > 0.0)
@@ -470,7 +482,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 }
 
 
-/*--- Death animation ---*/
+/*--- Death aftermath ---*/
 simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 {
 	local vector ApplyImpulse, ShotDir;
@@ -482,14 +494,15 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	TakeHitLocation = HitLoc;
 	HitDamageType = DamageType;
 	bReplicateMovement = false;
-
-	// Weapons
-	if (Weapon != None)
+	
+	// Weapon
+	if (Weapon != None )
 	{
 		DVWeapon(Weapon).DetachFrom(Mesh);
 		Weapon.Destroy();
 	}
-	if ( WorldInfo.NetMode == NM_DedicatedServer )
+	
+	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
 		GotoState('Dying');
 		return;
@@ -581,6 +594,7 @@ simulated State Dying
 	/*--- Marker movement logic ---*/
 	simulated function Tick(float DeltaTime)
 	{
+		// Marker
 		if (KM != None)
 			KM.SetLocation(Location);
 	}

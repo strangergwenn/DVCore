@@ -58,27 +58,7 @@ simulated function ChooseWeapons()
 
 /*--- Score management ---*/
 simulated function UpdateAllScores()
-{/*
-	local DVPlayerRepInfo PRI;
-	local DVPawn P;
-	local int i;
-	
-	i = 0;
-	ForEach AllActors(class'DVPawn', P)
-	{
-		PRI = DVPlayerRepInfo(P.PlayerReplicationInfo);
-		if (PRI != None)
-		{
-			PutShadedText(PRI.PlayerName, 
-				" " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
-				200, 100 + 30 * i);
-		}
-		else
-		{
-			PutShadedText(""$P, " has no replication info", 200, 100 + 30 * i);
-		}
-		i += 1;
-	}*/
+{
 	local DVPlayerRepInfo PRI;
 	local int i;
 	
@@ -118,7 +98,6 @@ event PostRender()
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
-	
 	//PutShadedText("PC: ", myOwner.DebugString0, 5, 50);
 	//PutShadedText("TI0: ", ""$TI0.GetScore(), 5, 70);
 	//PutShadedText("TI1: ", ""$TI1.GetScore(), 5, 90);

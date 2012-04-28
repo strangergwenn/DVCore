@@ -24,6 +24,7 @@ var DVTeamInfo						EnemyTeamInfo;
 
 var bool							bPrintScores;
 var float 							ScoreLength;
+var float							CleanUpFrequency;
 
 
 /*----------------------------------------------------------
@@ -34,12 +35,6 @@ replication
 {
 	if ( bNetDirty )
 		bUseBeam, UserChoiceWeapon, EnemyTeamInfo;
-}
-
-simulated event ReplicatedEvent(name VarName)
-{
-	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
-	Super.ReplicatedEvent(VarName);
 }
 
 
@@ -53,18 +48,6 @@ simulated event PostBeginPlay()
 {	
 	super.PostBeginPlay();
 	UpdatePawnColor();
-}
-
-
-/*--- Debug ---*/
-event PlayerTick( float DeltaTime )
-{
-	if (PlayerReplicationInfo != None)
-	{
-		if (PlayerReplicationInfo.Team != None)
-			SetDebug0("PC is "$ self $" team is " $ DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
-	}
-	super.PlayerTick(DeltaTime);
 }
 
 
@@ -179,6 +162,7 @@ simulated function string GetPlayerName()
 /*--- Pawn death ---*/
 function NotifyPawnDied()
 {
+	// Replication data
 	`log("NotifyPawnDied for " $ self);
 	if (PlayerReplicationInfo != None)
 		DVPlayerRepInfo(PlayerReplicationInfo).ScoreDeath();
@@ -221,7 +205,7 @@ reliable server simulated function HUDRespawn(byte NewWeapon)
 /* Client weapon switch */
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
-	`log("SetUserChoice choice : " $ NewWeapon);
+	`log("Player choosed " $ NewWeapon);
 	
 	// Survivors will be shot again
 	if (bShouldKill && Pawn != None)
@@ -244,7 +228,6 @@ reliable client simulated function bool GetBeamStatus()
 
 reliable server simulated function UpdatePawnColor()
 {
-	`log("UpdatePawnColor");
 	if (PlayerReplicationInfo != None)
 		DVPawn(Pawn).UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
 }
@@ -252,7 +235,6 @@ reliable server simulated function UpdatePawnColor()
 
 reliable server simulated function SetEnemyTeamInfo(DVTeamInfo TI)
 {
-	`log("SetEnemyTeamInfo " $ TI);
 	EnemyTeamInfo = TI;
 }
 
@@ -285,6 +267,7 @@ reliable server simulated function SetBeamStatus(bool NewStatus)
 	bUseBeam = NewStatus;
 }
 
+
 /*----------------------------------------------------------
 	States
 ----------------------------------------------------------*/
@@ -303,9 +286,9 @@ state Dead
 defaultproperties
 {
 	ScoreLength=3.0
-	bPrintScores=false
 	
 	bUseBeam=true
+	bPrintScores=false
 	
 	DebugString0=""
 	DebugString1="Unconnected"

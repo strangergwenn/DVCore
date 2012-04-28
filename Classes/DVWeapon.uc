@@ -69,9 +69,9 @@ simulated function TimeWeaponEquipping()
 	
 	`log("TimeWeaponEquipping " $ self $ "for " $ ZP);
 	//if (Role == ROLE_Authority && ZP != None)
-	if (WorldInfo.NetMode != NM_DedicatedServer && ZP != None)
+	if (WorldInfo.NetMode == NM_DedicatedServer && ZP != None)
 	{
-		`log("TimeWeaponEquipping Authority");
+		`log("TimeWeaponEquipping server");
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
 	}
@@ -137,8 +137,9 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 
 
 /*--- Detach weapon from pawn ---*/
-simulated function DetachFrom( SkeletalMeshComponent MeshCpnt )
+simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 {
+	`log("DetachFrom " $ MeshCpnt);
 	if (Mesh != None)
 	{
 		Mesh.SetShadowParent(None);
@@ -147,6 +148,7 @@ simulated function DetachFrom( SkeletalMeshComponent MeshCpnt )
 		if (MeshCpnt != None)
 			MeshCpnt.DetachComponent(Mesh);
 	}
+	BeamPSC.DeactivateSystem();
 }
 
 
@@ -209,9 +211,6 @@ simulated function Tick(float DeltaTime)
 			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
 		}
 	}
-	
-	if (target == None)
-		Destroy();
 }
 
 
