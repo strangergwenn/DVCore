@@ -65,7 +65,6 @@ simulated function ScoreDeath()
 }
 simulated function int GetDeathCount()
 {
-	`log("GetDeathCount " $ self $ " of " $ DeathCount);
 	return DeathCount;
 }
 

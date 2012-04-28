@@ -7,6 +7,7 @@
  
 class DVKillMarker_HS extends DVKillMarker;
 
+
 /*----------------------------------------------------------
 	Attributes
 ----------------------------------------------------------*/
@@ -53,8 +54,8 @@ function SetPlayerData(string P1, string P2, LinearColor NewLight)
 defaultproperties
 {
 	Begin Object Name=StaticMeshComp2
-   		StaticMesh=StaticMesh'GameEffects.Mesh.SM_Headshot'
+   		StaticMesh=StaticMesh'DV_CoreEffects.Mesh.SM_Headshot'
    		Scale=0.2
 	End Object
-	HeadshotMaterialTemplate=Material'GameEffects.Material.M_Headshot'
+	HeadshotMaterialTemplate=Material'DV_CoreEffects.Material.M_Headshot'
 }

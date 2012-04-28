@@ -42,7 +42,6 @@ simulated event ReplicatedEvent(name VarName)
 /*--- Score management ---*/
 reliable server simulated function int GetScore()
 {
-	`log("GetScore " $ self $ " " $ CurrentScore);
 	return CurrentScore;
 }
 

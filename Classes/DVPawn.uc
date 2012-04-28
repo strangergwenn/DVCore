@@ -673,18 +673,11 @@ defaultproperties
 	
 	// Main mesh
 	Begin Object class=SkeletalMeshComponent Name=SkeletalMeshComponent0
-		PhysicsAsset=PhysicsAsset'CH_AnimCorrupt.Mesh.SK_CH_Corrupt_Male_Physics'
-		AnimSets(0)=AnimSet'CH_AnimHuman.Anims.K_AnimHuman_AimOffset'
-		AnimSets(1)=AnimSet'CH_AnimHuman.Anims.K_AnimHuman_BaseMale'
-		AnimTreeTemplate=AnimTree'CH_AnimHuman_Tree.AT_CH_Human'
-		SkeletalMesh=SkeletalMesh'Spacegear.Mesh.SK_SpaceSuit'
-		
 		bHasPhysicsAssetInstance=true
 		bPerBoneMotionBlur=true
 		BlockZeroExtent=true
 		BlockRigidBody=true
 		CollideActors=true
-		
 		Rotation=(Yaw=-16384)
 		Scale=2.0
 	End Object
@@ -692,8 +685,6 @@ defaultproperties
 	Components.Add(SkeletalMeshComponent0)
 	
 	// Materials
-	TeamMaterials[0]=MaterialInstanceConstant'Spacegear.Material.M_SpaceSuit_Red'
-	TeamMaterials[1]=MaterialInstanceConstant'Spacegear.Material.M_SpaceSuit_Blue'
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 	
 	// Cylinder
@@ -724,9 +715,9 @@ defaultproperties
 	WeaponSocket=WeaponPoint
 	WeaponSocket2=DualWeaponPoint
 	InventoryManagerClass=class'DVCore.DVInventoryManager'
-	HitPSCTemplate=ParticleSystem'GameEffects.FX.PS_BloodHit'
-	BloodDecalPSCTemplate=ParticleSystem'GameEffects.FX.PS_BloodDecal'
-	LargeHitPSCTemplate=ParticleSystem'GameEffects.FX.PS_BloodHit_Large'
+	HitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit'
+	BloodDecalPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodDecal'
+	LargeHitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit_Large'
 	
 	// Jumping
 	JumpZ=600.0

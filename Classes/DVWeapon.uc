@@ -33,8 +33,6 @@ var (DVWeapon) ParticleSystem	BeamPSCTemplate;
 
 var ParticleSystemComponent		MuzzleFlashPSC;
 var (DVWeapon) ParticleSystem	MuzzleFlashPSCTemplate;
-var UDKExplosionLight			MuzzleFlashLight;
-var (DVWeapon) class<UDKExplosionLight> MuzzleFlashLightClass;
 
 var bool						bWeaponEmpty;
 var bool						bBeamActive;
@@ -146,8 +144,6 @@ simulated function DetachFrom( SkeletalMeshComponent MeshCpnt )
 		Mesh.SetShadowParent(None);
 		Mesh.SetLightEnvironment(None);
 		
-		if (MuzzleFlashLight != None)
-			SkeletalMeshComponent(Mesh).DetachComponent(MuzzleFlashLight);
 		if (MeshCpnt != None)
 			MeshCpnt.DetachComponent(Mesh);
 	}
@@ -535,10 +531,8 @@ defaultproperties
 	ZoomSensitivity=0.3
 	
 	// Effects
-	BeamPSCTemplate=ParticleSystem'Spacegear.FX.PS_LaserBeamEffect'
-	MuzzleFlashPSCTemplate=ParticleSystem'Spacegear.FX.PS_Flash'
-	MuzzleFlashLightClass=class'UTGame.UTShockMuzzleFlashLight'
-	WeaponEmptySound=SoundCue'Spacegear.Sound.A_Empty'
+	BeamPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
+	MuzzleFlashPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
 	LaserBeamSocket=Mount1
 	WeaponFireSnd[0]=None
 	WeaponFireSnd[1]=None

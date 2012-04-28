@@ -157,14 +157,14 @@ defaultproperties
 {
 	// Content
 	Begin Object class=StaticMeshComponent Name=StaticMeshComp1
-   		StaticMesh=StaticMesh'GameEffects.Mesh.SM_DoubleSquare'
+   		StaticMesh=StaticMesh'DV_CoreEffects.Mesh.SM_DoubleSquare'
    		Translation=(Z=-10)
    		Scale=0.5
 	End Object
 	Mesh = StaticMeshComp1
 	Components.Add(StaticMeshComp1)
 	CanvasTextureParamName=CanvasTexture
-	MarkerMaterialTemplate=Material'GameEffects.Material.M_DynamicText'
+	MarkerMaterialTemplate=Material'DV_CoreEffects.Material.M_DynamicText'
 	
 	// Symbol
 	Begin Object class=StaticMeshComponent Name=StaticMeshComp2
