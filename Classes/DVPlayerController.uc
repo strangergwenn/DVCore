@@ -13,9 +13,6 @@ class DVPlayerController extends UDKPlayerController;
 ----------------------------------------------------------*/
 
 var (DVPC) bool						bUseBeam;
-var (DVPC) string					DebugString0;
-var (DVPC) string					DebugString1;
-var (DVPC) string					DebugString2;
 
 var (DVPC) array<class<DVWeapon> > 	WeaponList;
 
@@ -90,10 +87,21 @@ exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
 }
 
 
+/*--- This is serious debug ---*/
+exec simulated function EndThisRightNow()
+{
+	local int i;
+	if (PlayerReplicationInfo != None)
+	{
+		for (i = 0; i < 42; i++)
+			DVPlayerRepInfo(PlayerReplicationInfo).ScorePoint(false);
+	}
+}
+
+
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
-
 
 /*--- Camera management  ---*/
 function UpdateRotation( float DeltaTime )
@@ -137,6 +145,14 @@ simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRota
 }
 
 
+/*--- End of game ---*/
+simulated function SignalEndGame(bool bHasWon)
+{
+	bPrintScores = true;
+	DVPawn(Pawn).LockCamera(true);
+}
+
+
 /*--- Ammo ---*/
 simulated function float GetAmmoPercentage()
 {
@@ -147,6 +163,16 @@ simulated function float GetAmmoPercentage()
 		return 100.0 * wp.GetAmmoRatio();
 	else
 		return 0.0;	
+}
+
+
+/*--- Team index management ---*/
+simulated function byte GetTeamIndex()
+{
+	if (PlayerReplicationInfo != None)
+		return DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex;
+	else
+		return -1;
 }
 
 
@@ -171,23 +197,6 @@ function NotifyPawnDied()
 }
 
 
-/*--- Debug ---*/
-simulated function SetDebug0 (string str)
-{
-	DebugString0 = str;
-}
-
-simulated function SetDebug1 (string str)
-{
-	DebugString1 = str;
-}
-
-simulated function SetDebug2 (string str)
-{
-	DebugString2 = str;
-}
-
-
 /*----------------------------------------------------------
 	Reliable client/server code
 ----------------------------------------------------------*/
@@ -195,7 +204,6 @@ simulated function SetDebug2 (string str)
 /*--- Call this to respawn the player ---*/
 reliable server simulated function HUDRespawn(byte NewWeapon)
 {
-	`log("HUDRespawn choice : " $ WeaponList[NewWeapon]);
 	ServerSetUserChoice(WeaponList[NewWeapon], true);
 	SetUserChoice(WeaponList[NewWeapon], true);
 	ServerReStartPlayer();
@@ -228,8 +236,10 @@ reliable client simulated function bool GetBeamStatus()
 
 reliable server simulated function UpdatePawnColor()
 {
-	if (PlayerReplicationInfo != None)
-		DVPawn(Pawn).UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
+	local byte i;
+	i = GetTeamIndex();
+	if (i != -1)
+		DVPawn(Pawn).UpdateTeamColor(i);
 }
 
 
@@ -249,8 +259,6 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 {
 	if (bShouldKill && Pawn != None)
 		Pawn.Destroy();
-	
-	`log("ServerSetUserChoice choice : " $ NewWeapon);
 	UserChoiceWeapon = NewWeapon;
 }
 
@@ -263,7 +271,6 @@ reliable client simulated function HideScores()
 
 reliable server simulated function SetBeamStatus(bool NewStatus)
 {
-	`log("SetBeamStatus " $ NewStatus);
 	bUseBeam = NewStatus;
 }
 
@@ -274,7 +281,7 @@ reliable server simulated function SetBeamStatus(bool NewStatus)
 
 state Dead
 {
-	exec function StartFire( optional byte FireModeNum )
+	exec function StartFire(optional byte FireModeNum)
 	{}
 }
 
@@ -289,8 +296,4 @@ defaultproperties
 	
 	bUseBeam=true
 	bPrintScores=false
-	
-	DebugString0=""
-	DebugString1="Unconnected"
-	DebugString2="Unconnected"
 }

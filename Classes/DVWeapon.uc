@@ -60,25 +60,20 @@ replication
 simulated function TimeWeaponEquipping()
 {
 	local DVPawn ZP;
-	local DVPlayerController PC;
 	
 	ZP = DVPawn(Owner);
 	AmmoCount = MaxAmmo;
 	Mesh.SetHidden(false);
-	PC = DVPlayerController(Instigator.Controller);
 	
 	`log("TimeWeaponEquipping " $ self $ "for " $ ZP);
-	//if (Role == ROLE_Authority && ZP != None)
 	if (WorldInfo.NetMode == NM_DedicatedServer && ZP != None)
 	{
-		`log("TimeWeaponEquipping server");
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
 	}
 	ZP.WeaponChanged(self);
 	
 	SetTimer(0.5, false, 'WeaponEquipped');
-	PC.SetDebug2("Equipped : " $ self);
 }
 
 

@@ -98,9 +98,6 @@ event PostRender()
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
-	//PutShadedText("PC: ", myOwner.DebugString0, 5, 50);
-	//PutShadedText("TI0: ", ""$TI0.GetScore(), 5, 70);
-	//PutShadedText("TI1: ", ""$TI1.GetScore(), 5, 90);
 	
 	// Scores
 	if (myOwner.bPrintScores)

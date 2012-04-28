@@ -48,6 +48,10 @@ function AddDefaultInventory(Pawn PlayerPawn)
 }
 
 
+/*--- Stub ---*/
+function ScoreUpdated(){}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/

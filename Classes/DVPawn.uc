@@ -108,7 +108,7 @@ function PostBeginPlay()
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
 		`log("DVLOG/IPOS/" $ self $ "/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
-		//SetTimer(0.5, true, 'LogPosition');
+		SetTimer(0.5, true, 'LogPosition');
 	}
 }
 
@@ -153,15 +153,6 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 		LeftLegControl = SkelControlFootPlacement(Mesh.FindSkelControl(LeftFootControlName));
 		RightLegControl = SkelControlFootPlacement(Mesh.FindSkelControl(RightFootControlName));
 	}
-}
-
-
-/*--- Debugging purpose ---*/
-simulated event BecomeViewTarget(PlayerController PC)
-{
-	super.BecomeViewTarget(PC);
-	User = DVPlayerController(Controller);
-	User.SetDebug1("Pawn ready");
 }
 
 
@@ -317,14 +308,6 @@ simulated function Tick(float DeltaTime)
 	}
 }
 
-/*--- Utility debug ---*/
-simulated function PostDebug(string str)
-{
-	if (User != None)
-	{
-		User.SetDebug1(str);
-	}
-}
 
 /*--- Set ragdoll on/off ---*/
 simulated function SetPawnRBChannels(bool bRagdollMode)

@@ -57,7 +57,10 @@ simulated function AddKill(bool bTeamKill)
 		CurrentScore -= 1;
 	else
 		CurrentScore += 1;
+	
+	// End
 	CurrentScore = Clamp (CurrentScore, 0, 65000);
+	DVGame(WorldInfo.Game).ScoreUpdated();
 }
 
 
