@@ -16,7 +16,56 @@ class DVAmmunitionFactory extends UDKPickupFactory
 ----------------------------------------------------------*/
 
 var (Ammunition) int			AmmoRechargeAmount;
+var (Ammunition) int			RespawnTime;
 
+
+/*----------------------------------------------------------
+	Methods
+----------------------------------------------------------*/
+
+simulated function SetPickupMesh()
+{
+	AttachComponent(PickupMesh);
+	SetPickupVisible();
+}
+
+/*--- Taken directly from Actor.uc since it overrides PickupFactory.uc ---*/
+simulated event SetInitialState()
+{
+	bScriptInitialized = true;
+	if( InitialState!='' )
+		GotoState( InitialState );
+	else
+		GotoState( 'Auto' );
+}
+
+/*--- Respawn time ---*/
+function float GetRespawnTime()
+{
+	return RespawnTime;
+}
+
+function SetRespawn()
+{
+	StartSleeping();
+}
+
+
+/*--- Rotation logic ---*/
+simulated event Tick(float DeltaTime)
+{
+	Local Rotator NewRotation;
+
+	if(WorldInfo.NetMode != NM_DedicatedServer && (WorldInfo.TimeSeconds - LastRenderTime < 0.2) )
+	{
+		if (PickupMesh != None)
+		{
+			NewRotation = PickupMesh.Rotation;
+			NewRotation.Yaw += DeltaTime * YawRotationRate;
+			PickupMesh.SetRotation(NewRotation);
+		}
+	}
+}
 
 /*----------------------------------------------------------
 	States
@@ -26,7 +75,6 @@ auto state Pickup
 {
 	function SpawnCopyFor( Pawn Recipient )
 	{
-		`log("SpawnCopyFor " $ Recipient);
 		DVPawn(Recipient).AddWeaponAmmo(AmmoRechargeAmount);
 	}
 	
@@ -41,7 +89,7 @@ auto state Pickup
 			SetTimer( 0.2, false, nameof(RecheckValidTouch) );
 			return false;
 		}
-		return true;
+		return (DVPlayerController(Other.Controller).GetAmmoPercentage() != 100.0);
 	}
 	
 	event BeginState(name PreviousStateName)
@@ -71,7 +119,6 @@ defaultproperties
 		CollideActors=false
 		bAcceptsLights=true
 		CastShadow=false
-		Translation=(Z=-50)
 	End Object
 	PickupMesh=BaseMeshComp
 	Components.Add(BaseMeshComp)
@@ -79,10 +126,9 @@ defaultproperties
 	
 	// Gameplay
 	AmmoRechargeAmount=50
-	InventoryType=class'UTGameContent.UTJumpBoots'
 	
 	// Settings
-	YawRotationRate=32768
+	YawRotationRate=16384
 	bRotatingPickup=true
 	bMovable=false
     bStatic=false
