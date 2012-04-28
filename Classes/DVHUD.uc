@@ -59,22 +59,25 @@ simulated function ChooseWeapons()
 /*--- Score management ---*/
 simulated function UpdateAllScores()
 {
-	local DVPlayerController PC;
+	local DVPlayerRepInfo PRI;
 	local DVPawn P;
 	local int i;
 	
 	i = 0;
 	ForEach AllActors(class'DVPawn', P)
 	{
-		PC = DVPlayerController(P.Controller);
-		if (PC != None)
+		PRI = DVPlayerRepInfo(P.PlayerReplicationInfo);
+		if (PRI != None)
 		{
-			PutShadedText(
-				PC.PlayerReplicationInfo.PlayerName, 
-				" " $ PC.KillCount $ " kills, " $ PC.DeathCount $ " deaths",
+			PutShadedText(PRI.PlayerName, 
+				" " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
 				200, 100 + 30 * i);
-			i += 1;
 		}
+		else
+		{
+			PutShadedText(""$P, " has no replication info", 200, 100 + 30 * i);
+		}
+		i += 1;
 	}
 }
 
@@ -96,8 +99,8 @@ event PostRender()
 	
 	// Score
 	TI0 = DVTeamInfo(myOwner.PlayerReplicationInfo.Team);
-	TI1 = myOwner.EnnemyTeamInfo;
-	if (TI0 != None)// && TI1 != None)
+	TI1 = myOwner.EnemyTeamInfo;
+	if (TI0 != None && TI1 != None)
 	{
 		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore());
 	}
@@ -107,8 +110,8 @@ event PostRender()
 	super.PostRender();
 	
 	PutShadedText("PC: ", myOwner.DebugString0, 5, 50);
-	//PutShadedText("PW: ", myOwner.DebugString1, 5, 70);
-	//PutShadedText("WP: ", myOwner.DebugString2, 5, 90);
+	PutShadedText("TI0: ", ""$TI0.GetScore(), 5, 70);
+	PutShadedText("TI1: ", ""$TI1.GetScore(), 5, 90);
 	
 	// Scores
 	if (myOwner.bPrintScores)
@@ -124,6 +127,7 @@ function ToggleRespawnMenu()
 	
 	if (myOwner.Pawn == None && !bRespawnOpened)
 	{
+		myOwner.NotifyPawnDied();
 		HudMovie.OpenRespawnMenu();
 		bRespawnOpened = true;
 	}

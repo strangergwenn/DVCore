@@ -43,7 +43,7 @@ var LinearColor					OffLight;
 
 var string						Killer;
 var string						UserName;
-var DVPlayerController			EnemyPC;
+var DVPlayerRepInfo				EnemyPRI;
 
 var bool 						bWasHS;
 var bool						bLocked;
@@ -66,11 +66,12 @@ var float						DeathFlickerFrequency;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, Killer, UserName, EnemyPC, bWasHS, TeamLight, OffLight;
+		CurrentWeaponClass, Killer, UserName, EnemyPRI, bWasHS, TeamLight;
 }
 
 simulated event ReplicatedEvent(name VarName)
 {
+	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
 	if ( VarName == 'CurrentWeaponClass' )
 	{
 		WeaponClassChanged();
@@ -175,15 +176,6 @@ simulated function WeaponClassChanged()
 		}
 	}
 }
-
-
-/*--- Replication of the team material ---*
-simulated function NotifyTeamChanged()
-{
-	`log("NotifyTeamChanged " $ self);
-	super.NotifyTeamChanged();
-	//UpdateTeamColor(DVPlayerRepInfo(Controller.PlayerReplicationInfo).Team.TeamIndex);
-}*/
 
 
 /*--- Weapon change ---*/
@@ -437,7 +429,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
 		Killer = DVPlayerController(InstigatedBy).GetPlayerName();
 		UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "BOT";
-		EnemyPC = DVPlayerController(InstigatedBy);
+		EnemyPRI = DVPlayerRepInfo(InstigatedBy.PlayerReplicationInfo);
 	}
 	
 	// Jumping multiplication
@@ -511,10 +503,8 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	}
 	
 	// Kill attribution
-	if (EnemyPC != None)
-		EnemyPC.ScorePoint(false);
-	if (Controller != None)
-		DVPlayerController(Controller).ScoreDeath();
+	if (EnemyPRI != None)
+		EnemyPRI.ScorePoint(false);
 
 	CheckHitInfo( HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
 	bBlendOutTakeHitPhysics = false;

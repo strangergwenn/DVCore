@@ -22,6 +22,7 @@ replication
 
 simulated event ReplicatedEvent(name VarName)
 {
+	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
 	if ( VarName == 'CurrentScore' )
 	{
 		LogScore();
@@ -39,8 +40,9 @@ simulated event ReplicatedEvent(name VarName)
 ----------------------------------------------------------*/
 
 /*--- Score management ---*/
-simulated function int GetScore()
+reliable server simulated function int GetScore()
 {
+	`log("GetScore " $ self $ " " $ CurrentScore);
 	return CurrentScore;
 }
 
@@ -51,6 +53,7 @@ simulated function LogScore()
 
 simulated function AddKill(bool bTeamKill)
 {
+	`log("AddKill " $ self);
 	if (bTeamKill)
 		CurrentScore -= 1;
 	else

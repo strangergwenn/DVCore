@@ -20,11 +20,9 @@ var (DVPC) string					DebugString2;
 var (DVPC) array<class<DVWeapon> > 	WeaponList;
 
 var class<DVWeapon> 				UserChoiceWeapon;
-var DVTeamInfo						EnnemyTeamInfo;
+var DVTeamInfo						EnemyTeamInfo;
 
 var bool							bPrintScores;
-var int 							KillCount;
-var int								DeathCount;
 var float 							ScoreLength;
 
 
@@ -35,12 +33,18 @@ var float 							ScoreLength;
 replication
 {
 	if ( bNetDirty )
-		bUseBeam, UserChoiceWeapon, EnnemyTeamInfo, KillCount, DeathCount;
+		bUseBeam, UserChoiceWeapon, EnemyTeamInfo;
+}
+
+simulated event ReplicatedEvent(name VarName)
+{
+	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
+	Super.ReplicatedEvent(VarName);
 }
 
 
 /*----------------------------------------------------------
-	Methods
+	Events
 ----------------------------------------------------------*/
 
 
@@ -48,7 +52,7 @@ replication
 simulated event PostBeginPlay()
 {	
 	super.PostBeginPlay();
-	//UpdatePawnColor();
+	UpdatePawnColor();
 }
 
 
@@ -64,39 +68,6 @@ event PlayerTick( float DeltaTime )
 }
 
 
-/*--- Register a kill ---*/
-simulated function ScorePoint (bool bTeamKill)
-{
-	if (PlayerReplicationInfo != None)
-	{
-		DVTeamInfo(PlayerReplicationInfo.Team).AddKill(bTeamKill);
-	}
-	if (bTeamKill)
-		KillCount -= 1;
-	else
-		KillCount += 1;
-}
-
-
-/*--- Register a death ---*/
-simulated function ScoreDeath()
-{
-	DeathCount += 1;
-}
-
-
-/*--- Scores ---*/
-exec function ShowCommandMenu()
-{
-	bPrintScores = true;
-	SetTimer(ScoreLength, false, 'HideScores');
-}
-reliable client simulated function HideScores()
-{
-	bPrintScores = false;
-}
-
-
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
 {
@@ -104,11 +75,16 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	UpdatePawnColor();
 }
 
-reliable server simulated function UpdatePawnColor()
+
+/*----------------------------------------------------------
+	Player actions
+----------------------------------------------------------*/
+
+/*--- Scores ---*/
+exec function ShowCommandMenu()
 {
-	`log("UpdatePawnColor");
-	if (PlayerReplicationInfo != None)
-		DVPawn(Pawn).UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
+	bPrintScores = true;
+	SetTimer(ScoreLength, false, 'HideScores');
 }
 
 
@@ -121,15 +97,20 @@ exec function Use()
 	}
 }
 
-reliable server simulated function SetBeamStatus(bool NewStatus)
+
+/*--- Switch weapon class ---*/
+exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
 {
-	`log("SetBeamStatus " $ NewStatus);
-	bUseBeam = NewStatus;
+	`log("SwitchToWeaponClass choice : " $ NewWeapon);
+	SetUserChoice(NewWeapon, false);
+	ServerSetUserChoice(NewWeapon, false);
 }
-reliable client simulated function bool GetBeamStatus()
-{
-	return bUseBeam;
-}
+
+
+/*----------------------------------------------------------
+	Methods
+----------------------------------------------------------*/
+
 
 /*--- Camera management  ---*/
 function UpdateRotation( float DeltaTime )
@@ -195,26 +176,45 @@ simulated function string GetPlayerName()
 }
 
 
+/*--- Pawn death ---*/
+function NotifyPawnDied()
+{
+	`log("NotifyPawnDied for " $ self);
+	if (PlayerReplicationInfo != None)
+		DVPlayerRepInfo(PlayerReplicationInfo).ScoreDeath();
+	else
+		`log("NotifyPawnDied could not store repinfo " $ self);
+}
+
+
+/*--- Debug ---*/
+simulated function SetDebug0 (string str)
+{
+	DebugString0 = str;
+}
+
+simulated function SetDebug1 (string str)
+{
+	DebugString1 = str;
+}
+
+simulated function SetDebug2 (string str)
+{
+	DebugString2 = str;
+}
+
+
+/*----------------------------------------------------------
+	Reliable client/server code
+----------------------------------------------------------*/
+
 /*--- Call this to respawn the player ---*/
 reliable server simulated function HUDRespawn(byte NewWeapon)
 {
 	`log("HUDRespawn choice : " $ WeaponList[NewWeapon]);
-	
 	ServerSetUserChoice(WeaponList[NewWeapon], true);
 	SetUserChoice(WeaponList[NewWeapon], true);
 	ServerReStartPlayer();
-}
-
-exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
-{
-	`log("SwitchToWeaponClass choice : " $ NewWeapon);
-	SetUserChoice(NewWeapon, false);
-	ServerSetUserChoice(NewWeapon, false);
-}
-
-reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
-{
-	WeaponList = NewList;
 }
 
 
@@ -226,7 +226,6 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 	// Survivors will be shot again
 	if (bShouldKill && Pawn != None)
 	{
-		`log("ServerSetUserChoice killed " $ Pawn);
 		if (Pawn.Health > 0)
 		{
 			Pawn.KilledBy(Pawn);
@@ -236,7 +235,34 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 	UserChoiceWeapon = NewWeapon;
 }
 
-/* Server weapon switch */
+
+reliable client simulated function bool GetBeamStatus()
+{
+	return bUseBeam;
+}
+
+
+reliable server simulated function UpdatePawnColor()
+{
+	`log("UpdatePawnColor");
+	if (PlayerReplicationInfo != None)
+		DVPawn(Pawn).UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
+}
+
+
+reliable server simulated function SetEnemyTeamInfo(DVTeamInfo TI)
+{
+	`log("SetEnemyTeamInfo " $ TI);
+	EnemyTeamInfo = TI;
+}
+
+
+reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
+{
+	WeaponList = NewList;
+}
+
+
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
 	if (bShouldKill && Pawn != None)
@@ -247,20 +273,17 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 }
 
 
-/*--- Debug ---*/
-simulated function SetDebug0 (string str)
+reliable client simulated function HideScores()
 {
-	DebugString0 = str;
-}
-simulated function SetDebug1 (string str)
-{
-	DebugString1 = str;
-}
-simulated function SetDebug2 (string str)
-{
-	DebugString2 = str;
+	bPrintScores = false;
 }
 
+
+reliable server simulated function SetBeamStatus(bool NewStatus)
+{
+	`log("SetBeamStatus " $ NewStatus);
+	bUseBeam = NewStatus;
+}
 
 /*----------------------------------------------------------
 	States
@@ -278,14 +301,11 @@ state Dead
 ----------------------------------------------------------*/
 
 defaultproperties
-{	
-	DeathCount=0
-	KillCount=0
-	
+{
 	ScoreLength=3.0
 	bPrintScores=false
 	
-	bUseBeam=false
+	bUseBeam=true
 	
 	DebugString0=""
 	DebugString1="Unconnected"
