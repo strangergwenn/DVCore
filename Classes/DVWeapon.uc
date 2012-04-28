@@ -182,7 +182,8 @@ simulated function Tick(float DeltaTime)
 	if (target == None)
 		return;
 	
-	// Getting location
+	// Mesh
+	Mesh.SetHidden(false);
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
 		`log("GetSocketWorldLocationAndrotation Tick failed ");
 	

@@ -35,6 +35,7 @@ var DVKillMarker				KM;
 var DVPlayerController 			User;
 var MaterialInstanceConstant	TeamMaterial;
 var AnimNodeBlend 				FeignDeathBlend;
+var	DVWeapon					OldWeaponReference;
 var repnotify class<DVWeapon> 	CurrentWeaponClass;
 var DynamicLightEnvironmentComponent LightEnvironment;
 
@@ -83,7 +84,7 @@ simulated event ReplicatedEvent(name VarName)
 	// Team color
 	if ( VarName == 'TeamLight' && Controller != None)
 	{
-		if ((Controller.PlayerReplicationInfo != None)
+		if (Controller.PlayerReplicationInfo != None)
 			UpdateTeamColor(DVPlayerRepInfo(Controller.PlayerReplicationInfo).Team.TeamIndex);
 		return;
 	}
@@ -358,11 +359,13 @@ simulated function WeaponChanged(DVWeapon NewWeapon)
 		DVWeapon(Weapon).AttachWeaponTo(Mesh);
 		bHasWeaponAttached = true;
 	}
+	OldWeaponReference = NewWeapon;
 }
+
 simulated function HideMesh(bool Invisible)
 {
     if ( LocalPlayer(PlayerController(Controller).Player) != None )
-        mesh.SetHidden(Invisible);
+        Mesh.SetHidden(Invisible);
 }
 
 
@@ -435,7 +438,6 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	local Actor SplatteredActor;
 	
 	// Local blood
-	PostDebug("Taking fire");
 	if (Role == ROLE_Authority && InstigatedBy != None && Controller != None)
 	{
 		FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
@@ -454,7 +456,6 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	// Headshot management
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
 	{
-		PostDebug("Taken headshot");
 		bWasHS = true;
 		Damage *= 2;
 	}
@@ -496,10 +497,12 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	bReplicateMovement = false;
 	
 	// Weapon
-	if (Weapon != None )
+	`log("PlayDying");
+	if (OldWeaponReference != None)
 	{
-		DVWeapon(Weapon).DetachFrom(Mesh);
-		Weapon.Destroy();
+		`log("PlayDying weapon detach");
+		OldWeaponReference.DetachFrom(Mesh);
+		OldWeaponReference.Destroy();
 	}
 	
 	if (WorldInfo.NetMode == NM_DedicatedServer)
