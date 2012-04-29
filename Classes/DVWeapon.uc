@@ -10,17 +10,17 @@ class DVWeapon extends UDKWeapon
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
 ----------------------------------------------------------*/
 
 var (DVWeapon) MaterialImpactEffect ImpactEffect;
 var (DVWeapon) array<SoundCue>	WeaponFireSnd;
 var (DVWeapon) SoundCue			WeaponEmptySound;
 
-var (DVWeapon) bool				bUseTargetIllumination;
 var (DVWeapon) float 			ZoomedFOV;
 var (DVWeapon) float			RecoilAngle;
 var (DVWeapon) float 			ZoomSensitivity;
+
 var (DVWeapon) vector			ZoomOffset;
 
 var (DVWeapon) name				WeaponFireAnim;
@@ -28,17 +28,27 @@ var (DVWeapon) name				ZoomSocket;
 var (DVWeapon) name				LaserBeamSocket;
 var (DVWeapon) array<name> 		EffectSockets;
 
-var ParticleSystemComponent		BeamPSC;
-var (DVWeapon) ParticleSystem	BeamPSCTemplate;
 
+/*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
+
+var ParticleSystemComponent		BeamPSC;
 var ParticleSystemComponent		MuzzleFlashPSC;
+
+var (DVWeapon) ParticleSystem	BeamPSCTemplate;
 var (DVWeapon) ParticleSystem	MuzzleFlashPSCTemplate;
 
 var bool						bWeaponEmpty;
 var bool						bBeamActive;
 var bool						bFlashActive;
 var bool						bZoomed;
+
+var float						SmoothingFactor;
+
 var const int					MaxAmmo;
+
+var  rotator					InitialRotation;
 
 
 /*----------------------------------------------------------
@@ -95,9 +105,11 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 		Mesh.SetLightEnvironment(target.LightEnvironment);
 		target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
 	}
-		
+	
 	if (SkeletalMeshComponent(Mesh) == None)
 		return;
+	else
+		InitialRotation = Mesh.Rotation;
 	
 	// FX
 	if (!bFlashActive)
@@ -135,22 +147,6 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 }
 
 
-/*--- Weapon movement ---*/
-simulated event SetPosition(UDKPawn Holder)
-{
-	local rotator FinalRotation;
-	
-	SetHidden(False);
-	Mesh.SetHidden(False);
-	Mesh.SetScale3D(default.Mesh.Scale3D);
-	Mesh.SetRotation(default.Mesh.Rotation);
-
-	SetBase(Holder);
-	FinalRotation = (Holder.Controller == None) ? Holder.GetBaseAimRotation() : Holder.Controller.Rotation;
-	SetRotation(FinalRotation);
-}
-
-
 /*--- Laser pointer end --*/
 simulated function Tick(float DeltaTime)
 {
@@ -164,6 +160,9 @@ simulated function Tick(float DeltaTime)
 	target = DVPawn(Owner);
 	if (target == None)
 		return;
+	
+	// Movement smoothing
+	Mesh.SetRotation(GetSmoothedRotation());
 	
 	// Mesh
 	Mesh.SetHidden(false);
@@ -195,6 +194,44 @@ simulated function Tick(float DeltaTime)
 			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
 		}
 	}
+}
+
+
+/*--- Movement smoothing for regulation ---*/
+simulated function rotator GetSmoothedRotation()
+{
+	// Init
+	local rotator SmoothRot, CurRot, BaseAim;
+	local vector CurLoc;
+	local DVPawn P;
+	
+	// Bone rotation (measure)
+	P = DVPawn(Owner);
+	if (P == None || P.Mesh == None)
+		return InitialRotation;
+	P.Mesh.GetSocketWorldLocationAndRotation(P.WeaponSocket, CurLoc, CurRot);
+	
+	// Target (command)
+	if (P.Controller != None)
+	{
+		P.Controller.GetPlayerViewPoint(CurLoc, BaseAim);
+	}
+	
+	// Smoothing calculation
+	SmoothRot.Pitch = InitialRotation.Pitch + (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
+	SmoothRot.Yaw = InitialRotation.Yaw + (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) * SmoothingFactor;
+	SmoothRot.Roll = InitialRotation.Roll + (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
+	return SmoothRot;
+}
+
+
+/*--- Don't cry :) ---*/
+simulated function float GetCorrectedFloat(float input)
+{
+	if (input < 32768)
+		return input;
+	else
+		return (input - 65536);
 }
 
 
@@ -518,12 +555,13 @@ defaultproperties
 	RecoilAngle=100.0
 	Spread(0)=0.0
 	Spread(1)=0.0
-	
+
 	// User settings
 	ZoomedFOV=60
 	ZoomOffset=(X=0,Y=0,Z=1.0)
 	ZoomSocket=Mount2
 	ZoomSensitivity=0.3
+	SmoothingFactor=0.6
 	
 	// Effects
 	BeamPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
