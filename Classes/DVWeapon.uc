@@ -48,8 +48,6 @@ var float						SmoothingFactor;
 
 var const int					MaxAmmo;
 
-var  rotator					InitialRotation;
-
 
 /*----------------------------------------------------------
 	Replication
@@ -95,6 +93,8 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	`log("AttachWeaponTo " $ self);
 	if (SocketName == '')
 		SocketName = target.WeaponSocket;
+	if (SkeletalMeshComponent(Mesh) == None)
+		return;
 	
 	// Mesh
 	AttachComponent(Mesh);
@@ -105,11 +105,6 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 		Mesh.SetLightEnvironment(target.LightEnvironment);
 		target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
 	}
-	
-	if (SkeletalMeshComponent(Mesh) == None)
-		return;
-	else
-		InitialRotation = Mesh.Rotation;
 	
 	// FX
 	if (!bFlashActive)
@@ -201,14 +196,16 @@ simulated function Tick(float DeltaTime)
 simulated function rotator GetSmoothedRotation()
 {
 	// Init
-	local rotator SmoothRot, CurRot, BaseAim;
+	local rotator SmoothRot, CurRot, BaseAim, InitRot;
 	local vector CurLoc;
 	local DVPawn P;
 	
 	// Bone rotation (measure)
 	P = DVPawn(Owner);
 	if (P == None || P.Mesh == None)
-		return InitialRotation;
+		return rotator(vect(0, 0, 0));
+	
+	InitRot = P.default.Mesh.Rotation;
 	P.Mesh.GetSocketWorldLocationAndRotation(P.WeaponSocket, CurLoc, CurRot);
 	
 	// Target (command)
@@ -218,9 +215,9 @@ simulated function rotator GetSmoothedRotation()
 	}
 	
 	// Smoothing calculation
-	SmoothRot.Pitch = InitialRotation.Pitch + (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
-	SmoothRot.Yaw = InitialRotation.Yaw + (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) * SmoothingFactor;
-	SmoothRot.Roll = InitialRotation.Roll + (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
+	SmoothRot.Pitch = InitRot.Pitch + (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
+	SmoothRot.Yaw = InitRot.Yaw + (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) * SmoothingFactor;
+	SmoothRot.Roll = InitRot.Roll + (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
 	return SmoothRot;
 }
 
