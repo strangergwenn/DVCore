@@ -40,7 +40,7 @@ simulated event ReplicatedEvent(name VarName)
 
 
 /*--- Kill scored ---*/
-simulated function ScorePoint (bool bTeamKill)
+reliable server simulated function ScorePoint (bool bTeamKill)
 {
 	DVTeamInfo(Team).AddKill(bTeamKill);
 	
@@ -50,19 +50,19 @@ simulated function ScorePoint (bool bTeamKill)
 		KillCount += 1;
 }
 
-simulated function int GetPointCount()
+reliable server simulated function int GetPointCount()
 {
 	return KillCount;
 }
 
 
 /*--- Death scored ---*/
-simulated function ScoreDeath()
+reliable server simulated function ScoreDeath()
 {
 	DeathCount += 1;
 }
 
-simulated function int GetDeathCount()
+reliable server simulated function int GetDeathCount()
 {
 	return DeathCount;
 }

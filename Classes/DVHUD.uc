@@ -68,6 +68,7 @@ simulated function UpdateAllScores()
 		PutShadedText(PRI.PlayerName, 
 			" " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
 			200, 100 + 30 * i);
+		i += 1;
 	}
 }
 

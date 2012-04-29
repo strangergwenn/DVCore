@@ -12,12 +12,6 @@ class DVPawn extends UDKPawn;
 	Attributes
 ----------------------------------------------------------*/
 
-var (DVPawn) vector				CameraTranslateScale;
-var (DVPawn) float				CameraBehindOffset;
-var (DVPawn) float				CameraZOffset;
-var (DVPawn) bool				bThirdPerson;
-var (DVPawn) const bool			bFreeCam;
-
 var (DVPawn) const name			EyeSocket;
 var (DVPawn) const name			WeaponSocket;
 var (DVPawn) const name			WeaponSocket2;
@@ -47,11 +41,9 @@ var string						UserName;
 var DVPlayerRepInfo				EnemyPRI;
 
 var bool 						bWasHS;
-var bool						bLocked;
 var bool						bZoomed;
 var bool						bJumping;
 var bool						bLightIsOn;
-var bool						bHasWeaponAttached;
 
 var float						RecoilAngle;
 var float						RecoilLength;
@@ -71,9 +63,7 @@ replication
 }
 
 simulated event ReplicatedEvent(name VarName)
-{
-	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
-	
+{	
 	// Weapon class
 	if ( VarName == 'CurrentWeaponClass' )
 	{
@@ -84,8 +74,7 @@ simulated event ReplicatedEvent(name VarName)
 	// Team color
 	if ( VarName == 'TeamLight' && Controller != None)
 	{
-		if (Controller.PlayerReplicationInfo != None)
-			UpdateTeamColor(DVPlayerRepInfo(Controller.PlayerReplicationInfo).Team.TeamIndex);
+		UpdateTeamColor(DVPlayerController(Controller).GetTeamIndex());
 		return;
 	}
 	else
@@ -103,8 +92,6 @@ simulated event ReplicatedEvent(name VarName)
 function PostBeginPlay()
 {
 	super.PostBeginPlay();
-	
-	// Logging
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
 		`log("DVLOG/IPOS/" $ self $ "/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
@@ -126,6 +113,7 @@ simulated function UpdateTeamColor(byte TeamIndex)
 			TeamMaterial.GetVectorParameterValue('LightColor', TeamLight);
 		}
 	}
+	`log("Updated "$ self $" color with index " $ TeamIndex);
 }
 
 
@@ -159,16 +147,16 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 /*--- Replicated weapon switch ---*/
 simulated function WeaponClassChanged()
 {
-	`log("WeaponClassChanged");
-	if ((Weapon == None || Weapon.Class != CurrentWeaponClass) && Mesh.SkeletalMesh != None)
+	`log("WeaponClassChanged for " $ self);
+	if (Mesh != None && (Weapon == None || Weapon.Class != CurrentWeaponClass))
 	{
 		if (Weapon != None)
 		{
 			`log("Destroyed " $ Weapon);
 			DVWeapon(Weapon).DetachFrom(Mesh);
 			Weapon.Destroy();
+			Weapon = None;
 		}
-		Weapon = None;
 
 		if (CurrentWeaponClass != None)
 		{
@@ -177,6 +165,19 @@ simulated function WeaponClassChanged()
 			`log("Spawned " $ Weapon);
 		}
 	}
+	WeaponChanged(DVWeapon(Weapon));
+}
+
+
+/*--- Weapon attachment ---*/
+simulated function WeaponChanged(DVWeapon NewWeapon)
+{
+	if (Mesh != None && NewWeapon.Mesh != None && Weapon != None)
+	{
+		`log("WeaponChanged, attaching mesh");
+		DVWeapon(Weapon).AttachWeaponTo(Mesh);
+	}
+	OldWeaponReference = NewWeapon;
 }
 
 
@@ -196,16 +197,6 @@ simulated function AddWeaponAmmo(int amount)
 {
 	if (Weapon != None)
 		Weapon.AddAmmo(amount);
-}
-
-
-/*--- Camera default mode ---*/
-simulated function name GetDefaultCameraMode (PlayerController RequestedBy)
-{
-	if (bFreeCam)
-		return 'FreeCam_Default';
-	else
-		return 'FirstPerson';
 }
 
 
@@ -253,7 +244,8 @@ simulated function EndZoom()
 /*--- Camera status update : view calculation ---*/
 simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out rotator out_CamRot, out float out_FOV)
 {
-	if (IsCameraLocked())
+	// Locked
+	if (Controller == None || DVPlayerController(Controller).IsCameraLocked())
 		return true;
 	
 	// Zoomed
@@ -283,21 +275,13 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 	return true;
 }
 
-/*--- Camera lock management ---*/
-simulated function LockCamera(bool NewState)
-{
-	bLocked = NewState;
-}
-simulated function bool IsCameraLocked()
-{
-	return bLocked;
-}
 
 /*--- Recoil ---*/
 simulated function GetWeaponRecoil(float angle)
 {
 	RecoilAngle += angle;
 }
+
 
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
@@ -334,17 +318,6 @@ simulated function SetPawnRBChannels(bool bRagdollMode)
 
 
 /*--- Mesh settings ---*/
-simulated function WeaponChanged(DVWeapon NewWeapon)
-{
-	if (NewWeapon.Mesh != None && Weapon != None && !bHasWeaponAttached)
-	{
-		`log("WeaponChanged, attaching mesh");
-		DVWeapon(Weapon).AttachWeaponTo(Mesh);
-		bHasWeaponAttached = true;
-	}
-	OldWeaponReference = NewWeapon;
-}
-
 simulated function HideMesh(bool Invisible)
 {
     if ( LocalPlayer(PlayerController(Controller).Player) != None )
@@ -359,7 +332,7 @@ simulated function StartFire(byte FireModeNum)
 	PC = DVPlayerController(Controller);
 	
 	// Camera lock
-	if (IsCameraLocked())
+	if (PC.IsCameraLocked())
 		return;
 	if (FireModeNum == 1 && PC != None)
 		StartZoom();
@@ -379,7 +352,7 @@ simulated function StopFire(byte FireModeNum)
 	PC = DVPlayerController(Controller);
 	
 	// Camera lock
-	if (IsCameraLocked()) return;
+	if (PC.IsCameraLocked()) return;
 	
 	if (FireModeNum == 1 && PC != None)
 		EndZoom();
@@ -483,7 +456,6 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	`log("PlayDying");
 	if (OldWeaponReference != None)
 	{
-		`log("PlayDying weapon detach");
 		OldWeaponReference.DetachFrom(Mesh);
 		OldWeaponReference.Destroy();
 	}
@@ -696,13 +668,6 @@ defaultproperties
 	CylinderComponent=CollisionCylinder
 	CollisionComponent=CollisionCylinder
 	
-	// Camera
-	bLocked=false
-	bFreeCam=false
-	bThirdPerson=false
-	CameraZOffset=32.0
-	CameraBehindOffset=120.0
-	
 	// Zoom
 	bZoomed=false
 	DefaultFOV=90
@@ -710,7 +675,6 @@ defaultproperties
 	UnzoomedGroundSpeed=750
 	
 	// Weapons
-	bHasWeaponAttached=false
 	EyeSocket=EyeSocket
 	WeaponSocket=WeaponPoint
 	WeaponSocket2=DualWeaponPoint

@@ -19,6 +19,7 @@ var (DVPC) array<class<DVWeapon> > 	WeaponList;
 var class<DVWeapon> 				UserChoiceWeapon;
 var DVTeamInfo						EnemyTeamInfo;
 
+var bool							bLocked;
 var bool							bPrintScores;
 var float 							ScoreLength;
 var float							CleanUpFrequency;
@@ -31,22 +32,13 @@ var float							CleanUpFrequency;
 replication
 {
 	if ( bNetDirty )
-		bUseBeam, UserChoiceWeapon, EnemyTeamInfo;
+		bUseBeam, UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores;
 }
 
 
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
-
-
-/*--- Controller started ---*/
-simulated event PostBeginPlay()
-{	
-	super.PostBeginPlay();
-	UpdatePawnColor();
-}
-
 
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
@@ -103,6 +95,19 @@ exec simulated function EndThisRightNow()
 	Methods
 ----------------------------------------------------------*/
 
+
+/*--- Camera lock management ---*/
+simulated function LockCamera(bool NewState)
+{
+	bLocked = NewState;
+}
+
+simulated function bool IsCameraLocked()
+{
+	return bLocked;
+}
+
+
 /*--- Camera management  ---*/
 function UpdateRotation( float DeltaTime )
 {
@@ -140,7 +145,7 @@ function UpdateRotation( float DeltaTime )
 /*--- Camera lock ---*/
 simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRotation, rotator DeltaRot)
 {
-	if (Pawn != None && !DVPawn(Pawn).IsCameraLocked())
+	if (Pawn != None && !IsCameraLocked())
 		super.ProcessViewRotation(DeltaTime, out_ViewRotation, DeltaRot );
 }
 
@@ -148,8 +153,10 @@ simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRota
 /*--- End of game ---*/
 simulated function SignalEndGame(bool bHasWon)
 {
+	`log("End of game " $ self);
 	bPrintScores = true;
-	DVPawn(Pawn).LockCamera(true);
+	LockCamera(true);
+	GotoState('RoundEnded');
 }
 
 
@@ -170,7 +177,12 @@ simulated function float GetAmmoPercentage()
 simulated function byte GetTeamIndex()
 {
 	if (PlayerReplicationInfo != None)
-		return DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex;
+	{
+		if (DVPlayerRepInfo(PlayerReplicationInfo).Team != None)
+			return DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex;
+		else
+			return -1;
+	}
 	else
 		return -1;
 }
@@ -228,6 +240,14 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 }
 
 
+reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
+{
+	if (bShouldKill && Pawn != None)
+		Pawn.Destroy();
+	UserChoiceWeapon = NewWeapon;
+}
+
+
 reliable client simulated function bool GetBeamStatus()
 {
 	return bUseBeam;
@@ -255,14 +275,6 @@ reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
 }
 
 
-reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
-{
-	if (bShouldKill && Pawn != None)
-		Pawn.Destroy();
-	UserChoiceWeapon = NewWeapon;
-}
-
-
 reliable client simulated function HideScores()
 {
 	bPrintScores = false;
@@ -286,6 +298,15 @@ state Dead
 }
 
 
+state RoundEnded
+{
+	// Nope
+	ignores KilledBy, Falling, TakeDamage, Suicide, DrawHud;
+	exec function ShowCommandMenu(){}
+	function PlayerMove(float DeltaTime){}
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
@@ -294,6 +315,7 @@ defaultproperties
 {
 	ScoreLength=3.0
 	
+	bLocked=false
 	bUseBeam=true
 	bPrintScores=false
 }

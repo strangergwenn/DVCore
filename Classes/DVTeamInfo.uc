@@ -12,18 +12,11 @@ class DVTeamInfo extends TeamInfo;
 	Attributes
 ----------------------------------------------------------*/
 
-var repnotify int 		CurrentScore;
-
-replication
-{
-	if ( bNetDirty )
-		CurrentScore;
-}
 
 simulated event ReplicatedEvent(name VarName)
 {
-	`log ("REPLICATION EVENT FOR " $ self $ " OF " $ VarName);
-	if ( VarName == 'CurrentScore' )
+	`log ("REPLICATION EVENT IN " $ self $ " FOR " $ VarName);
+	if ( VarName == 'Score' )
 	{
 		LogScore();
 		return;
@@ -42,25 +35,24 @@ simulated event ReplicatedEvent(name VarName)
 /*--- Score management ---*/
 reliable server simulated function int GetScore()
 {
-	return CurrentScore;
+	return Score * 2;
 }
 
-simulated function LogScore()
+reliable server simulated function LogScore()
 {
-	`log("New score is "$ CurrentScore);
+	`log("New score is "$ Score);
 }
 
-simulated function AddKill(bool bTeamKill)
+reliable server simulated function AddKill(bool bTeamKill)
 {
 	`log("AddKill " $ self);
 	if (bTeamKill)
-		CurrentScore -= 1;
+		Score -= 1;
 	else
-		CurrentScore += 1;
+		Score += 1;
 	
 	// End
-	CurrentScore = Clamp (CurrentScore, 0, 65000);
-	DVGame(WorldInfo.Game).ScoreUpdated();
+	Score = Clamp (Score, 0, 65000);
 }
 
 
@@ -86,5 +78,5 @@ function Initialize(int NewTeamIndex)
 ----------------------------------------------------------*/
 defaultproperties
 {
-	CurrentScore=0
+	Score=0
 }

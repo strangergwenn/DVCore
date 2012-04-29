@@ -71,20 +71,8 @@ simulated function TimeWeaponEquipping()
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
 	}
-	ZP.WeaponChanged(self);
 	
 	SetTimer(0.5, false, 'WeaponEquipped');
-}
-
-
-/*--- Ammo ---*/
-simulated function int AddAmmo(int amount)
-{
-	local int PreviousAmmo;
-	
-	PreviousAmmo = AmmoCount;
-	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
-	return AmmoCount - PreviousAmmo;
 }
 
 
@@ -207,6 +195,17 @@ simulated function Tick(float DeltaTime)
 			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
 		}
 	}
+}
+
+
+/*--- Ammo ---*/
+simulated function int AddAmmo(int amount)
+{
+	local int PreviousAmmo;
+	
+	PreviousAmmo = AmmoCount;
+	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
+	return AmmoCount - PreviousAmmo;
 }
 
 

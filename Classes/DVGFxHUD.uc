@@ -92,18 +92,18 @@ simulated function UpdateScore(int s1, int s2)
 /*--- Pause menu ---*/
 function TogglePause()
 {
-	if (PC.Pawn != None)
+	if (PC != None)
 	{
-		DVPawn(PC.Pawn).LockCamera(true);
+		PC.LockCamera(true);
 	}
 }
 
 /*--- Respawn menu ---*/
 reliable client simulated function OpenRespawnMenu()
 {
-	if (PC.Pawn != None)
+	if (PC != None)
 	{
-		DVPawn(PC.Pawn).LockCamera(true);
+		PC.LockCamera(true);
 	}
 	SceneMC.GotoAndPlayI(3);
 }
@@ -115,9 +115,9 @@ simulated function CloseRespawnMenu()
 	//x = WeaponListMC.GetFloat("selectedIndex");
 	
 	// HUD
-	if (PC.Pawn != None)
+	if (PC != None)
 	{
-		DVPawn(PC.Pawn).LockCamera(false);
+		PC.LockCamera(false);
 	}
 	SceneMC.GotoAndPlayI(1);
 	InitParts();
@@ -249,7 +249,7 @@ function OnSelectShotgun(GFxClikWidget.EventData evtd)
 function OnResume(GFxClikWidget.EventData evtd)
 {
 	`log("Resuming...");
-	DVPawn(PC.Pawn).LockCamera(false);
+	PC.LockCamera(false);
 	SceneMC.GotoAndPlayI(1);
 	InitParts();
 }
