@@ -23,11 +23,6 @@ var (Ammunition) int			RespawnTime;
 	Methods
 ----------------------------------------------------------*/
 
-simulated function SetPickupMesh()
-{
-	AttachComponent(PickupMesh);
-	SetPickupVisible();
-}
 
 /*--- Taken directly from Actor.uc since it overrides PickupFactory.uc ---*/
 simulated event SetInitialState()
@@ -37,17 +32,6 @@ simulated event SetInitialState()
 		GotoState( InitialState );
 	else
 		GotoState( 'Auto' );
-}
-
-/*--- Respawn time ---*/
-function float GetRespawnTime()
-{
-	return RespawnTime;
-}
-
-function SetRespawn()
-{
-	StartSleeping();
 }
 
 
@@ -66,6 +50,31 @@ simulated event Tick(float DeltaTime)
 		}
 	}
 }
+
+/*--- Respawn time ---*/
+function float GetRespawnTime()
+{
+	return RespawnTime;
+}
+
+function SetRespawn()
+{
+	StartSleeping();
+}
+
+
+/*--- Mesh ---*/
+simulated function InitializePickup()
+{
+	SetPickupMesh();
+}
+
+simulated function SetPickupMesh()
+{
+	AttachComponent(PickupMesh);
+	SetPickupVisible();
+}
+
 
 /*----------------------------------------------------------
 	States
@@ -97,6 +106,7 @@ auto state Pickup
 		TriggerEventClass(class'SeqEvent_PickupStatusChange', None, 0);
 	}
 }
+
 
 /*----------------------------------------------------------
 	Properties

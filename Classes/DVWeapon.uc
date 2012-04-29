@@ -66,7 +66,7 @@ simulated function TimeWeaponEquipping()
 	Mesh.SetHidden(false);
 	
 	`log("TimeWeaponEquipping " $ self $ "for " $ ZP);
-	if (WorldInfo.NetMode == NM_DedicatedServer && ZP != None)
+	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) && ZP != None)
 	{
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
@@ -203,6 +203,7 @@ simulated function int AddAmmo(int amount)
 {
 	local int PreviousAmmo;
 	
+	bWeaponEmpty = false;
 	PreviousAmmo = AmmoCount;
 	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
 	return AmmoCount - PreviousAmmo;
