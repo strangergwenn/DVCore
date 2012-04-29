@@ -15,6 +15,7 @@ var class<DVWeapon>					DefaultWeapon;
 var array<class<DVWeapon> > 		DefaultWeaponList;
 
 var int 							MaxScore;
+var float							EndGameTick;
 var float							RestartTimer;
 
 
@@ -25,7 +26,7 @@ var float							RestartTimer;
 event PostBeginPlay()
 {
 	super.PostBeginPlay();
-	SetTimer(1.5, true, 'ScoreUpdated');
+	SetTimer(EndGameTick, true, 'ScoreUpdated');
 }
 
 
@@ -93,6 +94,7 @@ simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 defaultproperties
 {
 	MaxScore=30
+	EndGameTick=0.5
 	RestartTimer=10.0
 	
 	HUDType=class'DVHUD'
