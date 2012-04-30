@@ -16,9 +16,12 @@ var (DVPawn) const name			EyeSocket;
 var (DVPawn) const name			WeaponSocket;
 var (DVPawn) const name			WeaponSocket2;
 
-var (DVPawn) float 				DefaultFOV;
+var (DVPawn) const float 		DefaultFOV;
 var (DVPawn) const float		ZoomedGroundSpeed;
 var (DVPawn) const float		UnzoomedGroundSpeed;
+var (DVPawn) const float		HeadshotMultiplier;
+var (DVPawn) const float		JumpDamageMultiplier;
+var (DVPawn) const float		DeathFlickerFrequency;
 
 var (DVPawn) ParticleSystem		HitPSCTemplate;
 var (DVPawn) ParticleSystem		LargeHitPSCTemplate;
@@ -48,8 +51,6 @@ var bool						bLightIsOn;
 var float						RecoilAngle;
 var float						RecoilLength;
 var float						FeignDeathStartTime;
-var float						JumpDamageMultiplier;
-var float						DeathFlickerFrequency;
 
 
 /*----------------------------------------------------------
@@ -413,7 +414,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
 	{
 		bWasHS = true;
-		Damage *= 2;
+		Damage *= HeadshotMultiplier;
 	}
 	else bWasHS = false;
 
@@ -687,6 +688,7 @@ defaultproperties
 	JumpZ=600.0
 	AirSpeed=800.0
 	MaxJumpHeight=110.0
+	HeadshotMultiplier=1.5
 	JumpDamageMultiplier=1.5
 	
 	// Gameplay

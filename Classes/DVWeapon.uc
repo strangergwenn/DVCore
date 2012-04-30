@@ -122,6 +122,8 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	BeamPSC = new(Outer) class'ParticleSystemComponent';
 	BeamPSC.bAutoActivate = false;
 	BeamPSC.SetTemplate(BeamPSCTemplate);
+	BeamPSC.bUpdateComponentInTick = true;
+	BeamPSC.SetTickGroup(TG_EffectsUpdateWork);
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
 }
 
@@ -156,9 +158,6 @@ simulated function Tick(float DeltaTime)
 	if (target == None)
 		return;
 	
-	// Movement smoothing
-	Mesh.SetRotation(GetSmoothedRotation());
-	
 	// Mesh
 	Mesh.SetHidden(false);
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
@@ -189,6 +188,9 @@ simulated function Tick(float DeltaTime)
 			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
 		}
 	}
+	
+	// Movement smoothing
+	Mesh.SetRotation(GetSmoothedRotation());
 }
 
 
@@ -225,7 +227,10 @@ simulated function rotator GetSmoothedRotation()
 /*--- Don't cry :) ---*/
 simulated function float GetCorrectedFloat(float input)
 {
-	if (input < 32768)
+	input = input % 65536;
+	if (input < -32768)
+		return input + 65536;
+	else if (input < 32768)
 		return input;
 	else
 		return (input - 65536);
