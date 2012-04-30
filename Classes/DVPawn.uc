@@ -43,6 +43,7 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
+var string 							DebugField;
 var string			 				KillerName;
 var string							UserName;
 
@@ -54,7 +55,8 @@ var float							RecoilAngle;
 var float							RecoilLength;
 var float							FeignDeathStartTime;
 
-var string dbg;
+
+
 /*----------------------------------------------------------
 	Replication
 ----------------------------------------------------------*/

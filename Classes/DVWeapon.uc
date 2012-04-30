@@ -46,6 +46,8 @@ var bool						bWeaponEmpty;
 var bool						bBeamActive;
 var bool						bZoomed;
 
+var string 						DebugField;
+
 
 /*----------------------------------------------------------
 	Replication

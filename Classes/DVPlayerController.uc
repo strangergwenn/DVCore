@@ -23,6 +23,8 @@ var bool							bLocked;
 var float							CleanUpFrequency;
 var float 							ScoreLength;
 
+var string 							DebugField;
+
 
 /*----------------------------------------------------------
 	Replication
