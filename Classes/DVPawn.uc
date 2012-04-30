@@ -204,6 +204,14 @@ simulated function AddWeaponAmmo(int amount)
 }
 
 
+/*--- Healing ---*/
+simulated function AddHealth(int amount)
+{
+	Health += amount;
+	Health = Clamp (Health, 0, HealthMax);
+}
+
+
 /*--- Zoomed view location : socket & offset ---*/
 simulated function vector GetZoomViewLocation()
 {

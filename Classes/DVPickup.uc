@@ -5,18 +5,18 @@
  *  @author Gwennaël ARBONA
  **/
 
-class DVAmmunitionFactory extends UDKPickupFactory
+class DVPickup extends UDKPickupFactory
 	placeable
 	ClassGroup(DeepVoid)
 	hidecategories(Collision, Physics);
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
 ----------------------------------------------------------*/
 
-var (Ammunition) int			AmmoRechargeAmount;
-var (Ammunition) int			RespawnTime;
+var (DVPickup) const int				RespawnTime;
+var (DVPickup) const SoundCue			PickupSound;
 
 
 /*----------------------------------------------------------
@@ -82,12 +82,12 @@ simulated function SetPickupMesh()
 
 auto state Pickup
 {
-	function SpawnCopyFor( Pawn Recipient )
+	function SpawnCopyFor(Pawn P)
 	{
-		DVPawn(Recipient).AddWeaponAmmo(AmmoRechargeAmount);
+		PlaySound(PickupSound, false, true);
 	}
 	
-	function bool ValidTouch( Pawn Other )
+	function bool ValidTouch(Pawn Other)
 	{
 		if (Other == None)
 		{
@@ -134,10 +134,8 @@ defaultproperties
 	Components.Add(BaseMeshComp)
 	CollisionComponent=CollisionCylinder
 	
-	// Gameplay
-	AmmoRechargeAmount=50
-	
 	// Settings
+	PickupSound=SoundCue'DV_Spacegear.Sound.A_Empty'
 	YawRotationRate=16384
 	bRotatingPickup=true
 	bMovable=false
