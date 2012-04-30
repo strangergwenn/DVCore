@@ -80,15 +80,13 @@ exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
 }
 
 
-/*--- This is serious debug ---*/
-exec simulated function EndThisRightNow()
+/*--- Fire started ---*/
+exec function StartFire(optional byte FireModeNum = 0)
 {
-	local int i;
-	if (PlayerReplicationInfo != None)
-	{
-		for (i = 0; i < 42; i++)
-			DVPlayerRepInfo(PlayerReplicationInfo).ScorePoint(false);
-	}
+	if (IsCameraLocked())
+		return;
+	else
+		super.StartFire(FireModeNum);
 }
 
 
@@ -161,16 +159,6 @@ simulated function SignalEndGame(bool bHasWon)
 }
 
 
-/*--- Fire started ---*/
-exec function StartFire(optional byte FireModeNum = 0)
-{
-	if (IsCameraLocked())
-		return;
-	else
-		super.StartFire(FireModeNum);
-}
-
-
 /*--- Ammo ---*/
 simulated function float GetAmmoPercentage()
 {
@@ -209,14 +197,15 @@ simulated function string GetPlayerName()
 
 
 /*--- Pawn death ---*/
-function NotifyPawnDied()
+function PawnDied(Pawn P)
 {
-	// Replication data
-	`log("NotifyPawnDied for " $ self);
+	`log("PawnDied for " $ self);
 	if (PlayerReplicationInfo != None)
 		DVPlayerRepInfo(PlayerReplicationInfo).ScoreDeath();
 	else
 		`log("NotifyPawnDied could not store repinfo " $ self);
+		
+	Super.PawnDied(P);
 }
 
 

@@ -561,7 +561,7 @@ function KilledBy(pawn EventInstigator)
 	EnemyPRI = DVPlayerRepInfo(EventInstigator.Controller.PlayerReplicationInfo);
 	
 	if (EnemyPRI != None)
-		EnemyPRI.ScorePoint(false);
+		EnemyPRI.ScorePoint((EventInstigator == self));
 }
 
 

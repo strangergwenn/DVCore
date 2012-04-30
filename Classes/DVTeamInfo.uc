@@ -9,26 +9,6 @@ class DVTeamInfo extends TeamInfo;
 
 
 /*----------------------------------------------------------
-	Attributes
-----------------------------------------------------------*/
-
-
-simulated event ReplicatedEvent(name VarName)
-{
-	`log ("REPLICATION EVENT IN " $ self $ " FOR " $ VarName);
-	if ( VarName == 'Score' )
-	{
-		LogScore();
-		return;
-	}
-	else
-	{
-		Super.ReplicatedEvent(VarName);
-	}
-}
-
-
-/*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
 
@@ -38,21 +18,11 @@ reliable server simulated function int GetScore()
 	return Score * 2;
 }
 
-reliable server simulated function LogScore()
-{
-	`log("New score is "$ Score);
-}
-
 reliable server simulated function AddKill(bool bTeamKill)
 {
 	`log("AddKill " $ self);
-	if (bTeamKill)
-		Score -= 1;
-	else
+	if (!bTeamKill)
 		Score += 1;
-	
-	// End
-	Score = Clamp (Score, 0, 65000);
 }
 
 

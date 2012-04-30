@@ -115,7 +115,6 @@ function ToggleRespawnMenu()
 	
 	if (myOwner.Pawn == None && !bRespawnOpened)
 	{
-		myOwner.NotifyPawnDied();
 		HudMovie.OpenRespawnMenu();
 		bRespawnOpened = true;
 	}
