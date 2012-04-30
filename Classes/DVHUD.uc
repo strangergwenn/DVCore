@@ -99,6 +99,7 @@ event PostRender()
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
+	//PutShadedText("", DVPawn(myOwner.Pawn).dbg, 20, 30);
 	
 	// Scores
 	if (myOwner.bPrintScores)

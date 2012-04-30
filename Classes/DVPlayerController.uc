@@ -9,20 +9,19 @@ class DVPlayerController extends UDKPlayerController;
 
 
 /*----------------------------------------------------------
-	Attributes
+	Private attributes
 ----------------------------------------------------------*/
 
-var (DVPC) bool						bUseBeam;
-
-var (DVPC) array<class<DVWeapon> > 	WeaponList;
-
+var array<class<DVWeapon> > 		WeaponList;
 var class<DVWeapon> 				UserChoiceWeapon;
 var DVTeamInfo						EnemyTeamInfo;
 
-var bool							bLocked;
 var bool							bPrintScores;
-var float 							ScoreLength;
+var bool							bUseBeam;
+var bool							bLocked;
+
 var float							CleanUpFrequency;
+var float 							ScoreLength;
 
 
 /*----------------------------------------------------------
@@ -157,6 +156,16 @@ simulated function SignalEndGame(bool bHasWon)
 	bPrintScores = true;
 	LockCamera(true);
 	GotoState('RoundEnded');
+}
+
+
+/*--- Fire started ---*/
+exec function StartFire(optional byte FireModeNum = 0)
+{
+	if (IsCameraLocked())
+		return;
+	else
+		super.StartFire(FireModeNum);
 }
 
 

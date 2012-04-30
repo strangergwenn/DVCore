@@ -9,50 +9,52 @@ class DVPawn extends UDKPawn;
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
 ----------------------------------------------------------*/
 
-var (DVPawn) const name			EyeSocket;
-var (DVPawn) const name			WeaponSocket;
-var (DVPawn) const name			WeaponSocket2;
+var (DVPawn) const name				EyeSocket;
+var (DVPawn) const name				WeaponSocket;
+var (DVPawn) const name				WeaponSocket2;
 
-var (DVPawn) const float 		DefaultFOV;
-var (DVPawn) const float		ZoomedGroundSpeed;
-var (DVPawn) const float		UnzoomedGroundSpeed;
-var (DVPawn) const float		HeadshotMultiplier;
-var (DVPawn) const float		JumpDamageMultiplier;
-var (DVPawn) const float		DeathFlickerFrequency;
+var (DVPawn) const float 			DefaultFOV;
+var (DVPawn) const float			ZoomedGroundSpeed;
+var (DVPawn) const float			UnzoomedGroundSpeed;
+var (DVPawn) const float			HeadshotMultiplier;
+var (DVPawn) const float			JumpDamageMultiplier;
+var (DVPawn) const float			DeathFlickerFrequency;
 
-var (DVPawn) ParticleSystem		HitPSCTemplate;
-var (DVPawn) ParticleSystem		LargeHitPSCTemplate;
-var (DVPawn) ParticleSystem		BloodDecalPSCTemplate;
-var (DVPawn) array<MaterialInstanceConstant> TeamMaterials;
+var (DVPawn) const LinearColor		OffLight;
 
-var DVKillMarker				KM;
-var DVPlayerController 			User;
-var MaterialInstanceConstant	TeamMaterial;
-var AnimNodeBlend 				FeignDeathBlend;
-var	DVWeapon					OldWeaponReference;
-var repnotify class<DVWeapon> 	CurrentWeaponClass;
+var (DVPawn) const ParticleSystem	HitPSCTemplate;
+var (DVPawn) const ParticleSystem	LargeHitPSCTemplate;
+var (DVPawn) const ParticleSystem	BloodDecalPSCTemplate;
+var (DVPawn) const array<MaterialInstanceConstant> TeamMaterials;
+
+
+/*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
+
+var DVKillMarker					KM;
+var MaterialInstanceConstant		TeamMaterial;
 var DynamicLightEnvironmentComponent LightEnvironment;
+var	DVWeapon						OldWeaponReference;
 
-var repnotify LinearColor		TeamLight;
-var LinearColor					OffLight;
+var repnotify LinearColor			TeamLight;
+var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
-var string						Killer;
-var string						UserName;
-var DVPlayerRepInfo				EnemyPRI;
+var string			 				KillerName;
+var string							UserName;
 
-var bool 						bWasHS;
-var bool						bZoomed;
-var bool						bJumping;
-var bool						bLightIsOn;
+var bool 							bWasHS;
+var bool							bZoomed;
+var bool							bJumping;
 
-var float						RecoilAngle;
-var float						RecoilLength;
-var float						FeignDeathStartTime;
+var float							RecoilAngle;
+var float							RecoilLength;
+var float							FeignDeathStartTime;
 
-
+var string dbg;
 /*----------------------------------------------------------
 	Replication
 ----------------------------------------------------------*/
@@ -60,7 +62,7 @@ var float						FeignDeathStartTime;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, Killer, UserName, EnemyPRI, bWasHS, TeamLight;
+		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -133,7 +135,6 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 		AimNode = AnimNodeAimOffset(mesh.FindAnimNode('AimNode'));
 		LeftHandIK = SkelControlLimb(mesh.FindSkelControl('LeftHandIK'));
 		RightHandIK = SkelControlLimb(mesh.FindSkelControl('RightHandIK'));
-		FeignDeathBlend = AnimNodeBlend(Mesh.FindAnimNode('FeignDeathBlend'));
 		RootRotControl = SkelControlSingleBone(mesh.FindSkelControl('RootRot'));
 		FlyingDirOffset = AnimNodeAimOffset(mesh.FindAnimNode('FlyingDirOffset'));
 		GunRecoilNode = GameSkelCtrl_Recoil(mesh.FindSkelControl('GunRecoilNode'));
@@ -277,13 +278,6 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 }
 
 
-/*--- Recoil ---*/
-simulated function GetWeaponRecoil(float angle)
-{
-	RecoilAngle += angle;
-}
-
-
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
 {
@@ -291,6 +285,62 @@ simulated function Tick(float DeltaTime)
 	{
 		RecoilAngle -= DeltaTime * RecoilLength;
 	}
+	
+	// Weapon adjustment
+	if (Weapon != None)
+		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
+}
+
+
+/*--- Movement smoothing for regulation ---*/
+simulated function rotator GetSmoothedRotation()
+{
+	// Init
+	local rotator SmoothRot, CurRot, BaseAim;
+	local vector CurLoc;
+	local float SmoothingFactor;
+	
+	// Bone rotation (measure)
+	if (Mesh == None)
+		return rotator(vect(0, 0, 0));
+	BaseAim = GetBaseAimRotation();
+	SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
+	Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, CurLoc, CurRot);
+	
+	// Smoothing calculation
+	SmoothRot.Pitch = (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
+	SmoothRot.Yaw = (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) ;
+	if (SmoothRot.Yaw > 65000)
+		SmoothRot.Yaw -= 65536;
+	SmoothRot.Yaw *= SmoothingFactor;
+	SmoothRot.Roll = (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
+	
+	//dbg=""$ SmoothRot.Yaw $ " = " $ GetCorrectedFloat(BaseAim.Yaw) $ " - " $ CurRot.Yaw;
+	// Final checks
+	if (abs(GetCorrectedFloat(BaseAim.Pitch)) > 12000)
+		return rotator(vect(0, 0, 0));
+	else
+		return SmoothRot;
+}
+
+
+/*--- Don't cry :) ---*/
+simulated function int GetCorrectedFloat(int input)
+{
+	input = input % 65536;
+	if (input <= -32768)
+		return input + 65536;
+	else if (input <= 32768)
+		return input;
+	else
+		return (input - 65536);
+}
+
+
+/*--- Recoil ---*/
+simulated function GetWeaponRecoil(float angle)
+{
+	RecoilAngle += angle;
 }
 
 
@@ -329,38 +379,20 @@ simulated function HideMesh(bool Invisible)
 /*--- Fire started ---*/
 simulated function StartFire(byte FireModeNum)
 {
-	local DVPlayerController PC;
-	PC = DVPlayerController(Controller);
-	
-	// Camera lock
-	if (PC.IsCameraLocked())
-		return;
-	if (FireModeNum == 1 && PC != None)
+	if (FireModeNum == 1)
 		StartZoom();
-	
-	// Real firing
 	else
-	{
-		super.StartFire( FireModeNum );
-	}
+		super.StartFire(FireModeNum);
 }
 
 
 /*--- Fire ended ---*/
 simulated function StopFire(byte FireModeNum)
-{
-	local DVPlayerController PC;
-	PC = DVPlayerController(Controller);
-	
-	// Camera lock
-	if (PC.IsCameraLocked()) return;
-	
-	if (FireModeNum == 1 && PC != None)
+{	
+	if (FireModeNum == 1)
 		EndZoom();
 	else
-	{
-		super.StopFire( FireModeNum );
-	}
+		super.StopFire(FireModeNum);
 }
 
 
@@ -398,17 +430,16 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (Role == ROLE_Authority && InstigatedBy != None && Controller != None)
 	{
 		FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
-		Killer = DVPlayerController(InstigatedBy).GetPlayerName();
-		UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "BOT";
-		EnemyPRI = DVPlayerRepInfo(InstigatedBy.PlayerReplicationInfo);
 	}
 	
-	// Jumping multiplication
+	// Jumping multiplication & kill marker settings
 	if (InstigatedBy != None)
 	{
+		KillerName = DVPlayerController(InstigatedBy).GetPlayerName();
 		if (InstigatedBy.Pawn != None)
 			Damage *= DVPawn(InstigatedBy.Pawn).GetJumpingFactor();
 	}
+	UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "BOT";;
 	
 	// Headshot management
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
@@ -466,17 +497,13 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 		GotoState('Dying');
 		return;
 	}
-	
+				
 	// Kill marker
 	KM = Spawn((bWasHS ? class'DVKillMarker_HS' : class'DVKillMarker'), self,,,);
 	if (Role == ROLE_Authority)
 	{
-		KM.SetPlayerData(UserName, Killer, TeamLight);
+		KM.SetPlayerData(UserName, KillerName, TeamLight);
 	}
-	
-	// Kill attribution
-	if (EnemyPRI != None)
-		EnemyPRI.ScorePoint(false);
 
 	CheckHitInfo( HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
 	bBlendOutTakeHitPhysics = false;
@@ -516,6 +543,18 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 }
 
 
+/*--- Kill attribution ---*/
+function KilledBy(pawn EventInstigator)
+{
+	local DVPlayerRepInfo EnemyPRI;
+	
+	EnemyPRI = DVPlayerRepInfo(EventInstigator.Controller.PlayerReplicationInfo);
+	
+	if (EnemyPRI != None)
+		EnemyPRI.ScorePoint(false);
+}
+
+
 /*----------------------------------------------------------
 	States
 ----------------------------------------------------------*/
@@ -536,7 +575,6 @@ simulated State Dying
 			Mesh.SetTickGroup(TG_PostAsyncWork);
 		}
 		SetTimer(30.0, false);
-		SetTimer(DeathFlickerFrequency, true, 'ToggleLighting');
 		
 		// Logging
 		if (WorldInfo.NetMode == NM_DedicatedServer)
@@ -574,8 +612,6 @@ simulated State Dying
 		if (Role == ROLE_Authority && InstigatedBy != None && Controller != None)
 		{
 			FireParticleSystem(LargeHitPSCTemplate, HitLocation, rotator(Momentum));
-			Killer = DVPlayerController(InstigatedBy).GetPlayerName();
-			UserName = DVPlayerController(Controller).GetPlayerName();
 		}
 
 		if( (Physics != PHYS_RigidBody) || (Momentum == vect(0,0,0)) || (HitInfo.BoneName == '') )
@@ -591,20 +627,6 @@ simulated State Dying
 		Mesh.WakeRigidBody();
 		Mesh.AddImpulse(ApplyImpulse, HitLocation, HitInfo.BoneName, true);
 	}
-}
-
-
-/*--- Death Lighting ---*/
-simulated function ToggleLighting()
-{
-	if (TeamMaterial != None)
-	{
-		if (bLightIsOn)
-			TeamMaterial.SetVectorParameterValue('LightColor', TeamLight);
-		else
-			TeamMaterial.SetVectorParameterValue('LightColor', OffLight);
-	}
-	bLightIsOn = !bLightIsOn;
 }
 
 
@@ -686,19 +708,16 @@ defaultproperties
 	
 	// Jumping
 	JumpZ=600.0
-	AirSpeed=800.0
+	AirSpeed=850.0
 	MaxJumpHeight=110.0
 	HeadshotMultiplier=1.5
-	JumpDamageMultiplier=1.5
+	JumpDamageMultiplier=1.3
 	
 	// Gameplay
 	bWasHS=false
 	bJumping=false
-	bLightIsOn=true
 	RecoilAngle=0.0
 	RecoilLength=7000.0
-	Killer="HIMSELF !"
-	UserName="SOMEONE"
-	DeathFlickerFrequency=1.0
-	FeignDeathStartTime = 0.0
+	UserName="Someone"
+	KillerName="himself"
 }

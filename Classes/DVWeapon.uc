@@ -13,40 +13,38 @@ class DVWeapon extends UDKWeapon
 	Public attributes
 ----------------------------------------------------------*/
 
-var (DVWeapon) MaterialImpactEffect ImpactEffect;
-var (DVWeapon) array<SoundCue>	WeaponFireSnd;
-var (DVWeapon) SoundCue			WeaponEmptySound;
+var (DVWeapon) const SoundCue				WeaponEmptySound;
+var (DVWeapon) const array<SoundCue>		WeaponFireSnd;
+var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 
-var (DVWeapon) float 			ZoomedFOV;
-var (DVWeapon) float			RecoilAngle;
-var (DVWeapon) float 			ZoomSensitivity;
+var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
+var (DVWeapon) const ParticleSystem			BeamPSCTemplate;
 
-var (DVWeapon) vector			ZoomOffset;
+var (DVWeapon) const vector					ZoomOffset;
 
-var (DVWeapon) name				WeaponFireAnim;
-var (DVWeapon) name				ZoomSocket;
-var (DVWeapon) name				LaserBeamSocket;
-var (DVWeapon) array<name> 		EffectSockets;
+var (DVWeapon) const float					SmoothingFactor;
+var (DVWeapon) const float 					ZoomSensitivity;
+var (DVWeapon) const float					RecoilAngle;
+var (DVWeapon) const float 					ZoomedFOV;
+
+var (DVWeapon) const int					MaxAmmo;
+
+var (DVWeapon) const name					LaserBeamSocket;
+var (DVWeapon) const name					WeaponFireAnim;
+var (DVWeapon) const name					ZoomSocket;
+var (DVWeapon) const array<name> 			EffectSockets;
 
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
-var ParticleSystemComponent		BeamPSC;
 var ParticleSystemComponent		MuzzleFlashPSC;
-
-var (DVWeapon) ParticleSystem	BeamPSCTemplate;
-var (DVWeapon) ParticleSystem	MuzzleFlashPSCTemplate;
+var ParticleSystemComponent		BeamPSC;
 
 var bool						bWeaponEmpty;
 var bool						bBeamActive;
-var bool						bFlashActive;
 var bool						bZoomed;
-
-var float						SmoothingFactor;
-
-var const int					MaxAmmo;
 
 
 /*----------------------------------------------------------
@@ -56,7 +54,7 @@ var const int					MaxAmmo;
 replication
 {
 	if ( bNetDirty )
-		bZoomed;
+		bZoomed, bBeamActive;
 }
 
 
@@ -106,17 +104,11 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 		target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
 	}
 	
-	// FX
-	if (!bFlashActive)
-	{
-		bFlashActive = true;
-		
-		// Flash
-		MuzzleFlashPSC = new(Outer) class'ParticleSystemComponent';
-		MuzzleFlashPSC.bAutoActivate = false;
-		MuzzleFlashPSC.SetTemplate(MuzzleFlashPSCTemplate);
-		SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
-	}
+	// Flash
+	MuzzleFlashPSC = new(Outer) class'ParticleSystemComponent';
+	MuzzleFlashPSC.bAutoActivate = false;
+	MuzzleFlashPSC.SetTemplate(MuzzleFlashPSCTemplate);
+	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
 	// FX : beam
 	BeamPSC = new(Outer) class'ParticleSystemComponent';
@@ -188,52 +180,6 @@ simulated function Tick(float DeltaTime)
 			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
 		}
 	}
-	
-	// Movement smoothing
-	Mesh.SetRotation(GetSmoothedRotation());
-}
-
-
-/*--- Movement smoothing for regulation ---*/
-simulated function rotator GetSmoothedRotation()
-{
-	// Init
-	local rotator SmoothRot, CurRot, BaseAim, InitRot;
-	local vector CurLoc;
-	local DVPawn P;
-	
-	// Bone rotation (measure)
-	P = DVPawn(Owner);
-	if (P == None || P.Mesh == None)
-		return rotator(vect(0, 0, 0));
-	
-	InitRot = P.default.Mesh.Rotation;
-	P.Mesh.GetSocketWorldLocationAndRotation(P.WeaponSocket, CurLoc, CurRot);
-	
-	// Target (command)
-	if (P.Controller != None)
-	{
-		P.Controller.GetPlayerViewPoint(CurLoc, BaseAim);
-	}
-	
-	// Smoothing calculation
-	SmoothRot.Pitch = InitRot.Pitch + (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
-	SmoothRot.Yaw = InitRot.Yaw + (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) * SmoothingFactor;
-	SmoothRot.Roll = InitRot.Roll + (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
-	return SmoothRot;
-}
-
-
-/*--- Don't cry :) ---*/
-simulated function float GetCorrectedFloat(float input)
-{
-	input = input % 65536;
-	if (input < -32768)
-		return input + 65536;
-	else if (input < 32768)
-		return input;
-	else
-		return (input - 65536);
 }
 
 
@@ -560,10 +506,10 @@ defaultproperties
 
 	// User settings
 	ZoomedFOV=60
-	ZoomOffset=(X=0,Y=0,Z=1.0)
 	ZoomSocket=Mount2
 	ZoomSensitivity=0.3
-	SmoothingFactor=0.6
+	SmoothingFactor=0.7
+	ZoomOffset=(X=0,Y=0,Z=1.0)
 	
 	// Effects
 	BeamPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
@@ -578,7 +524,6 @@ defaultproperties
 	bZoomed=false
 	bHidden=false
 	bBeamActive=false
-	bFlashActive=false
 	bWeaponEmpty=false
 	bOnlyRelevantToOwner=false
 	bOnlyDirtyReplication=false
