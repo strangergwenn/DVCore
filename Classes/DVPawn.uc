@@ -562,6 +562,8 @@ function KilledBy(pawn EventInstigator)
 	
 	if (EnemyPRI != None)
 		EnemyPRI.ScorePoint((EventInstigator == self));
+	
+	super.KilledBy(EventInstigator);
 }
 
 
