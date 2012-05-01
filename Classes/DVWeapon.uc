@@ -20,19 +20,24 @@ var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
 var (DVWeapon) const ParticleSystem			BeamPSCTemplate;
 
-var (DVWeapon) const vector					ZoomOffset;
+var (DVWeapon) vector						ZoomOffset;
 
-var (DVWeapon) const float					SmoothingFactor;
-var (DVWeapon) const float 					ZoomSensitivity;
-var (DVWeapon) const float					RecoilAngle;
-var (DVWeapon) const float 					ZoomedFOV;
+var (DVWeapon) float						SmoothingFactor;
+var (DVWeapon) float 						ZoomSensitivity;
+var (DVWeapon) float						RecoilAngle;
+var (DVWeapon) float 						ZoomedFOV;
 
-var (DVWeapon) const int					MaxAmmo;
+var (DVWeapon) int							MaxAmmo;
 
 var (DVWeapon) const name					LaserBeamSocket;
 var (DVWeapon) const name					WeaponFireAnim;
-var (DVWeapon) const name					ZoomSocket;
+var (DVWeapon) name							ZoomSocket;
 var (DVWeapon) const array<name> 			EffectSockets;
+
+var (DVWeapon) DVWeaponAddon				Addon1;
+var (DVWeapon) DVWeaponAddon				Addon2;
+var (DVWeapon) class<DVWeaponAddon>			AddonClass1;
+var (DVWeapon) class<DVWeaponAddon>			AddonClass2;
 
 
 /*----------------------------------------------------------
@@ -56,7 +61,7 @@ var string 						DebugField;
 replication
 {
 	if ( bNetDirty )
-		bZoomed, bBeamActive;
+		bZoomed, bBeamActive, Addon1, Addon2;
 }
 
 
@@ -119,6 +124,18 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	BeamPSC.bUpdateComponentInTick = true;
 	BeamPSC.SetTickGroup(TG_EffectsUpdateWork);
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
+	
+	// Weapon add-ons
+	if (AddonClass1 != None)
+	{
+		Addon1 = Spawn(AddonClass1, self);
+		Addon1.AttachToWeapon(self);
+	}
+	if (AddonClass2 != None)
+	{
+		Addon2 = Spawn(AddonClass2, self);
+		Addon2.AttachToWeapon(self);
+	}
 }
 
 
