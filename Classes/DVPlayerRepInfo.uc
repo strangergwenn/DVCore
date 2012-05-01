@@ -15,6 +15,12 @@ class DVPlayerRepInfo extends PlayerReplicationInfo;
 var int 							KillCount;
 var int								DeathCount;
 
+replication
+{
+	if (bNetDirty)
+		DeathCount, KillCount;
+}
+
 
 /*----------------------------------------------------------
 	Methods
@@ -35,7 +41,7 @@ simulated event ReplicatedEvent(name VarName)
 		}
 	}
 
-	Super.ReplicatedEvent(VarName);
+	super.ReplicatedEvent(VarName);
 }
 
 
@@ -50,7 +56,7 @@ reliable server simulated function ScorePoint (bool bTeamKill)
 		KillCount += 1;
 }
 
-reliable server simulated function int GetPointCount()
+simulated function int GetPointCount()
 {
 	return KillCount;
 }
@@ -62,7 +68,7 @@ reliable server simulated function ScoreDeath()
 	DeathCount += 1;
 }
 
-reliable server simulated function int GetDeathCount()
+simulated function int GetDeathCount()
 {
 	return DeathCount;
 }
