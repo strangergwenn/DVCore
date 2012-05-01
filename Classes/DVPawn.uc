@@ -67,7 +67,7 @@ var float							FeignDeathStartTime;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight;
+		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight, KM;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -247,6 +247,8 @@ simulated function Vector GetPawnViewLocation()
 	return SMS;
 }
 
+
+/*--- Zoom management ---*/
 simulated function StartZoom()
 {
 	bZoomed = true;
@@ -364,7 +366,7 @@ reliable client simulated function bool GetBeamStatus()
 
 reliable server simulated function SetBeamStatus(bool NewStatus)
 {
-	DVPlayerRepInfo(PlayerReplicationInfo).bUseBeam = NewStatus;
+	DVPlayerRepInfo(PlayerReplicationInfo).SetBeamState(NewStatus);
 }
 
 

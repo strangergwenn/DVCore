@@ -11,6 +11,9 @@ class DVHUD extends UDKHUD;
 	Attributes
 ----------------------------------------------------------*/
 
+var LinearColor			OrangeColor;
+var LinearColor			BlueColor;
+
 var Vector 				MouseHitWorldLocation;
 var Vector  			MouseHitWorldNormal;
 var Vector  			MousePositionWorldLocation;
@@ -52,6 +55,7 @@ event PostRender()
 	{
 		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore());
 	}
+
 	
 	// End
 	ToggleRespawnMenu();
@@ -102,8 +106,8 @@ simulated function UpdateAllScores()
 	i = 0;
 	ForEach AllActors(class'DVPlayerRepInfo', PRI)
 	{
-		PutShadedText(PRI.PlayerName, 
-			" " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
+		PutShadedText((DVTeamInfo(PRI.Team).TeamIndex == 1) ? BlueColor : OrangeColor,
+			PRI.PlayerName $ " " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
 			200, 100 + 30 * i);
 		i += 1;
 	}
@@ -158,12 +162,12 @@ function DisplayConsoleMessages()
 
 
 /*--- TEMPORARY ---*/
-function PutShadedText(string StringMessage1, string StringMessage2, float ScreenX, float ScreenY)
+function PutShadedText(LinearColor col, string StringMessage2, float ScreenX, float ScreenY)
 {
-	PutText(StringMessage1 ,StringMessage2, ScreenX, ScreenY, true);
-	PutText(StringMessage1 ,StringMessage2, ScreenX, ScreenY, false);
+	PutText(col ,StringMessage2, ScreenX, ScreenY, true);
+	PutText(col ,StringMessage2, ScreenX, ScreenY, false);
 }
-function PutText(string StringMessage1, string StringMessage2, float ScreenX, float ScreenY, bool bIsShade)
+function PutText(LinearColor col, string StringMessage2, float ScreenX, float ScreenY, bool bIsShade)
 {
 	Canvas.Font = GetFontSizeIndex(2);
 	
@@ -171,15 +175,12 @@ function PutText(string StringMessage1, string StringMessage2, float ScreenX, fl
 	{
 		Canvas.SetPos(ScreenX + 1.5, ScreenY);
 		Canvas.SetDrawColor(0,0,0,255);
-		Canvas.DrawText(StringMessage1, false, 1.00, 1.15, TextRenderInfo );
 		Canvas.DrawText(StringMessage2, false, 1.00, 1.15, TextRenderInfo );
 	}
 	else
 	{
 		Canvas.SetPos(ScreenX, ScreenY);
-		Canvas.SetDrawColor(255,255,255,255);
-		Canvas.DrawText(StringMessage1, false, , , TextRenderInfo );
-		Canvas.SetDrawColor(50,150,255,255);
+		Canvas.SetDrawColor(col.R, col.G, col.B, 255);
 		Canvas.DrawText(StringMessage2, false, , , TextRenderInfo );
 	}
 }
@@ -194,4 +195,6 @@ defaultproperties
 	HUDClass=class'DVGFxHUD'
 	bRespawnOpened=false
 	MenuDelay=0.5
+	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)
+	BlueColor=(R=20.0,G=50.0,B=255.0,A=0.0)
 }

@@ -116,8 +116,6 @@ function ScoreKill(Controller Killer, Controller Other)
 		DVPlayerRepInfo(DVPlayerController(Other).PlayerReplicationInfo).ScoreDeath();
 	else
 		`log("ScoreKill could not store repinfo " $ self);
-	
-	super.ScoreKill(Killer, Other);
 }
 
 

@@ -12,9 +12,8 @@ class DVPlayerRepInfo extends PlayerReplicationInfo;
 	Attributes
 ----------------------------------------------------------*/
 
-var int 							KillCount;
 var int								DeathCount;
-
+var int								KillCount;
 var bool							bUseBeam;
 
 replication
@@ -52,6 +51,7 @@ reliable server simulated function ScorePoint (bool bTeamKill)
 {
 	DVTeamInfo(Team).AddKill(bTeamKill);
 	`log("ScorePoint for " $ self);
+	bForceNetUpdate = true;
 	
 	if (bTeamKill)
 		KillCount -= 1;
@@ -65,10 +65,19 @@ simulated function int GetPointCount()
 }
 
 
+/*--- Replicated beam status ---*/
+reliable server simulated function SetBeamState(bool NewStatus)
+{
+	bUseBeam = NewStatus;
+	bForceNetUpdate = true;
+}
+
+
 /*--- Death scored ---*/
 reliable server simulated function ScoreDeath()
 {
 	DeathCount += 1;
+	bForceNetUpdate = true;
 }
 
 simulated function int GetDeathCount()

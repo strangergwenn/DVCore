@@ -18,7 +18,8 @@ var (DVWeapon) const array<SoundCue>		WeaponFireSnd;
 var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 
 var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
-var (DVWeapon) const ParticleSystem			BeamPSCTemplate;
+var (DVWeapon) const ParticleSystem			BeamPSCTemplate_Red;
+var (DVWeapon) const ParticleSystem			BeamPSCTemplate_Blue;
 
 var (DVWeapon) vector						ZoomOffset;
 
@@ -120,7 +121,10 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	// FX : beam
 	BeamPSC = new(Outer) class'ParticleSystemComponent';
 	BeamPSC.bAutoActivate = false;
-	BeamPSC.SetTemplate(BeamPSCTemplate);
+	if (DVPlayerRepInfo(target.PlayerReplicationInfo).Team.TeamIndex == 1)
+		BeamPSC.SetTemplate(BeamPSCTemplate_Blue);
+	else
+		BeamPSC.SetTemplate(BeamPSCTemplate_Red);
 	BeamPSC.bUpdateComponentInTick = true;
 	BeamPSC.SetTickGroup(TG_EffectsUpdateWork);
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
@@ -531,7 +535,8 @@ defaultproperties
 	ZoomOffset=(X=0,Y=0,Z=1.0)
 	
 	// Effects
-	BeamPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
+	BeamPSCTemplate_Blue=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect_Blue'
+	BeamPSCTemplate_Red=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
 	MuzzleFlashPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
 	LaserBeamSocket=Mount1
 	WeaponFireSnd[0]=None
