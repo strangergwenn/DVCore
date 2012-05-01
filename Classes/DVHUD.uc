@@ -196,5 +196,5 @@ defaultproperties
 	bRespawnOpened=false
 	MenuDelay=0.5
 	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)
-	BlueColor=(R=20.0,G=50.0,B=255.0,A=0.0)
+	BlueColor=(R=20.0,G=100.0,B=255.0,A=0.0)
 }
