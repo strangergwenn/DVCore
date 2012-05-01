@@ -17,8 +17,11 @@ var (DVPawn) const name				WeaponSocket;
 var (DVPawn) const name				WeaponSocket2;
 
 var (DVPawn) const float 			DefaultFOV;
+var (DVPawn) const float 			HeadBobbingFactor;
+var (DVPawn) const float 			StandardEyeHeight;
 var (DVPawn) const float			ZoomedGroundSpeed;
 var (DVPawn) const float			UnzoomedGroundSpeed;
+
 var (DVPawn) const float			HeadshotMultiplier;
 var (DVPawn) const float			JumpDamageMultiplier;
 var (DVPawn) const float			DeathFlickerFrequency;
@@ -79,7 +82,8 @@ simulated event ReplicatedEvent(name VarName)
 	// Team color
 	if ( VarName == 'TeamLight' && Controller != None)
 	{
-		UpdateTeamColor(DVPlayerController(Controller).GetTeamIndex());
+		if (PlayerReplicationInfo.Team != None)
+			UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
 		return;
 	}
 	else
@@ -232,8 +236,13 @@ simulated function Vector GetPawnViewLocation()
 	
 	if (bZoomed)
 		SMS = GetZoomViewLocation();
-	else if (!Mesh.GetSocketWorldLocationAndrotation(EyeSocket, SMS))
-		`log("GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
+	else
+	{
+		if (!Mesh.GetSocketWorldLocationAndrotation(EyeSocket, SMS))
+			`log("GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
+		SMS.Z = 	HeadBobbingFactor 	* SMS.Z + 
+			(1.0 - HeadBobbingFactor) 	* (Location.Z + StandardEyeHeight);
+	}
 	
 	return SMS;
 }
@@ -320,7 +329,7 @@ simulated function rotator GetSmoothedRotation()
 	// Smoothing calculation
 	SmoothRot.Pitch = (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
 	SmoothRot.Yaw = (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) ;
-	if (SmoothRot.Yaw > 65000)
+	if (SmoothRot.Yaw > 64000)
 		SmoothRot.Yaw -= 65536;
 	SmoothRot.Yaw *= SmoothingFactor;
 	SmoothRot.Roll = (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
@@ -344,6 +353,18 @@ simulated function int GetCorrectedFloat(int input)
 		return input;
 	else
 		return (input - 65536);
+}
+
+
+/*--- Beam status update ---*/
+reliable client simulated function bool GetBeamStatus()
+{
+	return DVPlayerRepInfo(PlayerReplicationInfo).bUseBeam;
+}
+
+reliable server simulated function SetBeamStatus(bool NewStatus)
+{
+	DVPlayerRepInfo(PlayerReplicationInfo).bUseBeam = NewStatus;
 }
 
 
@@ -449,7 +470,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		if (InstigatedBy.Pawn != None)
 			Damage *= DVPawn(InstigatedBy.Pawn).GetJumpingFactor();
 	}
-	UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "BOT";;
+	UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "Player";;
 	
 	// Headshot management
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
@@ -550,20 +571,6 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	}
 	
 	GotoState('Dying');
-}
-
-
-/*--- Kill attribution ---*/
-function KilledBy(pawn EventInstigator)
-{
-	local DVPlayerRepInfo EnemyPRI;
-	
-	EnemyPRI = DVPlayerRepInfo(EventInstigator.Controller.PlayerReplicationInfo);
-	
-	if (EnemyPRI != None)
-		EnemyPRI.ScorePoint((EventInstigator == self));
-	
-	super.KilledBy(EventInstigator);
 }
 
 
@@ -719,9 +726,9 @@ defaultproperties
 	LargeHitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit_Large'
 	
 	// Jumping
-	JumpZ=600.0
+	JumpZ=620.0
 	AirSpeed=850.0
-	MaxJumpHeight=110.0
+	MaxJumpHeight=100.0
 	HeadshotMultiplier=1.5
 	JumpDamageMultiplier=1.3
 	
@@ -730,6 +737,6 @@ defaultproperties
 	bJumping=false
 	RecoilAngle=0.0
 	RecoilLength=7000.0
-	UserName="Someone"
-	KillerName="himself"
+	UserName="SOMEONE"
+	KillerName="HIMSELF"
 }

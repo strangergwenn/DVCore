@@ -15,10 +15,12 @@ class DVPlayerRepInfo extends PlayerReplicationInfo;
 var int 							KillCount;
 var int								DeathCount;
 
+var bool							bUseBeam;
+
 replication
 {
 	if (bNetDirty)
-		DeathCount, KillCount;
+		DeathCount, KillCount, bUseBeam;
 }
 
 
@@ -49,6 +51,7 @@ simulated event ReplicatedEvent(name VarName)
 reliable server simulated function ScorePoint (bool bTeamKill)
 {
 	DVTeamInfo(Team).AddKill(bTeamKill);
+	`log("ScorePoint for " $ self);
 	
 	if (bTeamKill)
 		KillCount -= 1;
@@ -70,7 +73,7 @@ reliable server simulated function ScoreDeath()
 
 simulated function int GetDeathCount()
 {
-	return DeathCount;
+	return Clamp(DeathCount, 0, 65000);
 }
 
 
@@ -79,7 +82,8 @@ simulated function int GetDeathCount()
 ----------------------------------------------------------*/
 
 defaultproperties
-{	
+{
+	bUseBeam=true
 	KillCount=0
 	DeathCount=0
 }

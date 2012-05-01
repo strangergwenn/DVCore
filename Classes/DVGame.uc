@@ -34,8 +34,6 @@ event PostBeginPlay()
 	Methods
 ----------------------------------------------------------*/
 
-
-
 /*--- Spawning weapon management ---*/
 function AddDefaultInventory(Pawn PlayerPawn)
 {
@@ -84,6 +82,42 @@ function GameEnded(byte WinnerIndex)
 simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 {
 	return true;
+}
+
+
+/*--- Killed set ---*/
+function ScoreKill(Controller Killer, Controller Other)
+{
+	local DVPlayerRepInfo KillerPRI;
+	local bool bIsTeamKill;
+	
+	// Init
+	`log(Killer $ " ScoreKill " $ Other);
+	KillerPRI = DVPlayerRepInfo(Killer.PlayerReplicationInfo);
+	
+	// Score kill
+	`log(self $ " KilledBy " $ KillerPRI);
+	if (KillerPRI != None)
+	{
+		if (KillerPRI.Team != None && DVPlayerController(Other) != None)
+		{
+			bIsTeamKill = (	(Killer == Other)
+						 || (DVPlayerController(Killer).GetTeamIndex() == DVPlayerController(Other).GetTeamIndex()));
+		}
+		else
+			bIsTeamKill = (Killer == Other);
+		
+		`log(Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
+		KillerPRI.ScorePoint(bIsTeamKill);
+	}
+	
+	// Death
+	if (DVPlayerController(Other).PlayerReplicationInfo != None)
+		DVPlayerRepInfo(DVPlayerController(Other).PlayerReplicationInfo).ScoreDeath();
+	else
+		`log("ScoreKill could not store repinfo " $ self);
+	
+	super.ScoreKill(Killer, Other);
 }
 
 

@@ -217,12 +217,12 @@ simulated function int AddAmmo(int amount)
 /*--- Is beam online ---*/
 reliable client simulated function bool UseBeam()
 {
-	local DVPlayerController PC;
-	PC = DVPlayerController(Instigator.Controller);
+	local DVPawn P;
+	P = DVPawn(Owner);
 	
-	if (PC != None)
+	if (P != None)
 	{
-		return PC.GetBeamStatus();
+		return P.GetBeamStatus();
 	}
 	else
 		return true;

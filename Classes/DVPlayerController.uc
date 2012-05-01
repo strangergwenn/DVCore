@@ -17,7 +17,6 @@ var class<DVWeapon> 				UserChoiceWeapon;
 var DVTeamInfo						EnemyTeamInfo;
 
 var bool							bPrintScores;
-var bool							bUseBeam;
 var bool							bLocked;
 
 var float							CleanUpFrequency;
@@ -33,7 +32,7 @@ var string 							DebugField;
 replication
 {
 	if ( bNetDirty )
-		bUseBeam, UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores;
+		UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores;
 }
 
 
@@ -66,7 +65,7 @@ exec function Use()
 {
 	if (Pawn != None && DVWeapon(Pawn.Weapon) != None)
 	{
-		SetBeamStatus(!bUseBeam);
+		DVPawn(Pawn).SetBeamStatus(! DVPawn(Pawn).GetBeamStatus() );
 	}
 }
 
@@ -149,6 +148,11 @@ simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRota
 }
 
 
+/*--- No TTS ---*/
+simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI )
+{}
+
+
 /*--- End of game ---*/
 simulated function SignalEndGame(bool bHasWon)
 {
@@ -196,19 +200,6 @@ simulated function string GetPlayerName()
 }
 
 
-/*--- Pawn death ---*/
-function PawnDied(Pawn P)
-{
-	`log("PawnDied for " $ self);
-	if (PlayerReplicationInfo != None)
-		DVPlayerRepInfo(PlayerReplicationInfo).ScoreDeath();
-	else
-		`log("NotifyPawnDied could not store repinfo " $ self);
-		
-	Super.PawnDied(P);
-}
-
-
 /*----------------------------------------------------------
 	Reliable client/server code
 ----------------------------------------------------------*/
@@ -248,12 +239,6 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 }
 
 
-reliable client simulated function bool GetBeamStatus()
-{
-	return bUseBeam;
-}
-
-
 reliable server simulated function UpdatePawnColor()
 {
 	local byte i;
@@ -278,12 +263,6 @@ reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
 reliable client simulated function HideScores()
 {
 	bPrintScores = false;
-}
-
-
-reliable server simulated function SetBeamStatus(bool NewStatus)
-{
-	bUseBeam = NewStatus;
 }
 
 
@@ -316,6 +295,5 @@ defaultproperties
 	ScoreLength=3.0
 	
 	bLocked=false
-	bUseBeam=true
 	bPrintScores=false
 }
