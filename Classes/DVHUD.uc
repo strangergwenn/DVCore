@@ -100,17 +100,31 @@ simulated function ChooseWeapons()
 /*--- Score management ---*/
 simulated function UpdateAllScores()
 {
+	local array<DVPlayerRepInfo> PRList;
 	local DVPlayerRepInfo PRI;
 	local int i;
 	
-	i = 0;
+	// Getter
 	ForEach AllActors(class'DVPlayerRepInfo', PRI)
 	{
-		PutShadedText((DVTeamInfo(PRI.Team).TeamIndex == 1) ? BlueColor : OrangeColor,
-			PRI.PlayerName $ " " $ PRI.GetPointCount() $ " kills, " $ PRI.GetDeathCount() $ " deaths",
-			200, 100 + 30 * i);
-		i += 1;
+		PRList.AddItem(PRI);
 	}
+	PRList.Sort(SortPlayers);
+	
+	// Displaying
+	for (i = 0; i < PRList.Length; i++)
+	{
+		PutShadedText((DVTeamInfo(PRList[i].Team).TeamIndex == 1) ? BlueColor : OrangeColor,
+			PRList[i].PlayerName $ " " $ PRList[i].GetPointCount() $ " kills, " $ PRList[i].GetDeathCount() $ " deaths",
+			200, 100 + 30 * i);
+	}
+}
+
+
+/*--- Sorting method ---*/
+simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
+{
+	return A.GetPointCount() < B.GetPointCount() ? -1 : 0;
 }
 
 
