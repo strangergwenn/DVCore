@@ -15,7 +15,7 @@ class DVTeamInfo extends TeamInfo;
 /*--- Score management ---*/
 reliable server simulated function int GetScore()
 {
-	return Score * 2;
+	return Score;
 }
 
 reliable server simulated function AddKill(bool bTeamKill)

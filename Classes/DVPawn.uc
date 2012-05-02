@@ -53,6 +53,7 @@ var string							UserName;
 var bool 							bWasHS;
 var bool							bZoomed;
 var bool							bJumping;
+var bool							bHasGotTeamColors;
 
 var float							RecoilAngle;
 var float							RecoilLength;
@@ -78,9 +79,8 @@ simulated event ReplicatedEvent(name VarName)
 		WeaponClassChanged();
 		return;
 	}
-	
 	// Team color
-	if ( VarName == 'TeamLight' && Controller != None)
+	if ( VarName == 'TeamLight')
 	{
 		if (PlayerReplicationInfo.Team != None)
 			UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
@@ -105,6 +105,17 @@ function PostBeginPlay()
 	{
 		`log("DVLOG/IPOS/" $ self $ "/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
 		SetTimer(0.5, true, 'LogPosition');
+	}
+}
+
+
+/*--- Team replication event ---*/
+simulated function NotifyTeamChanged()
+{
+	if (!bHasGotTeamColors)
+	{
+		UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
+		bHasGotTeamColors = true;
 	}
 }
 
@@ -472,7 +483,8 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		if (InstigatedBy.Pawn != None)
 			Damage *= DVPawn(InstigatedBy.Pawn).GetJumpingFactor();
 	}
-	UserName = (Controller != None) ? DVPlayerController(Controller).GetPlayerName() : "Player";;
+	if (Controller != None)
+		UserName = DVPlayerController(Controller).GetPlayerName();
 	
 	// Headshot management
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
@@ -739,6 +751,7 @@ defaultproperties
 	bJumping=false
 	RecoilAngle=0.0
 	RecoilLength=7000.0
+	bHasGotTeamColors=false
 	UserName="SOMEONE"
 	KillerName="HIMSELF"
 }

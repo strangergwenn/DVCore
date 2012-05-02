@@ -49,7 +49,10 @@ simulated event ReplicatedEvent(name VarName)
 /*--- Kill scored ---*/
 reliable server simulated function ScorePoint (bool bTeamKill)
 {
-	DVTeamInfo(Team).AddKill(bTeamKill);
+	if (role == ROLE_Authority)
+	{
+		DVTeamInfo(Team).AddKill(bTeamKill);
+	}
 	`log("ScorePoint for " $ self);
 	bForceNetUpdate = true;
 	

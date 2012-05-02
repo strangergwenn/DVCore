@@ -231,20 +231,29 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 }
 
 
+/* Server team update */
+reliable server simulated function UpdatePawnColor()
+{
+	local byte i;
+	i = GetTeamIndex();
+	
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
+		PlayerReplicationInfo.bForceNetUpdate = true;
+	}
+	else
+	{
+		if (i != -1)
+			DVPawn(Pawn).UpdateTeamColor(i);
+	}
+}
+
+
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
 	if (bShouldKill && Pawn != None)
 		Pawn.Destroy();
 	UserChoiceWeapon = NewWeapon;
-}
-
-
-reliable server simulated function UpdatePawnColor()
-{
-	local byte i;
-	i = GetTeamIndex();
-	if (i != -1)
-		DVPawn(Pawn).UpdateTeamColor(i);
 }
 
 
