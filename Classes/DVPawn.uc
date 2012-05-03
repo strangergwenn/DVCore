@@ -277,7 +277,7 @@ simulated function EndZoom()
 
 /*--- Camera status update : view calculation ---*/
 simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out rotator out_CamRot, out float out_FOV)
-{
+{	
 	// Locked
 	if (Controller == None || DVPlayerController(Controller).IsCameraLocked())
 		return true;
@@ -288,7 +288,7 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 		out_FOV = DVWeapon(Weapon).ZoomedFOV;
 		out_CamLoc = GetZoomViewLocation();
 		out_CamRot = Controller.Rotation;
-		GroundSpeed = ZoomedGroundSpeed;
+		SetGroundSpeed(ZoomedGroundSpeed);
 	}
 	
 	// Standard viewpoint
@@ -301,12 +301,26 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 			out_CamRot = Controller.Rotation;
 		else
 			out_CamRot = Rotation;
-		GroundSpeed = UnzoomedGroundSpeed;
+		SetGroundSpeed(UnzoomedGroundSpeed);
 	}
 
 	// Recoil and end
 	out_camRot.Pitch += RecoilAngle;
 	return true;
+}
+
+
+/*--- Speed limit setting ---*/
+reliable server function SetGroundSpeed(float NewSpeed)
+{
+	local float OldSpeed;
+	OldSpeed = GroundSpeed;
+	GroundSpeed = NewSpeed;
+	
+	if (OldSpeed != GroundSpeed)
+	{
+		PlayerReplicationInfo.bForceNetUpdate = true;
+	}
 }
 
 
@@ -342,12 +356,14 @@ simulated function rotator GetSmoothedRotation()
 	// Smoothing calculation
 	SmoothRot.Pitch = (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
 	SmoothRot.Yaw = (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) ;
-	if (SmoothRot.Yaw > 64000)
-		SmoothRot.Yaw -= 65536;
+	
+	// Very curious things happen here, should be <~ 1000
+	if (abs(SmoothRot.Yaw) > 10000) SmoothRot.Yaw = 0;
+	
 	SmoothRot.Yaw *= SmoothingFactor;
 	SmoothRot.Roll = (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
 	
-	//dbg=""$ SmoothRot.Yaw $ " = " $ GetCorrectedFloat(BaseAim.Yaw) $ " - " $ CurRot.Yaw;
+	//DebugField=""$ SmoothRot.Yaw $ " = " $ GetCorrectedFloat(BaseAim.Yaw) $ " - " $ CurRot.Yaw;
 	// Final checks
 	if (abs(GetCorrectedFloat(BaseAim.Pitch)) > 12000)
 		return rotator(vect(0, 0, 0));
@@ -356,11 +372,11 @@ simulated function rotator GetSmoothedRotation()
 }
 
 
-/*--- Don't cry :) ---*/
+/*--- More really curious things. ---*/
 simulated function int GetCorrectedFloat(int input)
 {
 	input = input % 65536;
-	if (input <= -32768)
+	if (input < -32768)
 		return input + 65536;
 	else if (input <= 32768)
 		return input;

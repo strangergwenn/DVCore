@@ -60,7 +60,7 @@ event PostRender()
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
-	//PutShadedText("", DVPawn(myOwner.Pawn).DebugField, 20, 30);
+	//PutShadedText(BlueColor, DVPawn(myOwner.Pawn).DebugField, 20, 30);
 	
 	// Scores
 	if (myOwner.bPrintScores)
