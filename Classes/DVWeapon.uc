@@ -311,7 +311,7 @@ simulated function FireAmmunition()
 	}
 	else if (AmmoCount <= 0)
 	{
-		Instigator.PlaySound(WeaponEmptySound, false, true);
+		Instigator.PlaySound(WeaponEmptySound, false, true, false, Location);
 		bWeaponEmpty = true;
 		return;
 	}
@@ -463,7 +463,7 @@ simulated function PlayFiringSound()
 		if ( WeaponFireSnd[CurrentFireMode] != None )
 		{
 			MakeNoise(1.0);
-			Instigator.PlaySound(WeaponFireSnd[CurrentFireMode], false, true);
+			Instigator.PlaySound(WeaponFireSnd[CurrentFireMode], false, true, false, Location);
 		}
 	}
 }

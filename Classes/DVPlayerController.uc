@@ -303,6 +303,6 @@ defaultproperties
 {
 	ScoreLength=3.0
 	
-	bLocked=false
+	bLocked=true
 	bPrintScores=false
 }
