@@ -103,7 +103,7 @@ function PostBeginPlay()
 	super.PostBeginPlay();
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
-		`log("DVLOG/IPOS/" $ self $ "/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
+		ServerLogAction("IPOS");
 		SetTimer(0.5, true, 'LogPosition');
 	}
 }
@@ -140,7 +140,7 @@ simulated function UpdateTeamColor(byte TeamIndex)
 /*--- Position logging ---*/
 simulated function LogPosition()
 {
-	`log("DVLOG/POS/" $ self $ "/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
+	ServerLogAction("POS");
 }
 
 
@@ -511,8 +511,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	else bWasHS = false;
 
 	// Logging
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		`log("DVLOG/HIT/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/D/" $ Damage $ "/B/" $ HitInfo.BoneName $ "/ENDLOG");
+	ServerLogAction("HIT");
 	
 	// Blood impact
 	EndTrace = HitLocation + Momentum * 10.0;
@@ -604,6 +603,16 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 }
 
 
+/*--- Standard log procedure ---*/
+reliable server simulated function ServerLogAction(string event)
+{
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
+		`log("DVLOG/" $ event $ "/" $ self $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
+	}
+}
+
+
 /*----------------------------------------------------------
 	States
 ----------------------------------------------------------*/
@@ -628,7 +637,7 @@ simulated State Dying
 		// Logging
 		if (WorldInfo.NetMode == NM_DedicatedServer)
 		{
-			`log("DVLOG/DIED/" $ WorldInfo.TimeSeconds $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
+			ServerLogAction("DIED");
 		}
 	}
 	
@@ -683,6 +692,7 @@ simulated State Dying
 function bool DoJump( bool bUpdating )
 {
 	bJumping = true;
+	ServerLogAction("JUMP");
 	return super.DoJump(bUpdating);
 }
 
@@ -690,6 +700,7 @@ event Landed(vector HitNormal, Actor FloorActor)
 {
 	super.Landed(HitNormal, FloorActor);
 	bJumping = false;
+	ServerLogAction("LAND");
 }
 
 simulated function float GetJumpingFactor()

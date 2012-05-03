@@ -311,15 +311,14 @@ simulated function FireAmmunition()
 	}
 	else if (AmmoCount <= 0)
 	{
-		Instigator.PlaySound(WeaponEmptySound, false, true, false, Location);
+		PlaySound(WeaponEmptySound, false, true, false, Location);
 		bWeaponEmpty = true;
 		return;
 	}
 	AmmoCount -= 1;
 	
 	// Logging
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		`log("DVLOG/SHOOT/" $ WorldInfo.TimeSeconds $ "/X/" $ P.Location.Y $ "/Y/" $ P.Location.X $ "/W/" $ self.class $ "/ENDLOG");
+	P.ServerLogAction("SHOOT");
 	
 	// Anim
 	PlayFiringSound();
@@ -463,7 +462,7 @@ simulated function PlayFiringSound()
 		if ( WeaponFireSnd[CurrentFireMode] != None )
 		{
 			MakeNoise(1.0);
-			Instigator.PlaySound(WeaponFireSnd[CurrentFireMode], false, true, false, Location);
+			PlaySound(WeaponFireSnd[CurrentFireMode], false, true, false, Location);
 		}
 	}
 }
