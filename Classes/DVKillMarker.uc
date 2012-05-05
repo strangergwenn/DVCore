@@ -23,6 +23,7 @@ var (DVKillMarker) float 			YawRotationRate;
 
 var (DVKillMarker) ScriptedTexture 	CanvasTexture;
 var (DVKillMarker) MaterialInstanceConstant MarkerMaterial;
+var (DVKillMarker) MaterialInstanceConstant MarkerMaterial2;
 
 var string				 			MarkerText1;
 var string				 			MarkerText2;
@@ -30,6 +31,7 @@ var int 							MarkerMaterialIndex;
 var name 							CanvasTextureParamName;
 
 var MaterialInterface 				MarkerMaterialTemplate;
+var MaterialInterface 				HeadshotMaterialTemplate;
 var editinline const 				StaticMeshComponent Mesh;
 var editinline const 				StaticMeshComponent Mesh2;
 
@@ -41,7 +43,7 @@ var editinline const 				StaticMeshComponent Mesh2;
 replication
 {
 	if ( bNetDirty )
-		MarkerText1, MarkerText2, LightColor, MarkerMaterial;
+		MarkerText1, MarkerText2, LightColor, MarkerMaterial, MarkerMaterial2;
 }
 
 
@@ -66,7 +68,12 @@ function PostBeginPlay()
 			if(CanvasTextureParamName != '')
 				MarkerMaterial.SetTextureParameterValue(CanvasTextureParamName, CanvasTexture);
 		}
+		MarkerMaterial2 = Mesh2.CreateAndSetMaterialInstanceConstant(MarkerMaterialIndex);
+		if(MarkerMaterial2 != none)
+			MarkerMaterial2.SetParent(HeadshotMaterialTemplate);
 	}
+	
+	Mesh2.SetHidden(true);
 	SetTimer(ExpirationTime, false, 'RemoveMe');
 }
 
@@ -79,11 +86,13 @@ simulated function RemoveMe()
 
 
 /*--- Text edit ---*/
-function SetPlayerData(string P1, string P2, LinearColor NewLight)
+function SetPlayerData(string P1, string P2, LinearColor NewLight, bool bWasHS)
 {
 	MarkerText1 = P1;
 	MarkerText2 = P2;
 	MarkerMaterial.SetVectorParameterValue('Color', NewLight);
+	MarkerMaterial2.SetVectorParameterValue('Color', NewLight);
+	Mesh2.SetHidden(!bWasHS);
 }
 
 
@@ -163,15 +172,20 @@ defaultproperties
 	End Object
 	Mesh = StaticMeshComp1
 	Components.Add(StaticMeshComp1)
-	CanvasTextureParamName=CanvasTexture
-	MarkerMaterialTemplate=Material'DV_CoreEffects.Material.M_DynamicText'
 	
 	// Symbol
 	Begin Object class=StaticMeshComponent Name=StaticMeshComp2
+   		StaticMesh=StaticMesh'DV_CoreEffects.Mesh.SM_Headshot'
+   		Scale=0.2
    		Translation=(Z=100)
 	End Object
 	Mesh2 = StaticMeshComp2
 	Components.Add(StaticMeshComp2)
+	
+	// Materials
+	CanvasTextureParamName=CanvasTexture
+	MarkerMaterialTemplate=Material'DV_CoreEffects.Material.M_DynamicText'
+	HeadshotMaterialTemplate=Material'DV_CoreEffects.Material.M_Headshot'
 
 	// Settings
 	MarkerText1="<>"
