@@ -135,7 +135,6 @@ defaultproperties
 	CollisionComponent=CollisionCylinder
 	
 	// Settings
-	PickupSound=SoundCue'DV_Spacegear.Sound.A_Empty'
 	YawRotationRate=16384
 	bRotatingPickup=true
 	bMovable=false

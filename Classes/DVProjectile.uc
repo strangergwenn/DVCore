@@ -16,7 +16,6 @@ class DVProjectile extends UDKProjectile
 var bool 						bSuppressExplosionFX;
 var bool						bAdvanceExplosionEffect;
 
-var float 						TossZ;
 var float 						DurationOfDecal;
 var float 						MaxEffectDistance;
 var float 						GlobalCheckRadiusTweak;
@@ -86,7 +85,6 @@ function Init(vector Direction)
 {
 	SetRotation(rotator(Direction));
 	Velocity = Speed * Direction;
-	Velocity.Z += TossZ;
 	Acceleration = AccelRate * Normal(Velocity);
 }
 
@@ -259,7 +257,6 @@ state WaitingForVelocity
 
 defaultproperties
 {
-	TossZ=0.0
 	DamageRadius=+0.0
 	DurationOfDecal=24.0
 	TerminalVelocity=3500.0
