@@ -8,30 +8,36 @@
 class DVKillMarker extends Actor;
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
 ----------------------------------------------------------*/
 
-var (DVKillMarker) Color 			TextColor;
-var (DVKillMarker) LinearColor 		ClearColor;
-var (DVKillMarker) LinearColor 		LightColor;
+var (DVKillMarker) const Color 			TextColor;
+var (DVKillMarker) const LinearColor 	ClearColor;
 
-var (DVKillMarker) float 			TextScale;
-var (DVKillMarker) float			TextOffsetX;
-var (DVKillMarker) float			TextOffsetY;
-var (DVKillMarker) float			ExpirationTime;
-var (DVKillMarker) float 			YawRotationRate;
+var (DVKillMarker) const float 			TextScale;
+var (DVKillMarker) const float			TextOffsetX;
+var (DVKillMarker) const float			TextOffsetY;
+var (DVKillMarker) const float			ExpirationTime;
+var (DVKillMarker) const float 			YawRotationRate;
 
-var (DVKillMarker) ScriptedTexture 	CanvasTexture;
 var (DVKillMarker) MaterialInstanceConstant MarkerMaterial;
 var (DVKillMarker) MaterialInstanceConstant MarkerMaterial2;
+
+
+/*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
 
 var string				 			MarkerText1;
 var string				 			MarkerText2;
 var int 							MarkerMaterialIndex;
 var name 							CanvasTextureParamName;
 
+var LinearColor 					LightColor;
+var ScriptedTexture					CanvasTexture;
 var MaterialInterface 				MarkerMaterialTemplate;
 var MaterialInterface 				HeadshotMaterialTemplate;
+
 var editinline const 				StaticMeshComponent Mesh;
 var editinline const 				StaticMeshComponent Mesh2;
 
@@ -176,8 +182,8 @@ defaultproperties
 	// Symbol
 	Begin Object class=StaticMeshComponent Name=StaticMeshComp2
    		StaticMesh=StaticMesh'DV_CoreEffects.Mesh.SM_Headshot'
-   		Scale=0.2
    		Translation=(Z=100)
+   		Scale=0.2
 	End Object
 	Mesh2 = StaticMeshComp2
 	Components.Add(StaticMeshComp2)
@@ -187,7 +193,7 @@ defaultproperties
 	MarkerMaterialTemplate=Material'DV_CoreEffects.Material.M_DynamicText'
 	HeadshotMaterialTemplate=Material'DV_CoreEffects.Material.M_Headshot'
 
-	// Settings
+	// Text settings
 	MarkerText1="<>"
 	MarkerText2="<>"
 	TextScale=4.5
@@ -197,6 +203,7 @@ defaultproperties
 	TextColor=(R=255,G=255,B=255,A=255)
 	LightColor=(R=255,G=255,B=255,A=255)
 	
+	// Gameplay
 	ExpirationTime=25.0
 	YawRotationRate=20000
 	Physics=PHYS_Interpolating
