@@ -32,8 +32,8 @@ var (DVWeapon) int							MaxAmmo;
 
 var (DVWeapon) const name					LaserBeamSocket;
 var (DVWeapon) const name					WeaponFireAnim;
-var (DVWeapon) name							ZoomSocket;
 var (DVWeapon) const array<name> 			EffectSockets;
+var (DVWeapon) name							ZoomSocket;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
@@ -106,7 +106,6 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	AttachComponent(Mesh);
 	if (target.Mesh != None && Mesh != None)
 	{
-		`log("WPN (" $ Self $ ") Attaching " $ MeshCpnt $ " to " $ SocketName);
 		Mesh.SetShadowParent(target.Mesh);
 		Mesh.SetLightEnvironment(target.LightEnvironment);
 		target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
@@ -176,7 +175,7 @@ simulated function Tick(float DeltaTime)
 	// Mesh
 	Mesh.SetHidden(false);
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
-		`log("GetSocketWorldLocationAndrotation Tick failed ");
+		`warn("GetSocketWorldLocationAndrotation Tick failed ");
 	
 	// Impact location calculation
 	SocketLocation = DVPawn(Owner).GetZoomViewLocation(); // ignore previous result !
@@ -263,7 +262,7 @@ simulated function vector InstantFireEndTrace(vector StartTrace)
 	local vector loc;
 	
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[0], loc, rot))
-		`log("GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
+		`warn("GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
 	
 	return StartTrace + vector(rot) * GetTraceRange();
 }
@@ -311,7 +310,7 @@ simulated function FireAmmunition()
 	}
 	else if (AmmoCount <= 0)
 	{
-		PlaySound(WeaponEmptySound, false, true, false, Location);
+		PlaySound(WeaponEmptySound, false, true, false, P.Location);
 		bWeaponEmpty = true;
 		return;
 	}
@@ -411,7 +410,7 @@ simulated function vector GetZoomViewLocation()
 	if (Mesh != None)
 	{
 		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(ZoomSocket, loc, rot))
-			`log("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
+			`warn("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
 		
 		GetAxes(rot, X, Y, Z);
 		return loc + ZoomOffset.X * X +  ZoomOffset.Y * Y +  ZoomOffset.Z * Z;
@@ -462,7 +461,7 @@ simulated function PlayFiringSound()
 		if ( WeaponFireSnd[CurrentFireMode] != None )
 		{
 			MakeNoise(1.0);
-			PlaySound(WeaponFireSnd[CurrentFireMode], false, true, false, Location);
+			PlaySound(WeaponFireSnd[CurrentFireMode], false, true, false, Owner.Location);
 		}
 	}
 }
