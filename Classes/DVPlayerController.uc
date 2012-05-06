@@ -205,10 +205,10 @@ simulated function string GetPlayerName()
 ----------------------------------------------------------*/
 
 /*--- Call this to respawn the player ---*/
-reliable server simulated function HUDRespawn(byte NewWeapon)
+reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon)
 {
-	ServerSetUserChoice(WeaponList[NewWeapon], true);
-	SetUserChoice(WeaponList[NewWeapon], true);
+	ServerSetUserChoice(NewWeapon, true);
+	SetUserChoice(NewWeapon, true);
 	ServerReStartPlayer();
 }
 

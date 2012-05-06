@@ -9,26 +9,21 @@ class DVHUD extends UDKHUD;
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
 ----------------------------------------------------------*/
 
-var LinearColor			OrangeColor;
-var LinearColor			BlueColor;
+var (DVHUD) const LinearColor			OrangeColor;
+var (DVHUD) const LinearColor			BlueColor;
+var (DVHUD) const class<DVCoreUI_HUD>	HUDClass;
 
-var Vector 				MouseHitWorldLocation;
-var Vector  			MouseHitWorldNormal;
-var Vector  			MousePositionWorldLocation;
-var Vector  			MousePositionWorldNormal;
 
-var Vector 				RayDir;
-var Vector 				StartTrace;
-var Vector				EndTrace;
+/*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
 
-var DVGFxHUD   			HudMovie;
-var class<DVGFxHUD> 	HUDClass;
-
-var bool				bRespawnOpened;
-var float				MenuDelay;
+var DVCoreUI_HUD   				HudMovie;
+var const float					MenuDelay;
+var bool						bRespawnOpened;
 
 
 /*----------------------------------------------------------
@@ -207,7 +202,7 @@ function PutText(LinearColor col, string StringMessage2, float ScreenX, float Sc
 
 defaultproperties
 {
-	HUDClass=class'DVGFxHUD'
+	HUDClass=class'DVCoreUI_HUD'
 	bRespawnOpened=false
 	MenuDelay=0.5
 	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)

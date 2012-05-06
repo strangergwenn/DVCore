@@ -15,12 +15,11 @@ class DVMovie extends GFxMoviePlayer;
 var DVPlayerController					PC;
 
 var GFxObject 							Scene;
-
 var GFxClikWidget 						QuitButton;
 
 
 /*----------------------------------------------------------
-	Methods
+	Core methods
 ----------------------------------------------------------*/
 
 /*--- Registering widgets ---*/
@@ -38,6 +37,25 @@ function InitParts()
 {
 	Scene = GetVariableObject("_root");
 }
+
+
+/*--- Return true if str is found in data ---*/
+function bool IsInArray(string str, array<string> data)
+{
+	local byte i;
+	
+	for (i = 0; i < data.Length; i++)
+	{
+		if (InStr(str, data[i]) != -1)
+			return true;
+	}
+	return false;
+}
+
+
+/*----------------------------------------------------------
+	Game methods
+----------------------------------------------------------*/
 
 
 /*--- Return to desktop ---*/
@@ -60,13 +78,49 @@ function SetGamePaused()
 /*--- Game resume ---*/
 function SetGameUnPaused()
 {
+	Scene.GotoAndPlayI(1);
+	InitParts();
 	if (PC != None)
 	{
 		PC.LockCamera(false);
 	}
-	Scene.GotoAndPlayI(1);
-	InitParts();
 }
+
+
+/*----------------------------------------------------------
+	Getters / Setters
+----------------------------------------------------------*/
+
+/*--- Get a Flash text and set it ---*/
+function SetLabel(string SymbolName, string Text, bool bIsCaps)
+{
+	local GFxObject Symbol;
+	Symbol = GetSymbol(SymbolName);
+	
+	if (bIsCaps)
+	{
+		Text = Caps(Text);
+	}
+	Symbol.SetText(Text);
+}
+
+/*--- Get a Flash object reference --*/
+function GFxObject GetSymbol(string SymbolName)
+{
+	return GetVariableObject("_root." $ SymbolName);
+}
+
+
+/*--- Get an event-connected widget ---*/
+function GFxClikWidget GetLiveWidget(GFxObject Widget, name type, delegate<GFxClikWidget.EventListener> listener)
+{
+	local GFxClikWidget wg;
+	
+	wg = GFxClikWidget(Widget);
+	wg.AddEventListener(type, listener);
+	
+	return wg;
+} 
 
 
 /*----------------------------------------------------------
@@ -78,11 +132,10 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 {
 	switch(WidgetName)
 	{
-		case ('QuitDesktop'):
-			QuitButton = GFxClikWidget(Widget);
-			QuitButton.AddEventListener('CLIK_click', QuitToDesktop);
+		case ('ExitButton'):
+			QuitButton = GetLiveWidget(Widget, 'CLIK_click', QuitToDesktop);
 			break;
-			
+		
 		default: break;
 	}
 	return true;
@@ -101,5 +154,5 @@ defaultproperties
 	bDisplayWithHudOff=false
 	
 	// Bindings
-	WidgetBindings(0)={(WidgetName="QuitDesktop",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(0)={(WidgetName="ExitButton",WidgetClass=class'GFxClikWidget')}
 }
