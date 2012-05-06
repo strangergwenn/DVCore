@@ -44,24 +44,22 @@ function bool Start(optional bool StartPaused = false)
 /*--- Map list ---*/
 function UpdateListDataProvider()
 {
-	local byte i;
-	local string TempMapName;
-	local GFxObject TempObj;
-	local GFxObject DataProvider;
+	local byte 			i;
+	local string 		TempMapName;
+	local GFxObject 	TempObj;
+	local GFxObject 	DataProvider;
 	local array<UDKUIResourceDataProvider> ProviderList;
 
-	// Data parsing
+	// Checking data
 	class'UDKUIDataStore_MenuItems'.static.GetAllResourceDataProviders(class'UDKUIDataProvider_MapInfo', ProviderList);
 	for (i = 0; i < ProviderList.length; i++)
 	{
 		TempMapName = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
 		if (!IsInArray(TempMapName, IgnoredMaps)) 
-		{
 			MapList.AddItem(UDKUIDataProvider_MapInfo(ProviderList[i]));
-		}
 	}
 	
-	// Actual menu setting
+	// Sending data to menu
 	DataProvider = MapListMC.GetObject("dataProvider");
 	for (i = 0; i < MapList.Length; i++)
 	{

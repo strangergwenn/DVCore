@@ -161,10 +161,14 @@ function OnListItemClick(GFxClikWidget.EventData ev)
 		}
 	}
 	
-	PC.HUDRespawn(NewWeapon);
 	SetGameUnPaused();
+	PC.HUDRespawn(NewWeapon);
 }
 
+function TogglePause()
+{
+	SetGamePaused();
+}
 
 function OnResume(GFxClikWidget.EventData evtd)
 {
@@ -193,4 +197,3 @@ defaultproperties
 	WidgetBindings(2)={(WidgetName="QuitMenu",	WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(3)={(WidgetName="WeaponList",WidgetClass=class'GFxClikWidget')}
 }
-

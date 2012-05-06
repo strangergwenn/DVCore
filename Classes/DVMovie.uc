@@ -26,6 +26,7 @@ var GFxClikWidget 						QuitButton;
 function bool Start(optional bool StartPaused = false)
 {
 	super.Start();
+	`log("Gfx start");
 	Advance(0);
 	InitParts();
 	return true;
@@ -35,6 +36,7 @@ function bool Start(optional bool StartPaused = false)
 /*--- Do this on start & restart --*/
 function InitParts()
 {
+	`log("Gfx init parts");
 	Scene = GetVariableObject("_root");
 }
 
@@ -61,6 +63,7 @@ function bool IsInArray(string str, array<string> data)
 /*--- Return to desktop ---*/
 function QuitToDesktop(GFxClikWidget.EventData evtd)
 {
+	`log("Gfx exiting");
 	ConsoleCommand("exit");
 }
 
@@ -68,6 +71,7 @@ function QuitToDesktop(GFxClikWidget.EventData evtd)
 /*--- Pause menu ---*/
 function SetGamePaused()
 {
+	`log("Gfx paused game");
 	if (PC != None)
 	{
 		PC.LockCamera(true);
@@ -78,12 +82,13 @@ function SetGamePaused()
 /*--- Game resume ---*/
 function SetGameUnPaused()
 {
-	Scene.GotoAndPlayI(1);
-	InitParts();
+	`log("Gfx resumed game");
 	if (PC != None)
 	{
 		PC.LockCamera(false);
 	}
+	Scene.GotoAndStopI(1);
+	InitParts();
 }
 
 
