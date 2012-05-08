@@ -121,7 +121,7 @@ reliable client function UpdateListDataProvider()
 	
 	// Actual menu setting
 	DataProvider = WeaponListMC.GetObject("dataProvider");
-	for (i = 0; i < PC.WeaponList.Length; i++)
+	for (i = 0; i < PC.WeaponListLength; i++)
 	{
 		TempObj = CreateObject("Object");
 		TempObj.SetString("label", string(PC.WeaponList[i]));
@@ -152,7 +152,7 @@ function OnListItemClick(GFxClikWidget.EventData ev)
     button = ev._this.GetObject("itemRenderer");
 	NewWeaponName = button.GetString("label");
 	
-	for (i = 0; i < PC.WeaponList.Length; i++)
+	for (i = 0; i < PC.WeaponListLength; i++)
 	{
 		if (InStr(NewWeaponName, PC.WeaponList[i].name) != -1)
 		{
@@ -178,7 +178,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 function OnExit(GFxClikWidget.EventData evtd)
 {
 	`log("Loading...");
-	ConsoleCommand("open UDKFrontEndMap");
+	ConsoleCommand("open UDKFrontEndMap?game=DVCore.DVGame_Menu");
 }
 
 

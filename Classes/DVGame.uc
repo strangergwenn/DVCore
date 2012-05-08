@@ -13,7 +13,8 @@ class DVGame extends UDKGame;
 ----------------------------------------------------------*/
 
 var class<DVWeapon>					DefaultWeapon;
-var array<class<DVWeapon> > 		DefaultWeaponList;
+var class<DVWeapon> 				DefaultWeaponList[8];
+var int								WeaponListLength;
 
 var int 							MaxScore;
 var float							EndGameTick;

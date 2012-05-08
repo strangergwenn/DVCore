@@ -77,7 +77,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 {
     local GFxObject button;
     button = ev._this.GetObject("itemRenderer");
-	ConsoleCommand("open " $ button.GetString("label"));
+	ConsoleCommand("open " $ button.GetString("label") $ "?game=");
 }
 
 

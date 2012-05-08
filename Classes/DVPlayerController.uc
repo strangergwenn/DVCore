@@ -12,7 +12,8 @@ class DVPlayerController extends UDKPlayerController;
 	Private attributes
 ----------------------------------------------------------*/
 
-var array<class<DVWeapon> > 		WeaponList;
+var class<DVWeapon> 		 		WeaponList[8];
+var byte							WeaponListLength;
 var class<DVWeapon> 				UserChoiceWeapon;
 var DVTeamInfo						EnemyTeamInfo;
 
@@ -32,7 +33,7 @@ var string 							DebugField;
 replication
 {
 	if ( bNetDirty )
-		UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores;
+		UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores, WeaponList, WeaponListLength;
 }
 
 
@@ -263,9 +264,15 @@ reliable server simulated function SetEnemyTeamInfo(DVTeamInfo TI)
 }
 
 
-reliable server function SetWeaponList(array<class<DVWeapon> > NewList)
+reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeaponListLength)
 {
-	WeaponList = NewList;
+	local byte i;
+	WeaponListLength = NewWeaponListLength;
+	for (i = 0; i < WeaponListLength; i++)
+	{
+		if (NewList[i] != None)
+			WeaponList[i] = NewList[i];
+	}
 }
 
 

@@ -106,7 +106,7 @@ function SetGameUnPaused()
 	{
 		PC.LockCamera(false);
 	}
-	Scene.GotoAndPlayI(1);
+	Scene.GotoAndStopI(1);
 	InitParts();
 }
 
