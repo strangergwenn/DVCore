@@ -576,7 +576,7 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 		KM.SetPlayerData(UserName, KillerName, TeamLight, bWasHS);
 	}
 
-	CheckHitInfo( HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
+	CheckHitInfo(HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
 	bBlendOutTakeHitPhysics = false;
 	SetHandIKEnabled(false);
 
@@ -598,7 +598,7 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	SetPawnRBChannels(true);
 	
 	// Momentum
-	if( TearOffMomentum != vect(0,0,0) )
+	if(TearOffMomentum != vect(0,0,0))
 	{
 		ShotDir = normal(TearOffMomentum);
 		ApplyImpulse = ShotDir * DamageType.default.KDamageImpulse;
