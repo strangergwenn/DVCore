@@ -120,6 +120,55 @@ function ScoreKill(Controller Killer, Controller Other)
 }
 
 
+/*--- Player start determination ---*/
+function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
+{
+	local array<playerstart> PlayerStarts;
+	local PlayerStart 		P, BestStart;
+	local float 			BestRating, NewRating;
+	local int 				i, RandStart;
+
+	// All player starts
+	foreach WorldInfo.AllNavigationPoints(class'PlayerStart', P)
+	{
+		if ( P.bEnabled )
+			PlayerStarts[PlayerStarts.Length] = P;
+	}
+	RandStart = Rand(PlayerStarts.Length);
+
+	// Random points : end part
+	for (i = RandStart; i < PlayerStarts.Length; i++)
+	{
+		P = PlayerStarts[i];
+		NewRating = RatePlayerStart(P, InTeam, Player);
+		
+		if ( NewRating >= 30 )
+			return P;
+		if ( NewRating > BestRating )
+		{
+			BestRating = NewRating;
+			BestStart = P;
+		}
+	}
+	
+	// Random points : start part
+	for ( i = 0; i < RandStart; i++)
+	{
+		P = PlayerStarts[i];
+		NewRating = RatePlayerStart(P, InTeam, Player);
+		
+		if ( NewRating >= 30 )
+			return P;
+		if ( NewRating > BestRating )
+		{
+			BestRating = NewRating;
+			BestStart = P;
+		}
+	}
+	return BestStart;
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
