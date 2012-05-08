@@ -9,6 +9,17 @@ class DVMovie extends GFxMoviePlayer;
 
 
 /*----------------------------------------------------------
+	Public attributes
+----------------------------------------------------------*/
+
+var (DVMovie) const int					LSize;
+var (DVMovie) const int 				SpaceSizeFactor;
+
+var (DVMovie) const SoundCue 			BipSound;
+var (DVMovie) const SoundCue 			ClickSound;
+
+
+/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -16,9 +27,6 @@ var DVPlayerController					PC;
 
 var GFxObject 							Scene;
 var GFxClikWidget 						QuitButton;
-
-var int									LSize;
-var int 								SpaceSizeFactor;
 
 
 /*----------------------------------------------------------
@@ -177,6 +185,16 @@ function GFxClikWidget GetLiveWidget(GFxObject Widget, name type, delegate<GFxCl
 } 
 
 
+/*--- Play a sound ---*/
+function PlayUISound(SoundCue sound)
+{
+	if (PC != None)
+	{
+		PC.PlaySound(sound);
+	}
+}
+
+
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
@@ -210,6 +228,8 @@ defaultproperties
 	// Settings
 	LSize=40
 	SpaceSizeFactor=1
+	BipSound=SoundCue'DV_Sound.UI.A_Bip'
+	ClickSound=SoundCue'DV_Sound.UI.A_Click'
 	
 	// Bindings
 	WidgetBindings(0)={(WidgetName="ExitButton",WidgetClass=class'GFxClikWidget')}

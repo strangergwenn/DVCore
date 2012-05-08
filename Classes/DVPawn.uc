@@ -30,6 +30,8 @@ var (DVPawn) const float			DeathFlickerFrequency;
 
 var (DVPawn) const LinearColor		OffLight;
 
+var (DVPawn) const SoundCue			FootStepSound;
+
 var (DVPawn) const ParticleSystem	HitPSCTemplate;
 var (DVPawn) const ParticleSystem	LargeHitPSCTemplate;
 var (DVPawn) const ParticleSystem	BloodDecalPSCTemplate;
@@ -479,6 +481,13 @@ simulated function FireParticleSystem(ParticleSystem ps, vector loc, rotator rot
 	{
 		WorldInfo.MyEmitterPool.SpawnEmitter(ps, loc, rot);
 	}
+}
+
+
+/* -- Foot sound --*/
+event PlayFootStepSound(int FootDown)
+{
+	PlaySound(FootStepSound, false, true, false, Location);
 }
 
 

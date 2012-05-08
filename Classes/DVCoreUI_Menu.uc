@@ -265,6 +265,7 @@ function OnMenuItemClick(GFxClikWidget.EventData ev)
 	{
 		GoToFrame(button.GetInt("index"));
 	}
+	PlayUISound(BipSound);
 }
 
 
