@@ -9,6 +9,16 @@ class DVInventoryManager extends InventoryManager;
 
 
 /*----------------------------------------------------------
+	Methods
+----------------------------------------------------------*/
+
+/*--- Override ---*/
+simulated function SwitchToBestWeapon( optional bool bForceADifferentWeapon )
+{
+}
+
+
+/*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
 
