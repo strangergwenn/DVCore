@@ -13,6 +13,8 @@ class DVCoreUI_Menu extends DVMovie;
 ----------------------------------------------------------*/
 
 var (CoreUI) const array<string>		IgnoredMaps;
+var (CoreUI) const array<string>		MenuListData;
+var (CoreUI) const array<string>		ResListData;
 var (CoreUI) const string				ServerURL;
 
 
@@ -20,29 +22,23 @@ var (CoreUI) const string				ServerURL;
 	Private attributes
 ----------------------------------------------------------*/
 
-var GFxClikWidget						LaunchButtonMC;
-var GFxClikWidget						LaunchMultiMC;
+//var GFxClikWidget						LaunchButtonMC;
 var GFxClikWidget 						MapListMC;
+var GFxClikWidget 						MenuListMC;
+var GFxClikWidget 						ResListMC;
 
 var GFxObject 							ListDataProvider;
 var array<UDKUIDataProvider_MapInfo> 	MapList;
 
+var bool 								bMapsInitialized;
+
 
 /*----------------------------------------------------------
-	Methods
+	PAGE 1 : SERVERS
 ----------------------------------------------------------*/
 
-/*--- Language settings ---*/
-function bool Start(optional bool StartPaused = false)
-{
-	super.Start();
-	SetLabel("MenuTitle", "Menu principal", true);
-	return true;
-}
-
-
 /*--- Map list ---*/
-function UpdateListDataProvider()
+function UpdateMapList()
 {
 	local byte 			i;
 	local string 		TempMapName;
@@ -51,12 +47,16 @@ function UpdateListDataProvider()
 	local array<UDKUIResourceDataProvider> ProviderList;
 
 	// Checking data
-	class'UDKUIDataStore_MenuItems'.static.GetAllResourceDataProviders(class'UDKUIDataProvider_MapInfo', ProviderList);
-	for (i = 0; i < ProviderList.length; i++)
+	if (!bMapsInitialized)
 	{
-		TempMapName = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
-		if (!IsInArray(TempMapName, IgnoredMaps)) 
-			MapList.AddItem(UDKUIDataProvider_MapInfo(ProviderList[i]));
+		class'UDKUIDataStore_MenuItems'.static.GetAllResourceDataProviders(class'UDKUIDataProvider_MapInfo', ProviderList);
+		for (i = 0; i < ProviderList.length; i++)
+		{
+			TempMapName = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
+			if (!IsInArray(TempMapName, IgnoredMaps)) 
+				MapList.AddItem(UDKUIDataProvider_MapInfo(ProviderList[i]));
+		}
+		bMapsInitialized = true;
 	}
 	
 	// Sending data to menu
@@ -72,8 +72,132 @@ function UpdateListDataProvider()
 }
 
 
+/*--- Map click ---*/
+function OnMapItemClick(GFxClikWidget.EventData ev)
+{
+    local GFxObject button;
+    button = ev._this.GetObject("itemRenderer");
+	ConsoleCommand("open " $ button.GetString("label"));
+}
+
+
+/*--- Server connection ---*/
+function OpenServer(GFxClikWidget.EventData evtd)
+{
+	ConsoleCommand("open " $ ServerURL);
+}
+
+
+/*--- Language ---*/
+simulated function GetServerContent()
+{
+	SetLabel("MenuTitle", "Serveurs de jeu disponibles", true);
+	SetLabel("MapTitle", "Maps disponibles", true);
+}
+
+
 /*----------------------------------------------------------
-	Events
+	PAGE 2 : STATS
+----------------------------------------------------------*/
+
+/*--- Content ---*/
+simulated function GetStatsContent()
+{
+	// General
+	SetLabel("MenuTitle", "Statistiques de jeu", true);
+	SetLabel("StatGenTitle1", "Statistiques globales", true);
+	SetLabel("StatGenTitle2", "Dernière partie", true);
+	SetLabel("StatGenTitle3", "DeepVoid rank", true);
+	
+	// Stat block 1
+	SetLabel("StatTitle1", "Efficacité", true);
+	SetAlignedLabel("Stat10", "Victimes", "466");
+	SetAlignedLabel("Stat11", "Précision", "12%");
+	SetAlignedLabel("Stat12", "Ratio K/D", "1.2");
+	SetPieChart("PieStat1", "Stat13", "Headshots", 70.0);
+	
+	// Stat block 2
+	SetLabel("StatTitle2", "Victimes par arme", true);
+	SetAlignedLabel("Stat20", "Fusil d'assaut", "81");
+	SetAlignedLabel("Stat21", "Sniper", "66");
+	SetAlignedLabel("Stat22", "Shotgun", "45");
+	SetPieChart("PieStat2", "Stat23", "One-shots", 15.0);
+	
+	// Stat block 3
+	SetLabel("Stat30", "Votre équipe a gagné", false);
+	SetAlignedLabel("Stat31", "Rang final", "4°");
+	SetAlignedLabel("Stat32", "Victimes", "17");
+	SetAlignedLabel("Stat33", "Arme favorite", "Sniper");
+	
+	// Stat block 4
+	SetLabel("Stat40", "Vous êtes classé au rang 1", false);
+	SetLabel("Stat41", "Vous avez 87468 points", false);
+}
+
+
+/*----------------------------------------------------------
+	PAGE 3 : SETTINGS
+----------------------------------------------------------*/
+
+/*--- Content ---*/
+simulated function GetOptionsContent()
+{
+	// General
+	SetLabel("MenuTitle", "Configuration du jeu", true);
+	SetLabel("OptionGenTitle1", "Audio & Vidéo", true);
+	SetLabel("OptionGenTitle2", "Gameplay", true);
+	SetLabel("OptionGenTitle3", "Touches", true);
+	
+	// Option block 1
+	SetLabel("OptionCB1", "Musique de fond", true);
+	SetLabel("OptionCB2", "Plein écran", true);
+	
+	// Option block 2
+	
+	
+	// Option block 3
+	
+}
+
+
+/*--- Resolution list ---*/
+function UpdateResList()
+{
+	local byte 			i;
+	local GFxObject 	TempObj;
+	local GFxObject 	DataProvider;
+	
+	// Sending data to menu
+	DataProvider = ResListMC.GetObject("dataProvider");
+	for (i = 0; i < ResListData.Length; i++)
+	{
+		TempObj = CreateObject("Object");
+		TempObj.SetString("label", ResListData[i]);
+		DataProvider.SetElementObject(i, TempObj);
+	}
+	ResListMC.SetObject("dataProvider", DataProvider);
+}
+
+
+/*--- Resolution navigation ---*/
+function OnResItemClick(GFxClikWidget.EventData ev)
+{
+    local GFxObject button;
+    button = ev._this.GetObject("itemRenderer");
+    
+    `log("res = " $ button.GetString("label"));
+    
+    if (InStr("1080", button.GetString("label")) != -1)
+			ConsoleCommand("SetRes 1920*1080");
+    if (InStr("720", button.GetString("label")) != -1)
+			ConsoleCommand("SetRes 1280*720");
+    if (InStr("max", button.GetString("label")) != -1)
+			ConsoleCommand("SetRes 6000*3500");
+}
+
+
+/*----------------------------------------------------------
+	Common methods
 ----------------------------------------------------------*/
 
 /*--- Initialization ---*/
@@ -82,16 +206,23 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	switch(WidgetName)
 	{
 		case ('MapList'):
-			MapListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnListItemClick);
-			UpdateListDataProvider();	
+			MapListMC = GFxClikWidget(Widget);
+			UpdateMapList();
+			MapListMC.AddEventListener('CLIK_itemClick', OnMapItemClick);
 			break;
-
-		case ('LaunchMap') :
-			LaunchButtonMC = GetLiveWidget(Widget, 'CLIK_click', OpenMap);
+		case ('MenuList'):
+			MenuListMC = GFxClikWidget(Widget);
+			UpdateMenuList();
+			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
+			break;
+		case ('ResolutionList'):
+			ResListMC = GFxClikWidget(Widget);
+			UpdateResList();
+			ResListMC.AddEventListener('CLIK_itemClick', OnResItemClick);
 			break;
 
 		case ('LaunchMulti') :
-			LaunchMultiMC = GetLiveWidget(Widget, 'CLIK_click', OpenServ);
+			//LaunchMultiMC = GetLiveWidget(Widget, 'CLIK_click', OpenServer);
 			break;
 			
 		default:
@@ -101,27 +232,39 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 }
 
 
-/*----------------------------------------------------------
-	Click events
-----------------------------------------------------------*/
-
-function OnListItemClick(GFxClikWidget.EventData ev)
+/*--- Menu list ---*/
+function UpdateMenuList()
 {
-	/* Disabled for secondary button but working
+	local byte 			i;
+	local GFxObject 	TempObj;
+	local GFxObject 	DataProvider;
+	
+	// Sending data to menu
+	DataProvider = MenuListMC.GetObject("dataProvider");
+	for (i = 0; i < MenuListData.Length; i++)
+	{
+		TempObj = CreateObject("Object");
+		TempObj.SetString("label", MenuListData[i]);
+		DataProvider.SetElementObject(i, TempObj);
+	}
+	MenuListMC.SetObject("dataProvider", DataProvider);
+}
+
+
+/*--- Menu navigation ---*/
+function OnMenuItemClick(GFxClikWidget.EventData ev)
+{
     local GFxObject button;
-    button = ev._this.GetObject("target");
-	ConsoleCommand("open " $ button.GetString("name"));
-	*/
-}
-
-function OpenMap(GFxClikWidget.EventData evtd)
-{
-	ConsoleCommand("open " $ (MapList[MapListMC.GetFloat("selectedIndex")]).MapName);
-}
-
-function OpenServ(GFxClikWidget.EventData evtd)
-{
-	ConsoleCommand("open " $ ServerURL);
+    button = ev._this.GetObject("itemRenderer");
+    
+	if(button.GetString("label") == MenuListData[3])
+	{
+		ConsoleCommand("exit");
+	}
+	else
+	{
+		GoToFrame(button.GetInt("index"));
+	}
 }
 
 
@@ -132,9 +275,15 @@ function OpenServ(GFxClikWidget.EventData evtd)
 defaultproperties
 {
 	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
+	
+	MenuListData=("Serveurs","Statistiques","Réglages","Quitter")
+	ResListData=("Ecran HD (1080p)","Ecran HDReady (720p)","Résolution maximale")
+	
 	ServerURL="deepvoid.eu"
+	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
 	
 	WidgetBindings(1)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(2)={(WidgetName="LaunchMap",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(3)={(WidgetName="LaunchMulti",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(2)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(3)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
+	//WidgetBindings(3)={(WidgetName="LaunchMulti",WidgetClass=class'GFxClikWidget')}
 }

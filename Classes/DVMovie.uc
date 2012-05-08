@@ -17,6 +17,9 @@ var DVPlayerController					PC;
 var GFxObject 							Scene;
 var GFxClikWidget 						QuitButton;
 
+var int									LSize;
+var int 								SpaceSizeFactor;
+
 
 /*----------------------------------------------------------
 	Core methods
@@ -55,6 +58,14 @@ function bool IsInArray(string str, array<string> data)
 }
 
 
+/*--- Go to a 0-i indexed frame ---*/
+function GoToFrame(int index)
+{
+	Scene.GotoAndStopI(1 + index);
+	InitParts();
+}
+
+
 /*----------------------------------------------------------
 	Game methods
 ----------------------------------------------------------*/
@@ -87,7 +98,7 @@ function SetGameUnPaused()
 	{
 		PC.LockCamera(false);
 	}
-	Scene.GotoAndStopI(1);
+	Scene.GotoAndPlayI(1);
 	InitParts();
 }
 
@@ -96,11 +107,49 @@ function SetGameUnPaused()
 	Getters / Setters
 ----------------------------------------------------------*/
 
+/*--- Set a pie chart and associated label ---*/
+function SetPieChart(string PieName, string LabelName, string LabelText, float x)
+{
+	local GfxObject PieStat1;
+	
+	SetAlignedLabel(LabelName, LabelText, "" $ round(x) $ "%");
+	PieStat1 = GetSymbol("" $ PieName $ ".percentage");
+	PieStat1.GotoAndStopI(round(x * 3.6));
+}
+
+
+/*--- Get a Flash text, set it and align it using spaces ---*/
+function SetAlignedLabel(string SymbolName, string Text1, string Text2)
+{
+	local int CurrentSize;
+	local int SpaceFactor;
+	local string Spacer;
+	local byte i;
+	
+	Spacer = "";
+	CurrentSize = Len(Text1) + Len(Text2);
+	SpaceFactor = (float(LSize) / float(CurrentSize)) * SpaceSizeFactor;
+	if (CurrentSize < LSize)
+	{
+		for (i = CurrentSize; i < round(LSize + SpaceFactor); i++)
+		Spacer $= " ";
+	}
+	
+	SetLabel(SymbolName, Text1 $ Spacer $ Text2, false);
+}
+
+
 /*--- Get a Flash text and set it ---*/
 function SetLabel(string SymbolName, string Text, bool bIsCaps)
 {
 	local GFxObject Symbol;
 	Symbol = GetSymbol(SymbolName);
+	
+	if (Symbol == None)
+	{
+		`warn("Null symbol : " $ SymbolName);
+		return;
+	}
 	
 	if (bIsCaps)
 	{
@@ -157,6 +206,10 @@ defaultproperties
 	bAllowInput=true
 	bAllowFocus=true
 	bDisplayWithHudOff=false
+	
+	// Settings
+	LSize=40
+	SpaceSizeFactor=1
 	
 	// Bindings
 	WidgetBindings(0)={(WidgetName="ExitButton",WidgetClass=class'GFxClikWidget')}
