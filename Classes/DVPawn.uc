@@ -12,6 +12,8 @@ class DVPawn extends UDKPawn;
 	Public attributes
 ----------------------------------------------------------*/
 
+var (DVPawn) const bool				bDVLog;
+
 var (DVPawn) const name				EyeSocket;
 var (DVPawn) const name				WeaponSocket;
 var (DVPawn) const name				WeaponSocket2;
@@ -606,7 +608,7 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 /*--- Standard log procedure ---*/
 reliable server simulated function ServerLogAction(string event)
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
+	if (WorldInfo.NetMode == NM_DedicatedServer && bDVLog)
 	{
 		`log("DVLOG/" $ event $ "/" $ self $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
 	}
@@ -774,6 +776,7 @@ defaultproperties
 	JumpDamageMultiplier=1.3
 	
 	// Gameplay
+	bDVLog=false
 	bWasHS=false
 	bJumping=false
 	RecoilAngle=0.0

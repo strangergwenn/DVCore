@@ -62,7 +62,7 @@ var string 						DebugField;
 replication
 {
 	if ( bNetDirty )
-		bZoomed, bBeamActive, Addon1, Addon2;
+		bZoomed, bBeamActive, Addon1, Addon2, bWeaponEmpty;
 }
 
 
