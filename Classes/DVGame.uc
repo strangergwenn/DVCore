@@ -9,14 +9,25 @@ class DVGame extends UDKGame;
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
+----------------------------------------------------------*/
+
+var (DVGame) const class<DVWeapon> 		DefaultWeaponList[8];
+
+var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
+
+var (DVGame) const int					WeaponListLength;
+var (DVGame) const int 					MaxScore;
+
+
+/*----------------------------------------------------------
+	Private attributes
 ----------------------------------------------------------*/
 
 var class<DVWeapon>					DefaultWeapon;
-var class<DVWeapon> 				DefaultWeaponList[8];
-var int								WeaponListLength;
 
-var int 							MaxScore;
+var	DVTeamInfo						Teams[2];
+
 var float							EndGameTick;
 var float							RestartTimer;
 
@@ -25,10 +36,35 @@ var float							RestartTimer;
 	Events
 ----------------------------------------------------------*/
 
+/*--- Standard team creation ---*/
+function PreBeginPlay()
+{
+	super.PreBeginPlay();
+	CreateTeam(0);
+	CreateTeam(1);
+}
+
+
+/*--- Score update ---*/
 event PostBeginPlay()
 {
 	super.PostBeginPlay();
 	SetTimer(EndGameTick, true, 'ScoreUpdated');
+}
+
+
+/*--- Team attribution ---*/
+event PostLogin (PlayerController NewPlayer)
+{
+	local Actor A;
+	Super.PostLogin(NewPlayer);
+	
+	DVPlayerController(NewPlayer).SetWeaponList(DefaultWeaponList, WeaponListLength);
+	
+	if (LocalPlayer(NewPlayer.Player) == None)
+		return;
+	ForEach AllActors(class'Actor', A)
+		A.NotifyLocalPlayerTeamReceived();
 }
 
 
@@ -60,7 +96,19 @@ function AddDefaultInventory(Pawn PlayerPawn)
 
 
 /*--- Stub ---*/
-function ScoreUpdated(){}
+function ScoreUpdated()
+{
+	// Init
+	local int S0, S1;
+	S0 = Teams[0].GetScore();
+	S1 = Teams[1].GetScore();
+	
+	// Victory
+	if (S0 >= MaxScore || S1 >= MaxScore)
+	{
+		GameEnded( (S0 > S1) ? 0 : 1);
+	}
+}
 
 
 /*--- Game end ---*/
@@ -83,7 +131,7 @@ function GameEnded(byte WinnerIndex)
 /*--- Is this controller the winner ? ---*/
 simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 {
-	return true;
+	return (PC.GetTeamIndex() == WinnerIndex);
 }
 
 
@@ -170,17 +218,90 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 }
 
 
+/*---Team attribution ---*/
+function SetTeam(Controller Other, DVTeamInfo NewTeam, bool bNewTeam)
+{
+	local Actor A;
+
+	// Init
+	if ( Other.PlayerReplicationInfo == None )
+		return;
+	if (Other.PlayerReplicationInfo.Team != None || !ShouldSpawnAtStartSpot(Other))
+		Other.StartSpot = None;
+
+	// Team removal
+	if ( Other.PlayerReplicationInfo.Team != None )
+	{
+		Other.PlayerReplicationInfo.Team.RemoveFromTeam(Other);
+		Other.PlayerReplicationInfo.Team = none;
+	}
+	
+	// Team setting
+	if ( NewTeam == None || (NewTeam != None && NewTeam.AddToTeam(Other)) )
+	{
+		if ( (NewTeam!=None) && ((WorldInfo.NetMode != NM_Standalone) || (PlayerController(Other) == None) || (PlayerController(Other).Player != None)) )
+			BroadcastLocalizedMessage( GameMessageClass, 3, Other.PlayerReplicationInfo, None, NewTeam );
+	}
+	if ( (PlayerController(Other) != None) && (LocalPlayer(PlayerController(Other).Player) != None) )
+	{
+		ForEach AllActors(class'Actor', A)
+		{
+			A.NotifyLocalPlayerTeamReceived();
+		}
+	}
+	
+	// Enemy team
+	if (NewTeam.TeamIndex == 0)
+		DVPlayerController(Other).SetEnemyTeamInfo(Teams[1]);
+	else
+		DVPlayerController(Other).SetEnemyTeamInfo(Teams[0]);
+}
+
+
+/*--- Pick a team ! ---*/
+function byte PickTeam(byte num, Controller C)
+{
+	if (Teams[0].Size > Teams[1].Size)
+		return 1;
+	else
+		return 0;
+}
+
+
+/*--- Team storage ---*/
+function CreateTeam(int TeamIndex)
+{
+	Teams[TeamIndex] = spawn(TeamInfoClass);
+	Teams[TeamIndex].Initialize(TeamIndex);
+	GameReplicationInfo.SetTeam(TeamIndex, Teams[TeamIndex]);
+}
+
+
+/*--- Changing teams ---*/
+function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
+{
+	`log("ChangeTeam "$ Other $" "$ num $" "$ bNewTeam);
+	SetTeam(Other, Teams[num], bNewTeam);
+	return true;
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
 
 defaultproperties
 {
-	MaxScore=30
+	// Settings
+	bTeamGame=true
+	MaxScore=50
 	EndGameTick=0.5
 	RestartTimer=10.0
 	
+	// Classes
 	HUDType=class'DVHUD'
 	DefaultPawnClass=class'DVPawn'
+	TeamInfoClass=class'DVCore.DVTeamInfo'
 	PlayerControllerClass=class'DVPlayerController'
+	PlayerReplicationInfoClass=class'DVCore.DVPlayerRepInfo'
 }
