@@ -44,8 +44,13 @@ replication
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
 {
+	local string TeamName;
+	
 	super.Possess(aPawn, bVehicleTransition);
 	UpdatePawnColor();
+	
+	TeamName = (GetTeamIndex() == 0) ? "rouge" : "bleue";
+	ShowGenericMessage("Vous êtes dans l'équipe " $ TeamName);
 }
 
 
@@ -94,6 +99,26 @@ exec function StartFire(optional byte FireModeNum = 0)
 	Methods
 ----------------------------------------------------------*/
 
+/*--- Show a generic message ---*/ 
+reliable client simulated function ShowGenericMessage(string text)
+{
+	DVHUD(myHUD).GameplayMessage(text);
+}
+
+
+/*--- Show the killer message ---*/ 
+reliable client simulated function ShowKilledBy(string KillerName)
+{
+	ShowGenericMessage("Vous avez été tué par " $ KillerName $ " !");
+}
+
+
+/*--- Show the killed message ---*/ 
+reliable client simulated function ShowKilled(string KilledName)
+{
+	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
+}
+
 
 /*--- Camera lock management ---*/
 simulated function LockCamera(bool NewState)
@@ -101,6 +126,8 @@ simulated function LockCamera(bool NewState)
 	bLocked = NewState;
 }
 
+
+/*--- Camera lock getter ---*/
 simulated function bool IsCameraLocked()
 {
 	return bLocked;
@@ -160,6 +187,12 @@ simulated function SignalEndGame(bool bHasWon)
 	`log("End of game " $ self);
 	bPrintScores = true;
 	LockCamera(true);
+	
+	ShowGenericMessage((bHasWon) ? 
+		"Vous avez gagné la partie !" : 
+		"Vous avez perdu la partie !"
+	);
+	
 	GotoState('RoundEnded');
 }
 
@@ -250,6 +283,7 @@ reliable server simulated function UpdatePawnColor()
 }
 
 
+/*--- Register the weapon to use on respawn ---*/
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
 	if (bShouldKill && Pawn != None)
@@ -258,12 +292,14 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 }
 
 
+/*--- Register the ennemy team ---*/
 reliable server simulated function SetEnemyTeamInfo(DVTeamInfo TI)
 {
 	EnemyTeamInfo = TI;
 }
 
 
+/*--- Set the new weapon list ---*/
 reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeaponListLength)
 {
 	local byte i;
@@ -276,6 +312,7 @@ reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeapo
 }
 
 
+/*--- Hide the score screen ---*/
 reliable client simulated function HideScores()
 {
 	bPrintScores = false;
@@ -308,7 +345,7 @@ state RoundEnded
 
 defaultproperties
 {
-	ScoreLength=3.0
+	ScoreLength=4.0
 	
 	bLocked=true
 	bPrintScores=false

@@ -220,6 +220,9 @@ simulated function AddWeaponAmmo(int amount)
 {
 	if (Weapon != None)
 		Weapon.AddAmmo(amount);
+	
+	if (Controller != None)
+		DVPlayerController(Controller).ShowGenericMessage("Vous avez ramassé " $ amount $ " balles");
 }
 
 

@@ -16,6 +16,8 @@ var (DVHUD) const LinearColor			OrangeColor;
 var (DVHUD) const LinearColor			BlueColor;
 var (DVHUD) const class<DVCoreUI_HUD>	HUDClass;
 
+var (DVHUD) const float					GameplayMessageTime;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -82,6 +84,21 @@ simulated function PostBeginPlay()
 	// HUD register
 	HudMovie.PC = DVPlayerController(PlayerOwner);
 	SetTimer(MenuDelay, false, 'ChooseWeapons');
+}
+
+
+/*--- Put an on-screen message for some time ---*/
+simulated function GameplayMessage(string text)
+{
+	HudMovie.ShowBannerInfo(true, text);
+	SetTimer(GameplayMessageTime, false, 'ShutdownMessage');
+}
+
+
+/*--- Hide on-screen message ---*/
+simulated function ShutdownMessage()
+{
+	HudMovie.ShowBannerInfo(false);
 }
 
 
@@ -202,9 +219,12 @@ function PutText(LinearColor col, string StringMessage2, float ScreenX, float Sc
 
 defaultproperties
 {
-	HUDClass=class'DVCoreUI_HUD'
 	bRespawnOpened=false
+	HUDClass=class'DVCoreUI_HUD'
+	
 	MenuDelay=0.5
+	GameplayMessageTime=3.0
+	
 	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)
 	BlueColor=(R=20.0,G=100.0,B=255.0,A=0.0)
 }

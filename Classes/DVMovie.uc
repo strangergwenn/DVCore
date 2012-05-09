@@ -26,6 +26,7 @@ var (DVMovie) const SoundCue 			ClickSound;
 var DVPlayerController					PC;
 
 var GFxObject 							Scene;
+var GFxObject 							Banner;
 var GFxClikWidget 						QuitButton;
 
 
@@ -49,6 +50,8 @@ function InitParts()
 {
 	`log("Gfx init parts");
 	Scene = GetVariableObject("_root");
+	Banner = GetSymbol("Banner");
+	ShowBannerInfo(false);
 }
 
 
@@ -108,6 +111,32 @@ function SetGameUnPaused()
 	}
 	Scene.GotoAndStopI(1);
 	InitParts();
+}
+
+
+/*--- Banner information to player ---*/
+function ShowBannerInfo(bool NewState, optional string BannerText)
+{
+	// Checking
+	if (Banner == None)
+	{
+		`warn("Attempt to set an empty banner");
+		return;
+	}
+	
+	// Actual info
+	Banner.SetVisible(NewState);
+	Banner.SetText(BannerText);
+}
+
+
+/*--- Play a sound ---*/
+function PlayUISound(SoundCue sound)
+{
+	if (PC != None)
+	{
+		PC.PlaySound(sound);
+	}
 }
 
 
@@ -182,16 +211,6 @@ function GFxClikWidget GetLiveWidget(GFxObject Widget, name type, delegate<GFxCl
 	wg.AddEventListener(type, listener);
 	
 	return wg;
-} 
-
-
-/*--- Play a sound ---*/
-function PlayUISound(SoundCue sound)
-{
-	if (PC != None)
-	{
-		PC.PlaySound(sound);
-	}
 }
 
 

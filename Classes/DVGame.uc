@@ -138,12 +138,13 @@ simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 /*--- Killed set ---*/
 function ScoreKill(Controller Killer, Controller Other)
 {
-	local DVPlayerRepInfo KillerPRI;
+	local DVPlayerRepInfo KillerPRI, OtherPRI;
 	local bool bIsTeamKill;
 	
 	// Init
 	`log(Killer $ " ScoreKill " $ Other);
 	KillerPRI = DVPlayerRepInfo(Killer.PlayerReplicationInfo);
+	OtherPRI = DVPlayerRepInfo(Other.PlayerReplicationInfo);
 	
 	// Score kill
 	`log(self $ " KilledBy " $ KillerPRI);
@@ -159,11 +160,15 @@ function ScoreKill(Controller Killer, Controller Other)
 		
 		`log(Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
 		KillerPRI.ScorePoint(bIsTeamKill);
+		DVPlayerController(Other).ShowKilledBy(KillerPRI.PlayerName);
 	}
 	
 	// Death
-	if (DVPlayerController(Other).PlayerReplicationInfo != None)
-		DVPlayerRepInfo(DVPlayerController(Other).PlayerReplicationInfo).ScoreDeath();
+	if (OtherPRI != None)
+	{
+		DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName);
+		OtherPRI.ScoreDeath();
+	}
 	else
 		`log("ScoreKill could not store repinfo " $ self);
 }
@@ -294,7 +299,7 @@ defaultproperties
 {
 	// Settings
 	bTeamGame=true
-	MaxScore=50
+	MaxScore=5
 	EndGameTick=0.5
 	RestartTimer=10.0
 	

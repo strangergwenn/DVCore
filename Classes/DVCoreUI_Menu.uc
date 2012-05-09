@@ -22,7 +22,6 @@ var (CoreUI) const string				ServerURL;
 	Private attributes
 ----------------------------------------------------------*/
 
-//var GFxClikWidget						LaunchButtonMC;
 var GFxClikWidget 						MapListMC;
 var GFxClikWidget 						MenuListMC;
 var GFxClikWidget 						ResListMC;
@@ -176,6 +175,7 @@ function UpdateResList()
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	ResListMC.SetObject("dataProvider", DataProvider);
+	ResListMC.SetInt("selectedIndex", 0);
 }
 
 
@@ -219,10 +219,6 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			ResListMC = GFxClikWidget(Widget);
 			UpdateResList();
 			ResListMC.AddEventListener('CLIK_itemClick', OnResItemClick);
-			break;
-
-		case ('LaunchMulti') :
-			//LaunchMultiMC = GetLiveWidget(Widget, 'CLIK_click', OpenServer);
 			break;
 			
 		default:
@@ -286,5 +282,4 @@ defaultproperties
 	WidgetBindings(1)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(2)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(3)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
-	//WidgetBindings(3)={(WidgetName="LaunchMulti",WidgetClass=class'GFxClikWidget')}
 }

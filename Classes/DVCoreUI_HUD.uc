@@ -43,6 +43,7 @@ simulated function InitParts()
 	
 	ChatMC.SetText("");
 	IndicationMC.SetText("WORK IN PROGRESS - DEVELOPPEMENT EN COURS");
+	Banner = GetSymbol("Banner");
 }
 
 
@@ -54,6 +55,7 @@ reliable client simulated function OpenRespawnMenu()
 {
 	SetGamePaused();
 	Scene.GotoAndPlayI(3);
+	Banner = GetSymbol("Banner");
 }
 
 
