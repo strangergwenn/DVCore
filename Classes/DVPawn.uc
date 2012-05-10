@@ -498,6 +498,7 @@ event PlayFootStepSound(int FootDown)
 simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocation, vector Momentum, class<DamageType> DamageType, optional TraceHitInfo HitInfo, optional Actor DamageCauser)
 {
 	local vector EndTrace, BloodImpact, BloodNormal;
+	local DVPlayerController Attacker;
 	local Actor SplatteredActor;
 	
 	// Local blood
@@ -509,9 +510,10 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	// Jumping multiplication & kill marker settings
 	if (InstigatedBy != None)
 	{
-		KillerName = DVPlayerController(InstigatedBy).GetPlayerName();
-		if (InstigatedBy.Pawn != None)
-			Damage *= DVPawn(InstigatedBy.Pawn).GetJumpingFactor();
+		Attacker = DVPlayerController(InstigatedBy);
+		KillerName = Attacker.GetPlayerName();
+		if (Attacker.Pawn != None)
+			Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
 	}
 	if (Controller != None)
 		UserName = DVPlayerController(Controller).GetPlayerName();

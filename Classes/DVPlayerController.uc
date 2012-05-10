@@ -9,6 +9,15 @@ class DVPlayerController extends UDKPlayerController;
 
 
 /*----------------------------------------------------------
+	Public attributes
+----------------------------------------------------------*/
+
+var (DVPC) const SoundCue			HitSound;
+
+var (DVPC) const float 				ScoreLength;
+
+
+/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -19,9 +28,6 @@ var DVTeamInfo						EnemyTeamInfo;
 
 var bool							bPrintScores;
 var bool							bLocked;
-
-var float							CleanUpFrequency;
-var float 							ScoreLength;
 
 var string 							DebugField;
 
@@ -100,21 +106,35 @@ exec function StartFire(optional byte FireModeNum = 0)
 ----------------------------------------------------------*/
 
 /*--- Show a generic message ---*/ 
-reliable client simulated function ShowGenericMessage(string text)
+unreliable client simulated function ShowGenericMessage(string text)
 {
 	DVHUD(myHUD).GameplayMessage(text);
 }
 
 
 /*--- Show the killer message ---*/ 
-reliable client simulated function ShowKilledBy(string KillerName)
+unreliable client simulated function ShowKilledBy(string KillerName)
 {
 	ShowGenericMessage("Vous avez été tué par " $ KillerName $ " !");
 }
 
 
+/*--- Play the hit sound ---*/ 
+unreliable client simulated function PlayHitSound()
+{
+	PlaySound(HitSound);
+}
+
+
+/*--- Show the killer message ---*/ 
+unreliable client simulated function ShowEmptyAmmo()
+{
+	ShowGenericMessage("Votre arme est vide !");
+}
+
+
 /*--- Show the killed message ---*/ 
-reliable client simulated function ShowKilled(string KilledName)
+unreliable client simulated function ShowKilled(string KilledName)
 {
 	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
 }
@@ -349,4 +369,6 @@ defaultproperties
 	
 	bLocked=true
 	bPrintScores=false
+	
+	HitSound=SoundCue'DV_Sound.UI.A_Click'
 }

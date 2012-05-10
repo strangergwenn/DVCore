@@ -302,25 +302,22 @@ simulated function FireAmmunition()
 	PC = DVPlayerController(Instigator.Controller);
 	if (PC == None) return;
 	P = DVPawn(Owner);
-	
-	// Ammo
 	if (bWeaponEmpty)
-	{
 		return;
-	}
+	
+	// Empty ammo ?
 	else if (AmmoCount <= 0)
 	{
 		PlaySound(WeaponEmptySound, false, true, false, P.Location);
+		PC.ShowEmptyAmmo();
 		bWeaponEmpty = true;
 		return;
 	}
+	
+	// Firing
 	AmmoCount -= 1;
-	
-	// Logging
-	P.ServerLogAction("SHOOT");
-	
-	// Anim
 	PlayFiringSound();
+	P.ServerLogAction("SHOOT");
 	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	P.GetWeaponRecoil(RecoilAngle);
 	Super.FireAmmunition();
@@ -341,7 +338,7 @@ simulated function ProcessInstantHit(byte FiringMode, ImpactInfo Impact, optiona
 			HitEnemy++;
 		}
 		
-		if ( (UDKPawn(Impact.HitActor) == None) && (InstantHitMomentum[FiringMode] == 0) )
+		if ((UDKPawn(Impact.HitActor) == None) && (InstantHitMomentum[FiringMode] == 0))
 		{
 			InstantHitMomentum[FiringMode] = 1;
 			bFixMomentum = true;
@@ -385,10 +382,14 @@ simulated function PlayImpactEffects(vector HitLocation)
 			CheckHitInfo(HitInfo, Pawn(HitActor).Mesh, -HitNormal, NewHitLoc);
 		}
 		
-		// Sound effect
+		// Sound effects
 		if (ImpactEffect.Sound != None)
 		{
 			PlaySound(ImpactEffect.Sound, true,,, HitLocation);
+		}
+		if (DVPawn(HitActor) != None)
+		{
+			DVPlayerController(P.Controller).PlayHitSound();
 		}
 		
 		// Particle system template
