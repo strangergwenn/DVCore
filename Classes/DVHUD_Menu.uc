@@ -32,6 +32,16 @@ simulated function PostBeginPlay()
 	HudMovie.Start();
 	HudMovie.Advance(0);
 	HudMovie.PC = DVPlayerController(PlayerOwner);
+	
+	// Debug
+	AddServerInfo(
+		"DeepVoid.eu (hardcode)",
+		"LEVEL_01.udk",
+		"deepvoid.eu",
+		"G_TeamDeathmatch",
+		12,
+		16
+	);
 }
 
 
@@ -47,6 +57,14 @@ function DisplayResponse (bool bSuccess, string Msg)
 function HidePopup()
 {
 	HudMovie.HidePopup(true);
+}
+
+
+/*--- Server data ---*/  
+function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
+{
+	HudMovie.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers);
+	HudMovie.UpdateServerList();
 }
 
 

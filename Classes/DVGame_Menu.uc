@@ -21,6 +21,7 @@ event PostLogin (PlayerController NewPlayer)
 	NP = DVPlayerController(NewPlayer);
 	
 	NP.MasterServerLink = Spawn(class'DVLink');
+	NP.MasterServerLink.InitLink(NP);
 }
 
 

@@ -16,8 +16,6 @@ var (CoreUI) const array<string>		IgnoredMaps;
 var (CoreUI) const array<string>		MenuListData;
 var (CoreUI) const array<string>		ResListData;
 
-var (CoreUI) const string				ServerURL;
-
 
 /*----------------------------------------------------------
 	Private attributes
@@ -25,21 +23,79 @@ var (CoreUI) const string				ServerURL;
 
 var GFxClikWidget 						MapListMC;
 var GFxClikWidget 						MenuListMC;
+var GFxClikWidget 						ServerListMC;
 var GFxClikWidget 						ResListMC;
 
 var GFxClikWidget 						ServerConnect;
 var GFxClikWidget 						PlayerConnect;
 
-var GFxObject 							ListDataProvider;
 var array<UDKUIDataProvider_MapInfo> 	MapList;
+var array<string>						ServerList;
+var array<string>						IPList;
 
 var bool 								bMapsInitialized;
 var bool								bIsInRegisterPopup;
+
+var string								ServerURL;
 
 
 /*----------------------------------------------------------
 	PAGE 1 : SERVERS
 ----------------------------------------------------------*/
+
+/*--- Add a possibly new server to the local database ---*/
+function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
+{
+	if (IPList.Find(IP) < 0)
+	{
+		ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers));
+		IPList.AddItem(IP);
+	}
+}
+
+
+/*--- Server browser ---*/
+function UpdateServerList()
+{
+	local byte 			i;
+	local GFxObject 	TempObj;
+	local GFxObject 	DataProvider;
+
+	// Sending data to menu
+	DataProvider = ServerListMC.GetObject("dataProvider");
+	for (i = 0; i < ServerList.Length; i++)
+	{
+		TempObj = CreateObject("Object");
+		TempObj.SetString("label", ServerList[i]);
+		DataProvider.SetElementObject(i, TempObj);
+	}
+	ServerListMC.SetObject("dataProvider", DataProvider);
+	ServerListMC.SetFloat("rowCount", i);
+}
+
+
+/*--- Return a formatted server string to be displayed in the server browser ---*/
+function string FormatServerInfo(string ServerName, string Level, string Game, int Players, int MaxPlayers)
+{
+	ServerName = Caps(ServerName);
+	Game = GetRightMost(Game);
+	Level = Caps(Repl(Level, ".udk", "", false));
+	return (ServerName $ "\n" $Players $"/" $MaxPlayers $" joueurs, " $Game $"\n" $Level);
+}
+
+
+/*--- Server selection ---*/
+function OnServerItemClick(GFxClikWidget.EventData ev)
+{
+    local GFxObject button;
+    local string ServerString;
+    
+    button = ev._this.GetObject("itemRenderer");
+	ServerString = button.GetString("label");
+	
+	ServerURL = IPList[ServerList.Find(ServerString)];
+}
+
 
 /*--- Map list ---*/
 function UpdateMapList()
@@ -81,7 +137,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 {
     local GFxObject button;
     button = ev._this.GetObject("itemRenderer");
-	ConsoleCommand("open " $ button.GetString("label") $ "?game=");
+	ServerURL = button.GetString("label");
 }
 
 
@@ -96,7 +152,6 @@ function OpenServer(GFxClikWidget.EventData evtd)
 function OnPlayerConnect(GFxClikWidget.EventData evtd)
 {
 	OpenConnectionDialog(false);
-	PC.MasterServerLink.InitLink(PC);
 }
 
 
@@ -135,8 +190,8 @@ function OpenConnectionDialog(bool bShowRegister)
 simulated function GetServerContent()
 {
 	`log("GetServerContent");
-	SetLabel("MenuTitle", "Parties disponibles", true);
-	SetLabel("MapTitle", "Maps disponibles", true);
+	SetLabel("MenuTitle", "Parties en ligne", true);
+	SetLabel("MapTitle", "Parties en solo", true);
 	SetLabel("ServerTitle", "Parties en ligne", true);
 	SetLabel("ButtonsTitle", "Actions", true);
 	OpenConnectionDialog(false);
@@ -312,24 +367,27 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			UpdateMapList();
 			MapListMC.AddEventListener('CLIK_itemClick', OnMapItemClick);
 			break;
-		
+		case ('ServerList'):
+			ServerListMC = GFxClikWidget(Widget);
+			UpdateServerList();
+			ServerListMC.AddEventListener('CLIK_itemClick', OnServerItemClick);
+			break;
 		case ('MenuList'):
 			MenuListMC = GFxClikWidget(Widget);
 			UpdateMenuList();
 			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
 			break;
-		
 		case ('ResolutionList'):
 			ResListMC = GFxClikWidget(Widget);
 			UpdateResList();
 			ResListMC.AddEventListener('CLIK_itemClick', OnResItemClick);
 			break;
 		
+		// Buttons
 		case ('OpenServerButton'):
 			ServerConnect = GFxClikWidget(Widget);
 			ServerConnect.AddEventListener('CLIK_click', OpenServer);
 			break;
-		
 		case ('PlayerConnectButton'):
 			PlayerConnect = GFxClikWidget(Widget);
 			PlayerConnect.AddEventListener('CLIK_click', OnPlayerConnect);
@@ -403,8 +461,9 @@ defaultproperties
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
 	
 	WidgetBindings(3)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(4)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(5)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(6)={(WidgetName="OpenServerButton",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(7)={(WidgetName="PlayerConnectButton",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(4)={(WidgetName="ServerList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(5)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(6)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(7)={(WidgetName="OpenServerButton",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(8)={(WidgetName="PlayerConnectButton",WidgetClass=class'GFxClikWidget')}
 }

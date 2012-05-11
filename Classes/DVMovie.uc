@@ -143,7 +143,7 @@ function PlayUISound(SoundCue sound)
 		PC.PlaySound(sound);
 	}
 }
-
+ 
 
 /*----------------------------------------------------------
 	Popup management
@@ -188,6 +188,7 @@ function SetPopup(string Text[7], optional int PField, optional int PField2)
 			}
 			else
 			{
+				TempObject.SetBool("displayAsPassword", false);
 				TempObject.SetVisible(true);
 			}
 		}

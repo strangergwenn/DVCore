@@ -15,6 +15,7 @@ class DVLink extends TcpLink;
 var (DVLink) const int				MasterServerPort;
 
 var (DVLink) const float			TimeoutLength;
+var (DVLink) const float			ServerListUpdateFrequency;
 
 var (DVLink) const string 			MasterServerIP;
 
@@ -217,7 +218,7 @@ simulated function array<string> GetServerCommand(string Input)
 simulated function SignalTimeout()
 {
 	`warn("Command timeout...");
-	SignalController(LastCommandSent, false, "Serveur indisponible");
+	SignalController("NET", false, "Serveur indisponible");
 }
 
 
@@ -270,7 +271,7 @@ event ResolveFailed()
 	`log("Failed to resolve master server");
 	bIsConnected = false;
 	bIsOpened = false;
-	SignalController("NET", false);
+	SignalController("NET", false, "Hors ligne");
 }
 
 
@@ -280,6 +281,7 @@ event Opened()
 	`log("Successfully opened master server");
 	bIsConnected = false;
 	bIsOpened = true;
+	SetTimer(ServerListUpdateFrequency, true, 'GetServers'); 
 }
 
 
@@ -320,6 +322,14 @@ event ReceivedLine(string Line)
 		
 		// Server list
 		case "SERVER":
+			DVHUD_Menu(PC.myHUD).AddServerInfo(
+				Command[1],
+				Command[2],
+				Command[3],
+				Command[4], 
+				int(Command[5]),
+				int(Command[6])
+			);
 			break;
 		
 		// Global player statistics
@@ -348,6 +358,7 @@ defaultproperties
 	
 	CurrentID=0
 	TimeoutLength=5.0
+	ServerListUpdateFrequency=20.0
 	
 	MasterServerIP="server2.arbona.eu"
 	MasterServerPort=1337
