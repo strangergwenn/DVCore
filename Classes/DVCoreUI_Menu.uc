@@ -15,6 +15,7 @@ class DVCoreUI_Menu extends DVMovie;
 var (CoreUI) const array<string>		IgnoredMaps;
 var (CoreUI) const array<string>		MenuListData;
 var (CoreUI) const array<string>		ResListData;
+
 var (CoreUI) const string				ServerURL;
 
 
@@ -26,10 +27,14 @@ var GFxClikWidget 						MapListMC;
 var GFxClikWidget 						MenuListMC;
 var GFxClikWidget 						ResListMC;
 
+var GFxClikWidget 						ServerConnect;
+var GFxClikWidget 						PlayerConnect;
+
 var GFxObject 							ListDataProvider;
 var array<UDKUIDataProvider_MapInfo> 	MapList;
 
 var bool 								bMapsInitialized;
+var bool								bIsInRegisterPopup;
 
 
 /*----------------------------------------------------------
@@ -87,11 +92,107 @@ function OpenServer(GFxClikWidget.EventData evtd)
 }
 
 
+/*--- Player connexion event ---*/
+function OnPlayerConnect(GFxClikWidget.EventData evtd)
+{
+	OpenConnectionDialog(false);
+	PC.MasterServerLink.InitLink(PC);
+}
+
+
+/*--- Open the connection popup ---*/
+function OpenConnectionDialog(bool bShowRegister)
+{
+	local string Text[7];
+	
+	`log("OpenConnectionDialog");
+	if (!bShowRegister)
+	{
+		Text[0] = "Connexion DeepVoid";
+		Text[1] = "Joueur";
+		Text[2] = "Mot de passe";
+		Text[3] = "";
+		Text[4] = "";
+		Text[5] = "Connexion";
+		Text[6] = "Nouveau ?";
+		SetPopup(Text, 2);
+	}
+	else
+	{
+		Text[0] = "Nouveau compte";
+		Text[1] = "Joueur";
+		Text[2] = "E-mail";
+		Text[3] = "Mot de passe";
+		Text[4] = "Mot de passe";
+		Text[5] = "Enregistrement";
+		Text[6] = "Retour";
+		SetPopup(Text, 3, 4);
+	}
+}
+
+
 /*--- Language ---*/
 simulated function GetServerContent()
 {
-	SetLabel("MenuTitle", "Serveurs de jeu disponibles", true);
+	`log("GetServerContent");
+	SetLabel("MenuTitle", "Parties disponibles", true);
 	SetLabel("MapTitle", "Maps disponibles", true);
+	SetLabel("ServerTitle", "Parties en ligne", true);
+	SetLabel("ButtonsTitle", "Actions", true);
+	OpenConnectionDialog(false);
+	HidePopup(true);
+}
+
+
+/*--- Popup button 1 : action ---*/
+function OnPButton1(GFxClikWidget.EventData evtd)
+{
+	// Init
+	local array<string> Result;
+	super.OnPButton1(evtd);
+	Result = GetPopupContent();
+	
+	// Checking
+	if (Len(Result[0]) < 4 || Len(Result[1]) < 4)
+		SetPopupStatus("Données incorrectes");
+	else if (Result[2] != Result[3])
+		SetPopupStatus("Mots de passe différents");
+	
+	// Actions
+	else if (!bIsInRegisterPopup)
+	{
+		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
+		SetPopupStatus("Connexion...");
+	}
+	else
+	{
+		PC.MasterServerLink.RegisterUser(Result[0], Result[1], Result[2]);
+		SetPopupStatus("Enregistrement...");
+	}
+}
+
+
+/*--- Popup button 2 : change window ---*/
+function OnPButton2(GFxClikWidget.EventData evtd)
+{
+	super.OnPButton2(evtd);
+	bIsInRegisterPopup = !bIsInRegisterPopup;
+	OpenConnectionDialog(bIsInRegisterPopup);
+}
+
+
+/*--- Show result on screen ---*/
+function GetPopupResult(bool bSuccess, string Msg)
+{
+	`log("GetPopupResult");
+	if (bSuccess)
+	{
+		HidePopup(true);
+	}
+	else
+	{
+		SetPopupStatus((Msg != "") ? Msg : "Un problème s'est produit");
+	}
 }
 
 
@@ -205,20 +306,33 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 {
 	switch(WidgetName)
 	{
+		// Lists
 		case ('MapList'):
 			MapListMC = GFxClikWidget(Widget);
 			UpdateMapList();
 			MapListMC.AddEventListener('CLIK_itemClick', OnMapItemClick);
 			break;
+		
 		case ('MenuList'):
 			MenuListMC = GFxClikWidget(Widget);
 			UpdateMenuList();
 			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
 			break;
+		
 		case ('ResolutionList'):
 			ResListMC = GFxClikWidget(Widget);
 			UpdateResList();
 			ResListMC.AddEventListener('CLIK_itemClick', OnResItemClick);
+			break;
+		
+		case ('OpenServerButton'):
+			ServerConnect = GFxClikWidget(Widget);
+			ServerConnect.AddEventListener('CLIK_click', OpenServer);
+			break;
+		
+		case ('PlayerConnectButton'):
+			PlayerConnect = GFxClikWidget(Widget);
+			PlayerConnect.AddEventListener('CLIK_click', OnPlayerConnect);
 			break;
 			
 		default:
@@ -265,21 +379,32 @@ function OnMenuItemClick(GFxClikWidget.EventData ev)
 }
 
 
+/*--- Get a command response code ---*/
+function DisplayResponse (bool bSuccess, string Msg)
+{
+	GetPopupResult(bSuccess, Msg);
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
 
 defaultproperties
 {
+	bCaptureInput=true
+	 
 	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
 	
-	MenuListData=("Serveurs","Statistiques","Réglages","Quitter")
+	MenuListData=("Parties","Statistiques","Réglages","Quitter")
 	ResListData=("Ecran HD (1080p)","Ecran HDReady (720p)","Résolution maximale")
 	
 	ServerURL="deepvoid.eu"
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
 	
-	WidgetBindings(1)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(2)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(3)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(3)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(4)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(5)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(6)={(WidgetName="OpenServerButton",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(7)={(WidgetName="PlayerConnectButton",WidgetClass=class'GFxClikWidget')}
 }

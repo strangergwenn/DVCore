@@ -9,6 +9,22 @@ class DVGame_Menu extends GameInfo;
 
 
 /*----------------------------------------------------------
+	Methods
+----------------------------------------------------------*/
+
+/*--- Login ---*/
+event PostLogin (PlayerController NewPlayer)
+{
+	local DVPlayerController NP;
+	
+	super.PostLogin(NewPlayer);
+	NP = DVPlayerController(NewPlayer);
+	
+	NP.MasterServerLink = Spawn(class'DVLink');
+}
+
+
+/*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
 

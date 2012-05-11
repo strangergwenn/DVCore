@@ -15,6 +15,8 @@ class DVHUD_Menu extends UDKHUD;
 var const class<DVCoreUI_Menu>		HUDClass;
 var DVCoreUI_Menu   				HudMovie;
 
+var float							PopupTimer;
+
 
 /*----------------------------------------------------------
 	Methods
@@ -33,11 +35,27 @@ simulated function PostBeginPlay()
 }
 
 
+/*--- Show a command response code ---*/
+function DisplayResponse (bool bSuccess, string Msg)
+{
+	HudMovie.DisplayResponse(bSuccess, Msg);
+	SetTimer(PopupTimer, false, 'HidePopup');
+}
+
+
+/*--- Popup suppression ---*/
+function HidePopup()
+{
+	HudMovie.HidePopup(true);
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
 
 defaultproperties
 {
+	PopupTimer=2.0
 	HUDClass=class'DVCoreUI_Menu'
 }

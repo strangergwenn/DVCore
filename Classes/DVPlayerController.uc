@@ -22,9 +22,13 @@ var (DVPC) const float 				ScoreLength;
 ----------------------------------------------------------*/
 
 var class<DVWeapon> 		 		WeaponList[8];
-var byte							WeaponListLength;
 var class<DVWeapon> 				UserChoiceWeapon;
+
 var DVTeamInfo						EnemyTeamInfo;
+
+var DVLink							MasterServerLink;
+
+var byte							WeaponListLength;
 
 var bool							bPrintScores;
 var bool							bLocked;
@@ -57,6 +61,14 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (GetTeamIndex() == 0) ? "rouge" : "bleue";
 	ShowGenericMessage("Vous êtes dans l'équipe " $ TeamName);
+}
+
+
+/*--- Master server callback ---*/
+reliable client event TcpCallback(string Command, bool bIsOK, string Msg)
+{
+	if (myHUD.IsA('DVHUD_Menu'))
+		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);
 }
 
 

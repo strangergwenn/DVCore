@@ -14,9 +14,12 @@ class DVMovie extends GFxMoviePlayer;
 
 var (DVMovie) const int					LSize;
 var (DVMovie) const int 				SpaceSizeFactor;
+var (DVMovie) const int 				PopupFieldCount;
 
 var (DVMovie) const SoundCue 			BipSound;
 var (DVMovie) const SoundCue 			ClickSound;
+
+var (DVMovie) const string				PopupName;
 
 
 /*----------------------------------------------------------
@@ -27,7 +30,12 @@ var DVPlayerController					PC;
 
 var GFxObject 							Scene;
 var GFxObject 							Banner;
+
 var GFxClikWidget 						QuitButton;
+var GFxClikWidget 						PopupButton1;
+var GFxClikWidget 						PopupButton2;
+
+var GFxObject							PopupWindow;
 
 
 /*----------------------------------------------------------
@@ -119,10 +127,7 @@ function ShowBannerInfo(bool NewState, optional string BannerText)
 {
 	// Checking
 	if (Banner == None)
-	{
-		`warn("Attempt to set an empty banner");
 		return;
-	}
 	
 	// Actual info
 	Banner.SetVisible(NewState);
@@ -141,7 +146,123 @@ function PlayUISound(SoundCue sound)
 
 
 /*----------------------------------------------------------
-	Getters / Setters
+	Popup management
+----------------------------------------------------------*/
+
+/*--- Set up a popup using a text array, with 2 optional password fields ---*/
+function SetPopup(string Text[7], optional int PField, optional int PField2)
+{
+	// Init
+	local GFxObject TempObject;
+	local byte i;
+	PopupWindow = GetSymbol(PopupName);
+	if (PopupWindow == None)
+		return;
+	
+	// Text settings
+	SetLabel(PopupName $ ".PopupTitle", Text[0], true);
+	for (i = 1; i < PopupFieldCount + 2; i++)
+	{
+		if (i < PopupFieldCount)
+		{
+			// Label block
+			TempObject = GetSymbol(PopupName $ ".PopupLabel" $ i);
+			if (Text[i] != "")
+			{
+				TempObject.SetText(Text[i]);
+				TempObject.SetVisible(true);
+			}
+			else
+				TempObject.SetVisible(false);
+			
+			// Password block
+			TempObject = GetSymbol(PopupName $ ".PopupField" $ i);
+			if (Text[i] == "")
+			{
+				TempObject.SetVisible(false);
+			}
+			else if (i == PField || i == PField2)
+			{
+				TempObject.SetBool("displayAsPassword", true);
+				TempObject.SetVisible(true);
+			}
+			else
+			{
+				TempObject.SetVisible(true);
+			}
+		}
+		
+		// Buttons
+		else
+		{
+			TempObject = GetSymbol(PopupName $ ".PopupButton" $ (i - PopupFieldCount));
+			if (Text[i] == "")
+				TempObject.SetVisible(false);
+			else
+			{
+				TempObject.SetText(Text[i]);
+				TempObject.SetVisible(true);
+			}
+		}
+	}
+	SetPopupStatus("");
+	PopupWindow.SetVisible(true);
+	PlayUISound(BipSound);
+}
+
+
+/*--- Get popup content ---*/
+function array<string> GetPopupContent()
+{
+	local array<string> Result;
+	local GFxObject TempObject;
+	local byte i;
+	
+	// Content
+	for (i = 1; i < PopupFieldCount; i++)
+	{
+		TempObject = GetSymbol(PopupName $ ".PopupField" $ i);
+		Result.AddItem(TempObject.GetString("text"));
+	}
+	return Result;
+}
+
+
+/*--- Hide the popup ---*/
+function HidePopup(optional bool bHide)
+{
+	PopupWindow.SetVisible(!bHide);
+}
+
+
+/*--- Set the status ---*/
+function SetPopupStatus(string NewStatus)
+{
+	local GFxObject StatusField;
+	
+	StatusField = GetSymbol(PopupName $ ".PopupStatus");
+	StatusField.SetText(NewStatus);
+	
+	StatusField.SetVisible(NewStatus != "");
+}
+
+
+/*--- Popup button 1 ---*/
+function OnPButton1(GFxClikWidget.EventData evtd)
+{
+	PlayUISound(BipSound);
+}
+
+
+/*--- Popup button 2 ---*/
+function OnPButton2(GFxClikWidget.EventData evtd)
+{
+	PlayUISound(BipSound);
+}
+
+
+/*----------------------------------------------------------
+	Various interface widgets
 ----------------------------------------------------------*/
 
 /*--- Set a pie chart and associated label ---*/
@@ -226,6 +347,16 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		case ('ExitButton'):
 			QuitButton = GetLiveWidget(Widget, 'CLIK_click', QuitToDesktop);
 			break;
+			
+		case ('PopupButton1'):
+			PopupButton1 = GFxClikWidget(Widget);
+			PopupButton1.AddEventListener('CLIK_click', OnPButton1);
+			break;
+		
+		case ('PopupButton2'):
+			PopupButton2 = GFxClikWidget(Widget);
+			PopupButton2.AddEventListener('CLIK_click', OnPButton2);
+			break;
 		
 		default: break;
 	}
@@ -247,9 +378,13 @@ defaultproperties
 	// Settings
 	LSize=40
 	SpaceSizeFactor=1
+	PopupFieldCount=5
+	PopupName="PopupWindow"
 	BipSound=SoundCue'DV_Sound.UI.A_Bip'
 	ClickSound=SoundCue'DV_Sound.UI.A_Click'
 	
 	// Bindings
 	WidgetBindings(0)={(WidgetName="ExitButton",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(1)={(WidgetName="PopupButton1",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(2)={(WidgetName="PopupButton2",WidgetClass=class'GFxClikWidget')}
 }
