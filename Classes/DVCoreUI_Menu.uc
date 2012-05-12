@@ -335,13 +335,7 @@ simulated function GetOptionsContent()
 	SetWidgetLabel("OptionCB3", "Plein écran", false);
 	SetChecked("OptionCB1", HInfo.LocalStats.bBackgroundMusic);
 	SetChecked("OptionCB2", HInfo.LocalStats.bUseSoundOnHit);
-	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);
-	
-	// Option block 2
-	
-	
-	// Option block 3
-	
+	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);	
 }
 
 
