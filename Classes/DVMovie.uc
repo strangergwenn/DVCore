@@ -46,9 +46,11 @@ var GFxObject							PopupWindow;
 function bool Start(optional bool StartPaused = false)
 {
 	super.Start();
+	
 	`log("Gfx start");
 	Advance(0);
 	InitParts();
+	
 	return true;
 }
 
@@ -354,6 +356,24 @@ function GFxClikWidget GetLiveWidget(GFxObject Widget, name type, delegate<GFxCl
 	wg.AddEventListener(type, listener);
 	
 	return wg;
+}
+
+
+/*--- Get a checkbox value ---*/
+function bool IsChecked(string Symbol)
+{
+	Local GFxObject button; 
+	button = GetSymbol(Symbol);
+	return button.GetBool("selected");
+}
+
+
+/*--- Set a checbox value ---*/
+function SetChecked(string Symbol, bool Value)
+{
+	Local GFxObject button; 
+	button = GetSymbol(Symbol);
+	button.SetBool("selected", Value);
 }
 
 

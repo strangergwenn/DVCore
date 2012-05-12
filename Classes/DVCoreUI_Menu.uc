@@ -249,7 +249,7 @@ function GetPopupResult(bool bSuccess, string Msg)
 	{
 		HidePopup(true);
 	}
-	else
+	else	
 	{
 		SetPopupStatus((Msg != "") ? Msg : "Un problème s'est produit");
 	}
@@ -263,6 +263,12 @@ function GetPopupResult(bool bSuccess, string Msg)
 /*--- Content ---*/
 simulated function GetStatsContent()
 {
+	// Init
+	local DVUserStats LStats, GStats;
+	local string RankInfo;
+	LStats = DVHUD_Menu(PC.myHUD).LocalStats;
+	GStats = DVHUD_Menu(PC.myHUD).GlobalStats;
+	
 	// General
 	SetLabel("MenuTitle", "Statistiques de jeu", true);
 	SetLabel("StatGenTitle1", "Statistiques globales", true);
@@ -271,27 +277,31 @@ simulated function GetStatsContent()
 	
 	// Stat block 1
 	SetLabel("StatTitle1", "Efficacité", true);
-	SetAlignedLabel("Stat10", "Victimes", "466");
-	SetAlignedLabel("Stat11", "Précision", "12%");
-	SetAlignedLabel("Stat12", "Ratio K/D", "1.2");
-	SetPieChart("PieStat1", "Stat13", "Headshots", 70.0);
+	SetAlignedLabel("Stat10", "Victimes", string(GStats.Kills));
+	SetAlignedLabel("Stat11", "Précision", string(GStats.Kills / GStats.ShotsFired) $ "%");
+	SetAlignedLabel("Stat12", "Ratio K/D", string(GStats.Kills / GStats.Deaths));
+	SetPieChart("PieStat1", "Stat13", "Team-kill", GStats.TeamKills / GStats.Kills);
 	
 	// Stat block 2
 	SetLabel("StatTitle2", "Victimes par arme", true);
-	SetAlignedLabel("Stat20", "Fusil d'assaut", "81");
-	SetAlignedLabel("Stat21", "Sniper", "66");
-	SetAlignedLabel("Stat22", "Shotgun", "45");
-	SetPieChart("PieStat2", "Stat23", "One-shots", 15.0);
+	SetAlignedLabel("Stat20", "Fusil d'assaut", string(GStats.WeaponScores[0]));
+	SetAlignedLabel("Stat21", "Sniper",  string(GStats.WeaponScores[1]));
+	SetAlignedLabel("Stat22", "Shotgun",  string(GStats.WeaponScores[2]));
+	SetPieChart("PieStat2", "Stat23", "Headshots", GStats.Headshots / GStats.Kills);
 	
 	// Stat block 3
 	SetLabel("Stat30", "Votre équipe a gagné", false);
-	SetAlignedLabel("Stat31", "Rang final", "4°");
-	SetAlignedLabel("Stat32", "Victimes", "17");
-	SetAlignedLabel("Stat33", "Arme favorite", "Sniper");
+	SetAlignedLabel("Stat31", "Rang final", string(LStats.Rank));
+	SetAlignedLabel("Stat32", "Victimes", string(LStats.Kills));
+	SetAlignedLabel("Stat33", "Tirs effecté", string(LStats.ShotsFired));
 	
 	// Stat block 4
-	SetLabel("Stat40", "Vous êtes classé au rang 1", false);
-	SetLabel("Stat41", "Vous avez 87468 points", false);
+	if (GStats.Rank > 0)
+		RankInfo = "Vous êtes classé au rang " $ string(GStats.Rank);
+	else
+		RankInfo = "Vous n'êtes pas classé";
+	SetLabel("Stat40", RankInfo, false);
+	SetLabel("Stat41", "Vous avez " $ string(GStats.Points) $ " points", false);
 }
 
 
@@ -302,6 +312,9 @@ simulated function GetStatsContent()
 /*--- Content ---*/
 simulated function GetOptionsContent()
 {
+	local DVHUD_Menu HInfo;
+	HInfo = DVHUD_Menu(PC.myHUD);
+	
 	// General
 	SetLabel("MenuTitle", "Configuration du jeu", true);
 	SetLabel("OptionGenTitle1", "Audio & Vidéo", true);
@@ -312,6 +325,9 @@ simulated function GetOptionsContent()
 	SetWidgetLabel("OptionCB1", "Musique en jeu", false);
 	SetWidgetLabel("OptionCB2", "Indicateur d'impact", false);
 	SetWidgetLabel("OptionCB3", "Plein écran", false);
+	SetChecked("OptionCB1", HInfo.LocalStats.bBackgroundMusic);
+	SetChecked("OptionCB2", HInfo.LocalStats.bUseSoundOnHit);
+	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);
 	
 	// Option block 2
 	
@@ -344,8 +360,11 @@ function UpdateResList()
 /*--- Settings saved ---*/
 function ValidateSettings(GFxClikWidget.EventData ev)
 {
+	// Init
 	local GFxObject button;
+	local DVHUD_Menu HInfo;
 	local string res, flag;
+	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// Resolution
 	button = GetSymbol("ResolutionList");
@@ -353,8 +372,7 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	`log("Clicked resolution " $ res);
 	
 	// Fullscreen
-	button = GetSymbol("OptionCB3");
-	flag = (button.GetBool("selected") ? "f" : "w");
+	flag = (IsChecked("OptionCB3") ? "f" : "w");
 	
 	// Application
 	switch (res)
@@ -369,6 +387,12 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 			ConsoleCommand("SetRes 6000x3500" $flag);
 			break;
 	}
+	
+	// Options
+	HInfo.LocalStats.SetBoolValue("bBackgroundMusic", IsChecked("OptionCB1"));
+	HInfo.LocalStats.SetBoolValue("bUseSoundOnHit", IsChecked("OptionCB2"));
+	HInfo.LocalStats.SetBoolValue("bFullScreen", IsChecked("OptionCB3"));
+	HInfo.LocalStats.SaveConfig();
 }
 
 

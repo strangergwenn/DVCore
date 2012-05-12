@@ -17,15 +17,18 @@ var (DVHUD) const LinearColor			BlueColor;
 var (DVHUD) const class<DVCoreUI_HUD>	HUDClass;
 
 var (DVHUD) const float					GameplayMessageTime;
+var (DVHUD) const float					MenuDelay;
 
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
-var DVCoreUI_HUD   				HudMovie;
-var const float					MenuDelay;
-var bool						bRespawnOpened;
+var DVUserStats							LocalStats;
+var DVUserStats							GlobalStats;
+
+var DVCoreUI_HUD   						HudMovie;
+var bool								bRespawnOpened;
 
 
 /*----------------------------------------------------------
@@ -80,6 +83,11 @@ simulated function PostBeginPlay()
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
 	HudMovie.Start();
 	HudMovie.Advance(0);
+	
+	// Stats
+	LocalStats = new class'DVUserStats';
+	GlobalStats = new class'DVUserStats';
+	GlobalStats.EmptyStats();
 	
 	// HUD register
 	HudMovie.PC = DVPlayerController(PlayerOwner);

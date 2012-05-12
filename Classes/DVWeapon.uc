@@ -314,10 +314,13 @@ simulated function FireAmmunition()
 		return;
 	}
 	
-	// Firing
+	// Logging
 	AmmoCount -= 1;
-	PlayFiringSound();
+	PC.RegisterShot();
 	P.ServerLogAction("SHOOT");
+	
+	// Firing
+	PlayFiringSound();
 	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	P.GetWeaponRecoil(RecoilAngle);
 	Super.FireAmmunition();

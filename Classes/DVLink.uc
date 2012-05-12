@@ -332,16 +332,11 @@ event ReceivedLine(string Line)
 			);
 			break;
 		
-		// Global player statistics
+		// Player statistics
 		case "GET_GSTATS":
-			break;
-		
-		// Last game statistics
 		case "GET_LSTATS":
-			break;
-		
-		// Weapons statistics
 		case "GET_WSTATS":
+			PC.TcpGetStats(Command);
 			break;
 	}
 }

@@ -12,6 +12,9 @@ class DVHUD_Menu extends UDKHUD;
 	Attributes
 ----------------------------------------------------------*/
 
+var DVUserStats						LocalStats;
+var DVUserStats						GlobalStats;
+
 var const class<DVCoreUI_Menu>		HUDClass;
 var DVCoreUI_Menu   				HudMovie;
 
@@ -26,12 +29,17 @@ var float							PopupTimer;
 simulated function PostBeginPlay()
 {
 	super.PostBeginPlay();
+	
 	HudMovie = new HUDClass;
 	HudMovie.SetTimingMode(TM_Real);
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
 	HudMovie.Start();
 	HudMovie.Advance(0);
 	HudMovie.PC = DVPlayerController(PlayerOwner);
+	
+	LocalStats = new class'DVUserStats';
+	GlobalStats = new class'DVUserStats';
+	GlobalStats.EmptyStats();
 	
 	// Debug
 	AddServerInfo(

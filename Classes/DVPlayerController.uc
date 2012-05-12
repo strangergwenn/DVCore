@@ -65,10 +65,46 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 
 
 /*--- Master server callback ---*/
-reliable client event TcpCallback(string Command, bool bIsOK, string Msg)
+reliable client event TcpCallback(string Command, bool bIsOK, string Msg, optional int data[8])
 {
+	// Standard response if useful
 	if (myHUD.IsA('DVHUD_Menu'))
-		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);
+		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);	
+}
+
+
+/*--- Stats getting ---*/
+reliable client event TcpGetStats(array<string> Data)
+{
+	// Init
+	local byte i;
+	local string Command;
+	local DVUserStats GStats;
+	GStats = DVHUD(myHUD).GlobalStats;
+	GStats.EmptyStats();
+	Command = Data[0];
+	
+	// Parsing
+	switch(Command)
+	{
+		// Global game stats
+		case "GET_GSTATS":
+			GStats.SetIntValue("Kills", 	int(Data[1]));
+			GStats.SetIntValue("Deaths", 	int(Data[2]));
+			GStats.SetIntValue("TeamKills", int(Data[3]));
+			GStats.SetIntValue("Points", 	int(Data[4]));
+			GStats.SetIntValue("Shots", 	int(Data[5]));
+			GStats.SetIntValue("Headshots", int(Data[6]));
+			break;
+		
+		// Weapon stats
+		case "GET_WSTATS":
+			for (i = 0; i < WeaponListLength; i++)
+			{
+				GStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
+			}
+			break;
+	}
 }
 
 
@@ -109,7 +145,9 @@ exec function StartFire(optional byte FireModeNum = 0)
 	if (IsCameraLocked())
 		return;
 	else
+	{
 		super.StartFire(FireModeNum);
+	}
 }
 
 
@@ -127,6 +165,7 @@ unreliable client simulated function ShowGenericMessage(string text)
 /*--- Show the killer message ---*/ 
 unreliable client simulated function ShowKilledBy(string KillerName)
 {
+	RegisterDeath();
 	ShowGenericMessage("Vous avez été tué par " $ KillerName $ " !");
 }
 
@@ -148,6 +187,7 @@ unreliable client simulated function ShowEmptyAmmo()
 /*--- Show the killed message ---*/ 
 unreliable client simulated function ShowKilled(string KilledName)
 {
+	RegisterKill();
 	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
 }
 
@@ -167,7 +207,7 @@ simulated function bool IsCameraLocked()
 
 
 /*--- Camera management  ---*/
-function UpdateRotation( float DeltaTime )
+function UpdateRotation(float DeltaTime)
 {
 	local Rotator	DeltaRot, newRotation, ViewRotation;
 	local bool bAmIZoomed;
@@ -214,7 +254,7 @@ simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI
 
 
 /*--- End of game ---*/
-simulated function SignalEndGame(bool bHasWon)
+reliable client simulated function SignalEndGame(bool bHasWon)
 {
 	`log("End of game " $ self);
 	bPrintScores = true;
@@ -225,6 +265,7 @@ simulated function SignalEndGame(bool bHasWon)
 		"Vous avez perdu la partie !"
 	);
 	
+	DVHUD(myHUD).LocalStats.SaveConfig();
 	GotoState('RoundEnded');
 }
 
@@ -348,6 +389,60 @@ reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeapo
 reliable client simulated function HideScores()
 {
 	bPrintScores = false;
+}
+
+
+/*----------------------------------------------------------
+	Statistics database
+----------------------------------------------------------*/
+
+/*--- Store kill in DB ---*/
+reliable client simulated function RegisterDeath()
+{
+	local DVUserStats LStats;
+	LStats = DVHUD(myHUD).LocalStats;
+	LStats.SetIntValue("Deaths" , LStats.Deaths + 1);
+}
+
+
+/*--- Store shot in DB ---*/
+reliable client simulated function RegisterShot()
+{
+	local DVUserStats LStats;
+	LStats = DVHUD(myHUD).LocalStats;
+	LStats.SetIntValue("ShotsFired" , LStats.ShotsFired + 1);
+}
+
+
+/*--- Store kill in DB ---*/
+reliable client simulated function RegisterKill(optional bool bTeamKill)
+{
+	local DVUserStats LStats;
+	local int index;
+	
+	LStats = DVHUD(myHUD).LocalStats;
+	index = GetCurrentWeaponIndex();
+	
+	if (bTeamKill)
+	{
+		LStats.SetIntValue("TeamKills" , LStats.TeamKills + 1);
+	}
+	LStats.SetIntValue("Kills" , LStats.Kills + 1);
+	LStats.SetArrayIntValue("WeaponScores", index, LStats.WeaponScores[index] + 1);
+}
+
+
+/*--- Weapon index being used ---*/
+simulated function byte GetCurrentWeaponIndex()
+{
+	local byte i;
+	
+	for (i = 0; i < WeaponListLength; i++)
+	{
+		if (WeaponList[i] == DVPawn(Pawn).CurrentWeaponClass)
+			return i;
+	}
+	return WeaponListLength;
 }
 
 
