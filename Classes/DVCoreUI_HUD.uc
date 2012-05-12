@@ -180,7 +180,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 function OnExit(GFxClikWidget.EventData evtd)
 {
 	`log("Loading...");
-	PC.SaveGameStatistics();
+	PC.SaveGameStatistics(false, true);
 	ConsoleCommand("open UDKFrontEndMap?game=DVCore.DVGame_Menu");
 }
 

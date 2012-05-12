@@ -24,6 +24,7 @@ var (Database) config int						Rank;
 var (Database) config int						Points;
 
 var (Database) config bool						bHasWon;
+var (Database) config bool						bHasLeft;
 
 var (Database) config bool						bFullScreen;
 var (Database) config bool						bUseSoundOnHit;
@@ -31,6 +32,7 @@ var (Database) config bool						bBackgroundMusic;
 
 var (Database) config string					UserName;
 var (Database) config string					PassWord;
+var (Database) config string					Resolution;
 
 
 /*----------------------------------------------------------
@@ -56,7 +58,7 @@ function SetBoolValue(string PropertyName, bool NV)
 	switch(PropertyName)
 	{
 		case ("bHasWon"): 			bHasWon = NV; 			break;
-		
+		case ("bHasLeft"): 			bHasLeft = NV; 			break;
 		case ("bFullScreen"): 		bFullScreen = NV; 		break;
 		case ("bUseSoundOnHit"): 	bUseSoundOnHit = NV; 	break;
 		case ("bBackgroundMusic"): 	bBackgroundMusic = NV; 	break;
@@ -100,6 +102,7 @@ function SetStringValue(string PropertyName, string NV)
 	{
 		case ("UserName"): 			UserName = NV; 			break;
 		case ("PassWord"): 			PassWord = NV; 			break;
+		case ("Resolution"): 		Resolution = NV; 		break;
 		default : 											break;
 	}
 }

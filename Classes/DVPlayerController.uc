@@ -78,14 +78,11 @@ reliable client event TcpGetStats(array<string> Data)
 {
 	// Init
 	local byte i;
-	local string Command;
 	local DVUserStats GStats;
 	GStats = DVHUD(myHUD).GlobalStats;
-	GStats.EmptyStats();
-	Command = Data[0];
 	
 	// Parsing
-	switch(Command)
+	switch(Data[0])
 	{
 		// Global game stats
 		case "GET_GSTATS":
@@ -181,7 +178,8 @@ unreliable client simulated function ShowKilled(string KilledName, bool bTeamKil
 /*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound()
 {
-	PlaySound(HitSound);
+	if(DVHUD(myHUD).LocalStats.bUseSoundOnHit)
+		PlaySound(HitSound);
 }
 
 
@@ -265,7 +263,7 @@ reliable client simulated function SignalEndGame(bool bHasWon)
 		"Vous avez perdu la partie !"
 	);
 	
-	SaveGameStatistics();
+	SaveGameStatistics(bHasWon);
 	GotoState('RoundEnded');
 }
 
@@ -438,8 +436,11 @@ reliable client simulated function RegisterKill(optional bool bTeamKill)
 	{
 		LStats.SetIntValue("TeamKills" , LStats.TeamKills + 1);
 	}
-	LStats.SetIntValue("Kills" , LStats.Kills + 1);
-	LStats.SetArrayIntValue("WeaponScores", index, LStats.WeaponScores[index] + 1);
+	else
+	{
+		LStats.SetIntValue("Kills" , LStats.Kills + 1);
+		LStats.SetArrayIntValue("WeaponScores", index, LStats.WeaponScores[index] + 1);
+	}
 }
 
 
@@ -458,12 +459,13 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 
 
 /*--- End of game : saving ---*/
-reliable client simulated function SaveGameStatistics()
+reliable client simulated function SaveGameStatistics(bool bHasWon, optional bool bLeaving)
 {
 	local DVUserStats LStats;
 	
 	LStats = DVHUD(myHUD).LocalStats;
-	LStats.Rank = GetLocalRank();
+	LStats.SetBoolValue("bHasLeft", bLeaving);
+	LStats.SetIntValue("Rank", GetLocalRank() - (bLeaving ? 1 : 2)); // Pre-game or leaving deaths
 	LStats.SaveConfig();
 	
 	MasterServerLink.SaveGame(
@@ -487,10 +489,11 @@ reliable client simulated function int GetLocalRank()
 	
 	for (i = 0; i < PList.Length; i ++)
 	{
+		`log("Comparing " $ PList[i] $ " to " $ DVPlayerRepInfo(PlayerReplicationInfo));
 		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
 			return i;
 	}
-	return -1;
+	return 0;
 }
 
 

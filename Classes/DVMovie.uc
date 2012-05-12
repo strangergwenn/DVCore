@@ -65,17 +65,18 @@ function InitParts()
 }
 
 
-/*--- Return true if str is found in data ---*/
-function bool IsInArray(string str, array<string> data)
+/*--- Return index if a data line is found in str or else ---*/
+function int IsInArray(string str, array<string> data, optional bool bInvert)
 {
 	local byte i;
 	
 	for (i = 0; i < data.Length; i++)
 	{
-		if (InStr(str, data[i]) != -1)
-			return true;
+		if (   (!bInvert && InStr(str, data[i]) != -1)
+			|| (bInvert && InStr(data[i], str) != -1))
+			return i;
 	}
-	return false;
+	return -1;
 }
 
 
@@ -96,7 +97,7 @@ function GoToFrame(int index)
 function QuitToDesktop(GFxClikWidget.EventData evtd)
 {
 	`log("Gfx exiting");
-	PC.SaveGameStatistics();
+	PC.SaveGameStatistics(false, true);
 	ConsoleCommand("exit");
 }
 
@@ -145,6 +146,25 @@ function PlayUISound(SoundCue sound)
 	{
 		PC.PlaySound(sound);
 	}
+}
+
+
+/*--- Apply a resolution code ---*/
+function ApplyResolutionSetting(string code, string flag)
+{
+	switch (code)
+	{
+		case ("720p"):
+			ConsoleCommand("SetRes 1280x720" $flag);
+			break;
+		case ("1080p"):
+			ConsoleCommand("SetRes 1920x1080" $flag);
+			break;
+		case ("max"):
+			ConsoleCommand("SetRes 6000x3500" $flag);
+			break;
+	}	
+	
 }
  
 

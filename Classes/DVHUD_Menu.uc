@@ -37,9 +37,13 @@ simulated function PostBeginPlay()
 	HudMovie.Advance(0);
 	HudMovie.PC = DVPlayerController(PlayerOwner);
 	
+	// User settings
 	LocalStats = new class'DVUserStats';
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
+	
+	`log("Applying user setting" $ LocalStats.Resolution);
+	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
 	
 	// Debug
 	AddServerInfo(

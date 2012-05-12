@@ -87,6 +87,7 @@ simulated function PostBeginPlay()
 	// Stats
 	LocalStats = new class'DVUserStats';
 	GlobalStats = new class'DVUserStats';
+	LocalStats.EmptyStats();
 	GlobalStats.EmptyStats();
 	
 	// HUD register

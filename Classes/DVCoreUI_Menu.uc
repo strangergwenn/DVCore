@@ -115,7 +115,7 @@ function UpdateMapList()
 		for (i = 0; i < ProviderList.length; i++)
 		{
 			TempMapName = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
-			if (!IsInArray(TempMapName, IgnoredMaps)) 
+			if (IsInArray(TempMapName, IgnoredMaps) == -1) 
 				MapList.AddItem(UDKUIDataProvider_MapInfo(ProviderList[i]));
 		}
 		bMapsInitialized = true;
@@ -281,7 +281,7 @@ simulated function GetStatsContent()
 	SetAlignedLabel("Stat10", "Victimes", string(GStats.Kills));
 	SetAlignedLabel("Stat11", "Précision", string(GStats.Kills / GStats.ShotsFired) $ "%");
 	SetAlignedLabel("Stat12", "Ratio K/D", string(GStats.Kills / GStats.Deaths));
-	SetPieChart("PieStat1", "Stat13", "Team-kill", GStats.TeamKills / GStats.Kills);
+	SetPieChart("PieStat1", "Stat13", "Team-kill", (GStats.TeamKills / (GStats.Kills + GStats.TeamKills)));
 	
 	// Stat block 2
 	SetLabel("StatTitle2", "Victimes par arme", true);
@@ -291,10 +291,15 @@ simulated function GetStatsContent()
 	SetPieChart("PieStat2", "Stat23", "Headshots", GStats.Headshots / GStats.Kills);
 	
 	// Stat block 3
-	SetLabel("Stat30", "Votre équipe a gagné", false);
+	if (LStats.bHasLeft)
+		SetLabel("Stat30", "Vous avez fui la partie", false);
+	else
+		SetLabel("Stat30", "Votre équipe a " $ (LStats.bHasWon ? "gagné" : "perdu"), false);
+	
 	SetAlignedLabel("Stat31", "Rang final", string(LStats.Rank));
 	SetAlignedLabel("Stat32", "Victimes", string(LStats.Kills));
-	SetAlignedLabel("Stat33", "Tirs effecté", string(LStats.ShotsFired));
+	SetAlignedLabel("Stat33", "Morts", string(LStats.Deaths));
+	SetAlignedLabel("Stat34", "Tirs effecté", string(LStats.ShotsFired));
 	
 	// Stat block 4
 	if (GStats.Rank > 0)
@@ -344,6 +349,8 @@ function UpdateResList()
 	local byte 			i;
 	local GFxObject 	TempObj;
 	local GFxObject 	DataProvider;
+	local DVHUD_Menu 	HInfo;
+	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// Sending data to menu
 	DataProvider = ResListMC.GetObject("dataProvider");
@@ -354,7 +361,8 @@ function UpdateResList()
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	ResListMC.SetObject("dataProvider", DataProvider);
-	ResListMC.SetInt("selectedIndex", 0);
+	ResListMC.SetInt("selectedIndex", IsInArray(HInfo.LocalStats.Resolution, ResListData, true));
+	`log("data = " $IsInArray(HInfo.LocalStats.Resolution, ResListData, true));
 }
 
 
@@ -372,27 +380,17 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	res = Split(ResListData[int(button.GetString("selectedIndex"))], "(", false);
 	`log("Clicked resolution " $ res);
 	
-	// Fullscreen
-	flag = (IsChecked("OptionCB3") ? "f" : "w");
-	
 	// Application
-	switch (res)
-	{
-		case ("(720p)"):
-			ConsoleCommand("SetRes 1280x720" $flag);
-			break;
-		case ("(1080p)"):
-			ConsoleCommand("SetRes 1920x1080" $flag);
-			break;
-		case ("(max)"):
-			ConsoleCommand("SetRes 6000x3500" $flag);
-			break;
-	}
+	flag = (IsChecked("OptionCB3") ? "f" : "w");
+	res = Repl(res, "(", "");
+	res = Repl(res, ")", "");
+	ApplyResolutionSetting(res, flag);
 	
 	// Options
 	HInfo.LocalStats.SetBoolValue("bBackgroundMusic", IsChecked("OptionCB1"));
 	HInfo.LocalStats.SetBoolValue("bUseSoundOnHit", IsChecked("OptionCB2"));
 	HInfo.LocalStats.SetBoolValue("bFullScreen", IsChecked("OptionCB3"));
+	HInfo.LocalStats.SetStringValue("Resolution", res);
 	HInfo.LocalStats.SaveConfig();
 }
 
@@ -509,7 +507,7 @@ defaultproperties
 	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
 	
 	MenuListData=("Parties","Statistiques","Réglages","Quitter")
-	ResListData=("Ecran HD (1080p)","Ecran HDReady (720p)","Défaut (max)")
+	ResListData=("Ecran HDReady (720p)","Ecran HD (1080p)","Défaut (max)")
 	
 	ServerURL="deepvoid.eu"
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
