@@ -170,6 +170,14 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 }
 
 
+/*--- Show the killed message ---*/ 
+unreliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
+{
+	RegisterKill(bTeamKill);
+	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
+}
+
+
 /*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound()
 {
@@ -181,14 +189,6 @@ unreliable client simulated function PlayHitSound()
 unreliable client simulated function ShowEmptyAmmo()
 {
 	ShowGenericMessage("Votre arme est vide !");
-}
-
-
-/*--- Show the killed message ---*/ 
-unreliable client simulated function ShowKilled(string KilledName)
-{
-	RegisterKill();
-	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
 }
 
 
@@ -265,7 +265,7 @@ reliable client simulated function SignalEndGame(bool bHasWon)
 		"Vous avez perdu la partie !"
 	);
 	
-	DVHUD(myHUD).LocalStats.SaveConfig();
+	SaveGameStatistics();
 	GotoState('RoundEnded');
 }
 
@@ -396,6 +396,17 @@ reliable client simulated function HideScores()
 	Statistics database
 ----------------------------------------------------------*/
 
+/*--- Remember client ---*/
+reliable client simulated function SaveIDs(string User, string Pass)
+{
+	local DVUserStats LStats;
+	LStats = DVHUD(myHUD).LocalStats;
+	LStats.SetStringValue("UserName", User);
+	LStats.SetStringValue("PassWord", Pass);
+	LStats.SaveConfig();
+}
+
+
 /*--- Store kill in DB ---*/
 reliable client simulated function RegisterDeath()
 {
@@ -433,7 +444,7 @@ reliable client simulated function RegisterKill(optional bool bTeamKill)
 
 
 /*--- Weapon index being used ---*/
-simulated function byte GetCurrentWeaponIndex()
+reliable client simulated function byte GetCurrentWeaponIndex()
 {
 	local byte i;
 	
@@ -443,6 +454,65 @@ simulated function byte GetCurrentWeaponIndex()
 			return i;
 	}
 	return WeaponListLength;
+}
+
+
+/*--- End of game : saving ---*/
+reliable client simulated function SaveGameStatistics()
+{
+	local DVUserStats LStats;
+	
+	LStats = DVHUD(myHUD).LocalStats;
+	LStats.Rank = GetLocalRank();
+	LStats.SaveConfig();
+	
+	MasterServerLink.SaveGame(
+		LStats.Kills,
+		LStats.Deaths,
+		LStats.TeamKills,
+		LStats.Rank,
+		LStats.ShotsFired,
+		LStats.WeaponScores
+	);
+}
+
+
+/*--- Get the player rank in the game ---*/
+reliable client simulated function int GetLocalRank()
+{
+	local array<DVPlayerRepInfo> PList;
+	local byte i;
+	
+	PList = GetPlayerList();
+	
+	for (i = 0; i < PList.Length; i ++)
+	{
+		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
+			return i;
+	}
+	return -1;
+}
+
+
+/*--- Get the local PRI list, sorted by rank ---*/
+reliable client simulated function array<DVPlayerRepInfo> GetPlayerList()
+{
+	local array<DVPlayerRepInfo> PRList;
+	local DVPlayerRepInfo PRI;
+	
+	ForEach AllActors(class'DVPlayerRepInfo', PRI)
+	{
+		PRList.AddItem(PRI);
+	}
+	PRList.Sort(SortPlayers);
+	return PRList;
+}
+
+
+/*--- Sorting method ---*/
+simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
+{
+	return A.GetPointCount() < B.GetPointCount() ? -1 : 0;
 }
 
 

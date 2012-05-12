@@ -119,18 +119,12 @@ simulated function ChooseWeapons()
 
 
 /*--- Score management ---*/
-simulated function UpdateAllScores()
+reliable client simulated function UpdateAllScores()
 {
 	local array<DVPlayerRepInfo> PRList;
-	local DVPlayerRepInfo PRI;
 	local int i;
 	
-	// Getter
-	ForEach AllActors(class'DVPlayerRepInfo', PRI)
-	{
-		PRList.AddItem(PRI);
-	}
-	PRList.Sort(SortPlayers);
+	PRList = DVPlayerController(PlayerOwner).GetPlayerList();
 	
 	// Displaying
 	for (i = 0; i < PRList.Length; i++)
@@ -139,13 +133,6 @@ simulated function UpdateAllScores()
 			PRList[i].PlayerName $ " " $ PRList[i].GetPointCount() $ " kills, " $ PRList[i].GetDeathCount() $ " deaths",
 			200, 100 + 30 * i);
 	}
-}
-
-
-/*--- Sorting method ---*/
-simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
-{
-	return A.GetPointCount() < B.GetPointCount() ? -1 : 0;
 }
 
 

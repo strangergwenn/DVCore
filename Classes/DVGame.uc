@@ -166,7 +166,7 @@ function ScoreKill(Controller Killer, Controller Other)
 	// Death
 	if (OtherPRI != None)
 	{
-		DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName);
+		DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName, bIsTeamKill);
 		OtherPRI.ScoreDeath();
 	}
 	else

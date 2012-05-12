@@ -96,6 +96,7 @@ function GoToFrame(int index)
 function QuitToDesktop(GFxClikWidget.EventData evtd)
 {
 	`log("Gfx exiting");
+	PC.SaveGameStatistics();
 	ConsoleCommand("exit");
 }
 

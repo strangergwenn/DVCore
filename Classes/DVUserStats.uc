@@ -29,6 +29,9 @@ var (Database) config bool						bFullScreen;
 var (Database) config bool						bUseSoundOnHit;
 var (Database) config bool						bBackgroundMusic;
 
+var (Database) config string					UserName;
+var (Database) config string					PassWord;
+
 
 /*----------------------------------------------------------
 	Methods
@@ -89,3 +92,14 @@ function SetArrayIntValue(string PropertyName, int NV, int index)
 	}
 }
 
+
+/*--- Set the new data value : string ---*/
+function SetStringValue(string PropertyName, string NV)
+{
+	switch(PropertyName)
+	{
+		case ("UserName"): 			UserName = NV; 			break;
+		case ("PassWord"): 			PassWord = NV; 			break;
+		default : 											break;
+	}
+}

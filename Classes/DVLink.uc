@@ -125,7 +125,7 @@ simulated function GetLeaderboard(int Count)
 
 
 /*--- Save the current game statistics ---*/
-simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots)
+simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores)
 {
 	local array<string> Params;
 	
@@ -137,6 +137,8 @@ simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int 
 	Params.AddItem(""$rank);
 	Params.AddItem(""$shots);
 	SendServerCommand("SAVE_GAME", Params, true);
+	
+	SaveWeaponsStats(WeaponScores);
 }
 
 

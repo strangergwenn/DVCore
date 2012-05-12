@@ -222,6 +222,7 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	else if (!bIsInRegisterPopup)
 	{
 		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
+		PC.SaveIDs(Result[0], Result[1]);
 		SetPopupStatus("Connexion...");
 	}
 	else
