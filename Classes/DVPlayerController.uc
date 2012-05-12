@@ -30,7 +30,6 @@ var DVLink							MasterServerLink;
 
 var byte							WeaponListLength;
 
-var bool							bPrintScores;
 var bool							bLocked;
 
 var string 							DebugField;
@@ -43,7 +42,7 @@ var string 							DebugField;
 replication
 {
 	if ( bNetDirty )
-		UserChoiceWeapon, EnemyTeamInfo, bLocked, bPrintScores, WeaponList, WeaponListLength;
+		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength;
 }
 
 
@@ -112,7 +111,7 @@ reliable client event TcpGetStats(array<string> Data)
 /*--- Scores ---*/
 exec function ShowCommandMenu()
 {
-	bPrintScores = true;
+	DVHUD(myHUD).ShowPlayerList();
 	SetTimer(ScoreLength, false, 'HideScores');
 }
 
@@ -266,7 +265,7 @@ simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI
 reliable client simulated function SignalEndGame(bool bHasWon)
 {
 	`log("End of game " $ self);
-	bPrintScores = true;
+	DVHUD(myHUD).ShowPlayerList();
 	LockCamera(true);
 	
 	ShowGenericMessage((bHasWon) ? 
@@ -397,7 +396,7 @@ reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeapo
 /*--- Hide the score screen ---*/
 reliable client simulated function HideScores()
 {
-	bPrintScores = false;
+	DVHUD(myHUD).HidePlayerList();
 }
 
 
@@ -556,10 +555,7 @@ state RoundEnded
 
 defaultproperties
 {
-	ScoreLength=4.0
-	
 	bLocked=true
-	bPrintScores=false
-	
+	ScoreLength=4.0
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
 }

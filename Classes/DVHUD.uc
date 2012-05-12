@@ -56,16 +56,11 @@ event PostRender()
 	{
 		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore());
 	}
-
 	
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
 	//PutShadedText(BlueColor, DVPawn(myOwner.Pawn).DebugField, 20, 30);
-	
-	// Scores
-	if (myOwner.bPrintScores)
-		UpdateAllScores();
 }
 
 
@@ -121,20 +116,18 @@ simulated function ChooseWeapons()
 
 
 /*--- Score management ---*/
-reliable client simulated function UpdateAllScores()
+reliable client simulated function ShowPlayerList()
 {
 	local array<DVPlayerRepInfo> PRList;
-	local int i;
-	
 	PRList = DVPlayerController(PlayerOwner).GetPlayerList();
-	
-	// Displaying
-	for (i = 0; i < PRList.Length; i++)
-	{
-		PutShadedText((DVTeamInfo(PRList[i].Team).TeamIndex == 1) ? BlueColor : OrangeColor,
-			PRList[i].PlayerName $ " " $ PRList[i].GetPointCount() $ " kills, " $ PRList[i].GetDeathCount() $ " deaths",
-			200, 100 + 30 * i);
-	}
+	HudMovie.OpenPlayerList(PRList);
+}
+
+
+/*--- Score management ---*/
+reliable client simulated function HidePlayerList()
+{
+	HudMovie.ClosePlayerList();
 }
 
 

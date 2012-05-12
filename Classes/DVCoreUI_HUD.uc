@@ -48,6 +48,8 @@ simulated function InitParts()
 	ChatTextMC = GetSymbol("ChatInput");
 	
 	// Various init
+	ScoreListBlue.SetVisible(false);
+	ScoreListRed.SetVisible(false);
 	ChatTextMC.SetVisible(false);
 	bCaptureInput = false;
 	ChatMC.SetText("");
@@ -66,20 +68,21 @@ reliable client simulated function OpenRespawnMenu()
 	bCaptureInput = true;
 	Scene.GotoAndPlayI(2);
 	Banner = GetSymbol("Banner");
+	OpenPlayerList(PC.GetPlayerList());
 }
 
 
 /*--- Health bar ---*/
 simulated function UpdateHealth(int amount)
 {
-	HealthMC.GotoAndStopI(amount);
+	//HealthMC.GotoAndStopI(amount);
 }
 
 
 /*--- Ammo bar ---*/
 simulated function UpdateAmmo(int amount)
 {
-	AmmoMC.GotoAndStopI(amount);
+	//AmmoMC.GotoAndStopI(amount);
 }
 
 
@@ -105,6 +108,83 @@ simulated function SetupButtons()
 	SetWidgetLabel("Resume", "Reprendre", false);
 	SetWidgetLabel("QuitMenu", "Quitter la partie", false);
 	SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
+}
+
+
+/*--- Open the player list ---*/
+reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
+{
+	`log("OpenPlayerList");
+	
+	ScoreListRed.SetVisible(true);
+	ScoreListBlue.SetVisible(true);
+	FillPlayerList(ScoreListRed, PRList, 0);
+	FillPlayerList(ScoreListBlue, PRList, 1);
+	
+	SetupButtons();
+	ResumeButtonMC.SetVisible(PC.Pawn.Health > 0);
+}
+
+
+/*--- Close the player list ---*/
+reliable client function ClosePlayerList()
+{
+	`log("ClosePlayerList");
+	ScoreListRed.SetVisible(false);
+	ScoreListBlue.SetVisible(false);
+}
+
+
+/*--- PLayer list filling ---*/
+reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> PRList, byte TeamIndex)
+{
+	local byte i, j;
+	local GFxObject TempObj;
+	local GFxObject DataProvider;
+	
+	// Init
+	j = 0;
+	`log("FillPlayerList");
+	DataProvider = List.GetObject("dataProvider");
+	
+	// Player filtering
+	for (i = 0; i < PRList.Length; i++)
+	{
+		if (PRList[i].Team.TeamIndex == TeamIndex)
+		{
+			TempObj = CreateObject("Object");
+			TempObj.SetString("label", PRList[i].PlayerName $ " - "$ PRList[i].KillCount $ " kills");
+			DataProvider.SetElementObject(j, TempObj);
+			j++;
+		}
+	}
+	List.SetObject("dataProvider", DataProvider);
+	List.SetFloat("rowCount", j);
+}
+
+
+/*--- Update the weapon list ---*/
+reliable client function UpdateWeaponList()
+{
+	local byte i;
+	local GFxObject TempObj;
+	local GFxObject DataProvider;
+	`log("UpdateWeaponList");
+	
+	// Actual menu setting
+	DataProvider = WeaponListMC.GetObject("dataProvider");
+	for (i = 0; i < PC.WeaponListLength; i++)
+	{
+		TempObj = CreateObject("Object");
+		TempObj.SetString("label", string(PC.WeaponList[i]));
+		DataProvider.SetElementObject(i, TempObj);
+	}
+	
+	// List update
+	WeaponListMC.SetObject("dataProvider", DataProvider);
+	WeaponListMC.SetFloat("rowCount", i);
+	SetupButtons();
+	ResumeButtonMC.SetVisible(PC.Pawn.Health > 0);
 }
 
 
@@ -151,35 +231,6 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	return true;
 }
 
-
-/*--- Update the weapon list ---*/
-reliable client function UpdateWeaponList()
-{
-	local byte i;
-	local GFxObject TempObj;
-	local GFxObject DataProvider;
-	`log("UpdateWeaponList");
-	
-	// Actual menu setting
-	DataProvider = WeaponListMC.GetObject("dataProvider");
-	for (i = 0; i < PC.WeaponListLength; i++)
-	{
-		TempObj = CreateObject("Object");
-		TempObj.SetString("label", string(PC.WeaponList[i]));
-		DataProvider.SetElementObject(i, TempObj);
-	}
-	
-	// List update
-	WeaponListMC.SetObject("dataProvider", DataProvider);
-	WeaponListMC.SetFloat("rowCount", i);
-	SetupButtons();
-	ResumeButtonMC.SetVisible(PC.Pawn.Health > 0);
-}
-
-
-/*----------------------------------------------------------
-	Click events
-----------------------------------------------------------*/
 
 /*--- Weapon selection ---*/
 function OnWeaponClick(GFxClikWidget.EventData ev)
@@ -248,4 +299,6 @@ defaultproperties
 	WidgetBindings(4)={(WidgetName="QuitMenu",	WidgetClass=class'GFxClikWidget')}
 	
 	WidgetBindings(5)={(WidgetName="WeaponList",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(6)={(WidgetName="ScoreListRed",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(7)={(WidgetName="ScoreListBlue",WidgetClass=class'GFxClikWidget')}
 }
