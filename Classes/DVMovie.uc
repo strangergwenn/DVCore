@@ -208,6 +208,7 @@ function SetPopup(string Text[7], optional int PField, optional int PField2)
 			{
 				TempObject.SetBool("displayAsPassword", true);
 				TempObject.SetVisible(true);
+				TempObject.SetText("");
 			}
 			else
 			{
@@ -249,6 +250,15 @@ function array<string> GetPopupContent()
 		Result.AddItem(TempObject.GetString("text"));
 	}
 	return Result;
+}
+
+
+/*--- Set popup content ---*/
+function SetPopupContent(int FieldID, string Content)
+{
+	local GFxObject TempObject;
+	TempObject = GetSymbol(PopupName $ ".PopupField" $ FieldID);
+	TempObject.SetText(Content);
 }
 
 

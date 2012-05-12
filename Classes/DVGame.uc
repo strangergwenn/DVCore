@@ -57,14 +57,20 @@ event PostBeginPlay()
 event PostLogin (PlayerController NewPlayer)
 {
 	local Actor A;
+	local DVPlayerController P;
 	Super.PostLogin(NewPlayer);
 	
 	DVPlayerController(NewPlayer).SetWeaponList(DefaultWeaponList, WeaponListLength);
 	
 	if (LocalPlayer(NewPlayer.Player) == None)
 		return;
-	ForEach AllActors(class'Actor', A)
+	foreach AllActors(class'Actor', A)
 		A.NotifyLocalPlayerTeamReceived();
+	foreach AllActors(class'DVPlayerController', P)
+	{
+		if (P != NewPlayer)
+			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
+	}
 }
 
 

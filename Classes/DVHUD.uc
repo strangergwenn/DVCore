@@ -100,6 +100,7 @@ simulated function PostBeginPlay()
 simulated function GameplayMessage(string text)
 {
 	HudMovie.ShowBannerInfo(true, text);
+	PlaySound(HudMovie.BipSound);
 	SetTimer(GameplayMessageTime, false, 'ShutdownMessage');
 }
 

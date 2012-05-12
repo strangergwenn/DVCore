@@ -41,8 +41,6 @@ simulated function PostBeginPlay()
 	LocalStats = new class'DVUserStats';
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
-	
-	`log("Applying user setting" $ LocalStats.Resolution);
 	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
 	
 	// Debug

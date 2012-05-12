@@ -15,7 +15,7 @@ class DVUserStats extends Object
 var (Database) config array<int>				WeaponScores;
 
 var (Database) config int						ShotsFired;
-var (Database) config int						TeamKills;
+var (Database) config int						teamkills;
 var (Database) config int						Headshots;
 var (Database) config int						Kills;
 var (Database) config int						Deaths;
@@ -31,7 +31,7 @@ var (Database) config bool						bUseSoundOnHit;
 var (Database) config bool						bBackgroundMusic;
 
 var (Database) config string					UserName;
-var (Database) config string					PassWord;
+var (Database) config string					Password;
 var (Database) config string					Resolution;
 
 
@@ -73,7 +73,7 @@ function SetIntValue(string PropertyName, int NV)
 	switch(PropertyName)
 	{
 		case ("ShotsFired"): 		ShotsFired = NV; 		break;
-		case ("TeamKills"): 		TeamKills = NV; 		break;
+		case ("TeamKills"): 		teamkills = NV; 		break;
 		case ("Headsots"): 			Headshots = NV; 		break;
 		case ("Kills"): 			Kills = NV; 			break;
 		case ("Rank"): 				Rank = NV; 				break;
@@ -101,7 +101,7 @@ function SetStringValue(string PropertyName, string NV)
 	switch(PropertyName)
 	{
 		case ("UserName"): 			UserName = NV; 			break;
-		case ("PassWord"): 			PassWord = NV; 			break;
+		case ("PassWord"): 			Password = NV; 			break;
 		case ("Resolution"): 		Resolution = NV; 		break;
 		default : 											break;
 	}

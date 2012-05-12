@@ -152,10 +152,14 @@ exec function StartFire(optional byte FireModeNum = 0)
 	Methods
 ----------------------------------------------------------*/
 
-/*--- Show a generic message ---*/ 
-unreliable client simulated function ShowGenericMessage(string text)
+/*--- Notify a new player ---*/ 
+unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)
 {
-	DVHUD(myHUD).GameplayMessage(text);
+	NotifyNewPlayer(PlayerName);
+}
+unreliable client simulated function NotifyNewPlayer(string PlayerName)
+{
+	ShowGenericMessage("" $PlayerName $ " a rejoint la partie");
 }
 
 
@@ -175,18 +179,25 @@ unreliable client simulated function ShowKilled(string KilledName, bool bTeamKil
 }
 
 
+/*--- Show the killer message ---*/ 
+unreliable client simulated function ShowEmptyAmmo()
+{
+	ShowGenericMessage("Votre arme est vide !");
+}
+
+
+/*--- Show a generic message ---*/ 
+unreliable client simulated function ShowGenericMessage(string text)
+{
+	DVHUD(myHUD).GameplayMessage(text);
+}
+
+
 /*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound()
 {
 	if(DVHUD(myHUD).LocalStats.bUseSoundOnHit)
 		PlaySound(HitSound);
-}
-
-
-/*--- Show the killer message ---*/ 
-unreliable client simulated function ShowEmptyAmmo()
-{
-	ShowGenericMessage("Votre arme est vide !");
 }
 
 
@@ -398,7 +409,7 @@ reliable client simulated function HideScores()
 reliable client simulated function SaveIDs(string User, string Pass)
 {
 	local DVUserStats LStats;
-	LStats = DVHUD(myHUD).LocalStats;
+	LStats = DVHUD_Menu(myHUD).LocalStats;
 	LStats.SetStringValue("UserName", User);
 	LStats.SetStringValue("PassWord", Pass);
 	LStats.SaveConfig();

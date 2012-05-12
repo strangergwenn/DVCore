@@ -179,13 +179,15 @@ function OpenConnectionDialog(bool bShowRegister)
 	{
 		Text[0] = "Nouveau compte";
 		Text[1] = "Joueur";
-		Text[2] = "E-mail";
+		Text[2] = "Mot de passe";
 		Text[3] = "Mot de passe";
-		Text[4] = "Mot de passe";
+		Text[4] = "E-mail";
 		Text[5] = "S'enregistrer";
 		Text[6] = "Retour";
-		SetPopup(Text, 3, 4);
+		SetPopup(Text, 2, 3);
 	}
+	SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
+	SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
 }
 
 
@@ -213,21 +215,21 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	Result = GetPopupContent();
 	
 	// Checking
-	if (Len(Result[0]) < 4 || Len(Result[1]) < 4)
+	if (Len(Result[0]) < 4 || (bIsInRegisterPopup && Len(Result[3]) < 10))
 		SetPopupStatus("Données incorrectes");
-	else if (Result[2] != Result[3])
+	else if (Result[1] != Result[2])
 		SetPopupStatus("Mots de passe différents");
 	
 	// Actions
 	else if (!bIsInRegisterPopup)
 	{
-		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
 		PC.SaveIDs(Result[0], Result[1]);
+		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
 		SetPopupStatus("Connexion...");
 	}
 	else
 	{
-		PC.MasterServerLink.RegisterUser(Result[0], Result[1], Result[2]);
+		PC.MasterServerLink.RegisterUser(Result[0], Result[3], Result[1]);
 		SetPopupStatus("Enregistrement...");
 	}
 }
@@ -362,7 +364,6 @@ function UpdateResList()
 	}
 	ResListMC.SetObject("dataProvider", DataProvider);
 	ResListMC.SetInt("selectedIndex", IsInArray(HInfo.LocalStats.Resolution, ResListData, true));
-	`log("data = " $IsInArray(HInfo.LocalStats.Resolution, ResListData, true));
 }
 
 
