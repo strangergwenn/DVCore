@@ -153,7 +153,7 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 		if (PRList[i].Team.TeamIndex == TeamIndex)
 		{
 			TempObj = CreateObject("Object");
-			TempObj.SetString("label", PRList[i].PlayerName $ " - "$ PRList[i].KillCount $ " kills");
+			TempObj.SetString("label", PRList[i].PlayerName $ " - "$ PRList[i].KillCount $ " victimes");
 			DataProvider.SetElementObject(j, TempObj);
 			j++;
 		}
