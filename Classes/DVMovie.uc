@@ -196,12 +196,12 @@ function SetPopup(string Text[7], optional int PField, optional int PField2)
 		// Buttons
 		else
 		{
-			TempObject = GetSymbol(PopupName $ ".PopupButton" $ (i - PopupFieldCount));
+			TempObject = GetSymbol(PopupName $ ".PopupButton" $ (i + 1 - PopupFieldCount));
 			if (Text[i] == "")
 				TempObject.SetVisible(false);
 			else
 			{
-				TempObject.SetText(Text[i]);
+				TempObject.SetString("label", Text[i]);
 				TempObject.SetVisible(true);
 			}
 		}
@@ -316,6 +316,27 @@ function SetLabel(string SymbolName, string Text, bool bIsCaps)
 	}
 	Symbol.SetText(Text);
 }
+
+
+/*--- Get a Flash widget and set it ---*/
+function SetWidgetLabel(string SymbolName, string Text, bool bIsCaps)
+{
+	local GFxObject Symbol;
+	Symbol = GetSymbol(SymbolName);
+	
+	if (Symbol == None)
+	{
+		`warn("Null symbol : " $ SymbolName);
+		return;
+	}
+	
+	if (bIsCaps)
+	{
+		Text = Caps(Text);
+	}
+	Symbol.SetString("label", Text);
+}
+
 
 /*--- Get a Flash object reference --*/
 function GFxObject GetSymbol(string SymbolName)

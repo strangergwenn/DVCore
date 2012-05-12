@@ -28,6 +28,7 @@ var GFxClikWidget 						ResListMC;
 
 var GFxClikWidget 						ServerConnect;
 var GFxClikWidget 						PlayerConnect;
+var GFxClikWidget 						SaveVideoSettings;
 
 var array<UDKUIDataProvider_MapInfo> 	MapList;
 var array<string>						ServerList;
@@ -94,6 +95,7 @@ function OnServerItemClick(GFxClikWidget.EventData ev)
 	ServerString = button.GetString("label");
 	
 	ServerURL = IPList[ServerList.Find(ServerString)];
+	ServerConnect.SetBool("enabled", true);
 }
 
 
@@ -138,6 +140,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
     local GFxObject button;
     button = ev._this.GetObject("itemRenderer");
 	ServerURL = button.GetString("label");
+	ServerConnect.SetBool("enabled", true);
 }
 
 
@@ -179,7 +182,7 @@ function OpenConnectionDialog(bool bShowRegister)
 		Text[2] = "E-mail";
 		Text[3] = "Mot de passe";
 		Text[4] = "Mot de passe";
-		Text[5] = "Enregistrement";
+		Text[5] = "S'enregistrer";
 		Text[6] = "Retour";
 		SetPopup(Text, 3, 4);
 	}
@@ -190,10 +193,12 @@ function OpenConnectionDialog(bool bShowRegister)
 simulated function GetServerContent()
 {
 	`log("GetServerContent");
+	
 	SetLabel("MenuTitle", "Parties en ligne", true);
 	SetLabel("MapTitle", "Parties en solo", true);
 	SetLabel("ServerTitle", "Parties en ligne", true);
 	SetLabel("ButtonsTitle", "Actions", true);
+	
 	OpenConnectionDialog(false);
 	HidePopup(true);
 }
@@ -304,8 +309,9 @@ simulated function GetOptionsContent()
 	SetLabel("OptionGenTitle3", "Touches", true);
 	
 	// Option block 1
-	SetLabel("OptionCB1", "Musique de fond", true);
-	SetLabel("OptionCB2", "Plein écran", true);
+	SetWidgetLabel("OptionCB1", "Musique en jeu", false);
+	SetWidgetLabel("OptionCB2", "Indicateur d'impact", false);
+	SetWidgetLabel("OptionCB3", "Plein écran", false);
 	
 	// Option block 2
 	
@@ -335,20 +341,34 @@ function UpdateResList()
 }
 
 
-/*--- Resolution navigation ---*/
-function OnResItemClick(GFxClikWidget.EventData ev)
+/*--- Settings saved ---*/
+function ValidateSettings(GFxClikWidget.EventData ev)
 {
-    local GFxObject button;
-    button = ev._this.GetObject("itemRenderer");
-    
-    `log("res = " $ button.GetString("label"));
-    
-    if (InStr("1080", button.GetString("label")) != -1)
-			ConsoleCommand("SetRes 1920*1080");
-    if (InStr("720", button.GetString("label")) != -1)
-			ConsoleCommand("SetRes 1280*720");
-    if (InStr("max", button.GetString("label")) != -1)
-			ConsoleCommand("SetRes 6000*3500");
+	local GFxObject button;
+	local string res, flag;
+	
+	// Resolution
+	button = GetSymbol("ResolutionList");
+	res = Split(ResListData[int(button.GetString("selectedIndex"))], "(", false);
+	`log("Clicked resolution " $ res);
+	
+	// Fullscreen
+	button = GetSymbol("OptionCB3");
+	flag = (button.GetBool("selected") ? "f" : "w");
+	
+	// Application
+	switch (res)
+	{
+		case ("(720p)"):
+			ConsoleCommand("SetRes 1280x720" $flag);
+			break;
+		case ("(1080p)"):
+			ConsoleCommand("SetRes 1920x1080" $flag);
+			break;
+		case ("(max)"):
+			ConsoleCommand("SetRes 6000x3500" $flag);
+			break;
+	}
 }
 
 
@@ -358,7 +378,7 @@ function OnResItemClick(GFxClikWidget.EventData ev)
 
 /*--- Initialization ---*/
 event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget)
-{
+{		
 	switch(WidgetName)
 	{
 		// Lists
@@ -377,20 +397,29 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			UpdateMenuList();
 			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
 			break;
-		case ('ResolutionList'):
-			ResListMC = GFxClikWidget(Widget);
-			UpdateResList();
-			ResListMC.AddEventListener('CLIK_itemClick', OnResItemClick);
-			break;
 		
 		// Buttons
 		case ('OpenServerButton'):
 			ServerConnect = GFxClikWidget(Widget);
 			ServerConnect.AddEventListener('CLIK_click', OpenServer);
+			ServerConnect.SetString("label", "Rejoindre la partie sélectionnée");
+			ServerConnect.SetBool("enabled", false);
 			break;
 		case ('PlayerConnectButton'):
 			PlayerConnect = GFxClikWidget(Widget);
 			PlayerConnect.AddEventListener('CLIK_click', OnPlayerConnect);
+			PlayerConnect.SetString("label", "Se connecter à DeepVoid.eu");
+			break;
+		case ('ResolutionList'):
+			ResListMC = GFxClikWidget(Widget);
+			UpdateResList();
+			break;
+		
+		// Various
+		case ('SaveVideoSettings'):
+			SaveVideoSettings = GFxClikWidget(Widget);
+			SaveVideoSettings.AddEventListener('CLIK_click', ValidateSettings);
+			SaveVideoSettings.SetString("label", "Sauvegarder les réglages");
 			break;
 			
 		default:
@@ -455,7 +484,7 @@ defaultproperties
 	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
 	
 	MenuListData=("Parties","Statistiques","Réglages","Quitter")
-	ResListData=("Ecran HD (1080p)","Ecran HDReady (720p)","Résolution maximale")
+	ResListData=("Ecran HD (1080p)","Ecran HDReady (720p)","Défaut (max)")
 	
 	ServerURL="deepvoid.eu"
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
@@ -464,6 +493,12 @@ defaultproperties
 	WidgetBindings(4)={(WidgetName="ServerList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(5)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(6)={(WidgetName="ResolutionList",WidgetClass=class'GFxClikWidget')}
+	
 	WidgetBindings(7)={(WidgetName="OpenServerButton",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(8)={(WidgetName="PlayerConnectButton",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(9)={(WidgetName="SaveVideoSettings",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(10)={(WidgetName="OptionCB1",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(11)={(WidgetName="OptionCB2",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(12)={(WidgetName="OptionCB3",WidgetClass=class'GFxClikWidget')}
 }
