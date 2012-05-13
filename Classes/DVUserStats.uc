@@ -6,7 +6,7 @@
  **/
 
 class DVUserStats extends Object
-	config(UserStats);
+	config(DVSettings);
 
 /*----------------------------------------------------------
 	Database attributes
