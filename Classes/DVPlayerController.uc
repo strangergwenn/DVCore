@@ -174,6 +174,20 @@ exec function StartFire(optional byte FireModeNum = 0)
 }
 
 
+/*--- Send text ---*/
+exec function Talk()
+{
+	//super.Talk();
+	`log("Talk");
+	DVHUD(myHUD).HudMovie.StartTalking();
+}
+
+
+/*--- Nope ---*/
+exec function TeamTalk()
+{}
+
+
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/

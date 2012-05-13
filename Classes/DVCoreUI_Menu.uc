@@ -153,7 +153,6 @@ function UpdateMapList()
 	{
 		TempObj = CreateObject("Object");
 		TempObj.SetString("label", Caps((MapList[i]).MapName));
-		TempObj.SetString("iconimage", "img://IcoThumbs.Textures.TX_THUMBNAIL_Level01");
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	MapListMC.SetObject("dataProvider", DataProvider);
@@ -164,10 +163,15 @@ function UpdateMapList()
 /*--- Map click ---*/
 function OnMapItemClick(GFxClikWidget.EventData ev)
 {
-    local GFxObject button;
+    local GFxObject button;//, TempIcon;
     button = ev._this.GetObject("itemRenderer");
 	ServerURL = button.GetString("label");
 	ServerConnect.SetBool("enabled", true);
+	
+	/*
+	TempIcon = button.GetObject("imageLoader");
+	TempIcon.SetString("source", "img://IcoThumbs.Textures.TX_THUMBNAIL_Level01");
+	*/
 }
 
 

@@ -17,7 +17,7 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 {
 	if(IEvent == IE_Pressed)
 	{
-		if (Len(KeyName) <= 10)
+		if (Len(KeyName) <= 10 && DVHUD_Menu(myHUD) != None)
 			DVHUD_Menu(myHUD).HudMovie.SetKeyPressed(string(KeyName));
 	}
 	return false;

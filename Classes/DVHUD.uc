@@ -155,25 +155,16 @@ function DrawMessageText(HudLocalizedMessage LocalMessage, float ScreenX, float 
 /*--- Console message between players ---*/
 function DisplayConsoleMessages()
 {
-	// Init
-    local int Idx;
-    local string text;
-	if (ConsoleMessages.Length < 1 )
-		return;
+	local string text;
+	local byte i;
+	text = "";
 	
-	// Text display
-    for (Idx = 0; Idx < ConsoleMessages.Length; Idx++)
-    {
-		if ( ConsoleMessages[Idx].Text == "" || ConsoleMessages[Idx].MessageLife < WorldInfo.TimeSeconds )
-		{
-			if (Idx > 0)
-				ConsoleMessages.Remove(Idx--,1);
-			else
-				ConsoleMessages.Remove(Idx, 1);
-		}
-    }
-    text = "" $ ConsoleMessages[ConsoleMessages.Length - 1].Text $ "\n" $ ConsoleMessages[ConsoleMessages.Length - 2].Text;
-    HUDMovie.UpdateChat(text);
+	for (i = 0; i < ConsoleMessages.length; i++)
+	{
+		text $= ConsoleMessages[i].Text;
+		text $= "\n";
+	}
+	HUDMovie.UpdateChat(text);
 }
 
 

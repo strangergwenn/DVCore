@@ -87,6 +87,7 @@ function SignalConnected()
 {
 	HudMovie.SetConnectState(true, 2);
 	HidePopup();
+	ConsoleCommand("SetName"@LocalStats.UserName);
 }
 
 

@@ -30,6 +30,7 @@ var GFxObject 				ChatTextMC;
 var string 					NewWeaponName;
 
 var bool					bFirstConnection;
+var bool					bChatting;
 
 
 /*----------------------------------------------------------
@@ -66,6 +67,7 @@ simulated function InitParts()
 reliable client simulated function OpenRespawnMenu()
 {
 	SetGamePaused();
+	bChatting = false;
 	bCaptureInput = true;
 	Scene.GotoAndPlayI(2);
 	Banner = GetSymbol("Banner");
@@ -84,6 +86,41 @@ simulated function UpdateHealth(int amount)
 simulated function UpdateAmmo(int amount)
 {
 	//AmmoMC.GotoAndStopI(amount);
+}
+
+
+/*--- Open chat ---*/
+simulated function StartTalking()
+{
+	if (!bChatting)
+	{
+		PlayUISound(ClickSound);
+		ChatTextMC.SetVisible(true);
+		ChatTextMC.SetString("text", " ");
+		ChatTextMC.SetBool("focused", true);
+		bCaptureInput = true;
+		bChatting = true;
+	}
+}
+
+
+/*--- Open chat ---*/
+simulated function SendChatMessage()
+{
+	local string text;
+	
+	bCaptureInput = false;
+	if (bChatting)
+	{
+		PlayUISound(ClickSound);
+		ChatTextMC.SetVisible(false);
+		ChatTextMC.SetBool("focused", false);
+		bChatting = false;
+		
+		text = ChatTextMC.GetString("text");
+		if (text != "")
+			ConsoleCommand("Say"@text);
+	}
 }
 
 
