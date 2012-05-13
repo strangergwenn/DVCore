@@ -604,4 +604,5 @@ defaultproperties
 	LocalLeaderBoardOffset=4
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
+	InputClass=class'DVPlayerInput'
 }

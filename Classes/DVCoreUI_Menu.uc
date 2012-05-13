@@ -16,6 +16,9 @@ var (CoreUI) const array<string>		IgnoredMaps;
 var (CoreUI) const array<string>		MenuListData;
 var (CoreUI) const array<string>		ResListData;
 
+var (CoreUI) const array<string>		KeyListData;
+var (CoreUI) const array<string>		BindListData;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -39,8 +42,11 @@ var array<string>						IPList;
 
 var bool 								bMapsInitialized;
 var bool								bIsInRegisterPopup;
+var bool								bIsKeyEditing;
 
 var string								ServerURL;
+
+var int									KeyBeingEdited;
 
 
 /*----------------------------------------------------------
@@ -87,6 +93,7 @@ function UpdateServerList()
 	{
 		TempObj = CreateObject("Object");
 		TempObj.SetString("label", ServerList[i]);
+		TempObj.SetString("iconimage", "img://IcoThumbs.Textures.TX_THUMBNAIL_Level01");
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	ServerListMC.SetObject("dataProvider", DataProvider);
@@ -146,6 +153,7 @@ function UpdateMapList()
 	{
 		TempObj = CreateObject("Object");
 		TempObj.SetString("label", Caps((MapList[i]).MapName));
+		TempObj.SetString("iconimage", "img://IcoThumbs.Textures.TX_THUMBNAIL_Level01");
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	MapListMC.SetObject("dataProvider", DataProvider);
@@ -374,14 +382,20 @@ simulated function UpdateLeaderboard(GFxObject List, bool bIsLocal)
 /*--- Content ---*/
 simulated function GetOptionsContent()
 {
+	local GFxObject tmpDisabled;
 	local DVHUD_Menu HInfo;
+	local string Key;
+	local byte i;
 	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// General
 	SetLabel("MenuTitle", "Configuration du jeu", true);
 	SetLabel("OptionGenTitle1", "Audio & Vidéo", true);
-	SetLabel("OptionGenTitle2", "Gameplay", true);
 	SetLabel("OptionGenTitle3", "Touches", true);
+	
+	// Unused
+	tmpDisabled = GetSymbol("OptionGenTitle2");
+	tmpDisabled.SetVisible(false);
 	
 	// Option block 1
 	SetWidgetLabel("OptionCB1", "Musique en jeu", false);
@@ -389,7 +403,14 @@ simulated function GetOptionsContent()
 	SetWidgetLabel("OptionCB3", "Plein écran", false);
 	SetChecked("OptionCB1", HInfo.LocalStats.bBackgroundMusic);
 	SetChecked("OptionCB2", HInfo.LocalStats.bUseSoundOnHit);
-	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);	
+	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);
+	
+	// Keys
+	for (i = 0; i < KeyListData.Length; i++)
+	{
+		Key = DVPlayerInput(PC.PlayerInput).GetKeyBinding(BindListData[i]);
+		SetLabel("Key" $(i + 1), Key $ " - " $ KeyListData[i], false);
+	}
 }
 
 
@@ -415,16 +436,47 @@ function UpdateResList()
 }
 
 
+/*--- Launch key editing ---*/
+function EditKey(GFxClikWidget.EventData ev)
+{
+	local GFxObject button;
+	
+	if (!bIsKeyEditing)
+	{
+	    button = ev._this.GetObject("target");
+	    
+		KeyBeingEdited = (IsInArray(Split(button.GetString("text"), " - ", true), KeyListData, true) + 1);
+		SetLabel("Key" $KeyBeingEdited, "Attente de la nouvelle touche", false);
+		
+		bIsKeyEditing = true;
+		bCaptureInput = false;
+	}
+}
+
+
+/*--- Save key pressed ---*/
+function SetKeyPressed(string KeyName)
+{
+	if (bIsKeyEditing)
+	{
+		SetLabel("Key" $KeyBeingEdited, KeyName $ " - " $KeyListData[KeyBeingEdited - 1], false);
+		bIsKeyEditing = false;
+		bCaptureInput = true;
+	}
+}
+
+
 /*--- Settings saved ---*/
 function ValidateSettings(GFxClikWidget.EventData ev)
 {
-	// Init
+	// Vars
 	local GFxObject button;
 	local DVHUD_Menu HInfo;
 	local string res, flag;
-	HInfo = DVHUD_Menu(PC.myHUD);
+	local byte i;
 	
 	// Resolution
+	HInfo = DVHUD_Menu(PC.myHUD);
 	button = GetSymbol("ResolutionList");
 	res = Split(ResListData[int(button.GetString("selectedIndex"))], "(", false);
 	`log("Clicked resolution " $ res);
@@ -441,6 +493,14 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	HInfo.LocalStats.SetBoolValue("bFullScreen", IsChecked("OptionCB3"));
 	HInfo.LocalStats.SetStringValue("Resolution", res);
 	HInfo.LocalStats.SaveConfig();
+	
+	// Keys
+	for (i = 0; i < KeyListData.Length; i++)
+	{
+		button = GetSymbol("Key" $(i + 1));
+		res = Left(button.GetString("text"), InStr(button.GetString("text"), " - "));
+		DVPlayerInput(PC.PlayerInput).SetKeyBinding(name(res), BindListData[i]);
+	}
 }
 
 
@@ -450,7 +510,9 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 
 /*--- Initialization ---*/
 event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget)
-{		
+{
+	local GFxClikWidget TempObject;
+	
 	switch(WidgetName)
 	{
 		// Lists
@@ -480,19 +542,32 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		
 		// Buttons
 		case ('OpenServerButton'):
-			ServerConnect = GFxClikWidget(Widget);
-			ServerConnect.AddEventListener('CLIK_click', OpenServer);
+			ServerConnect = GetLiveWidget(Widget, 'CLIK_click', OpenServer);
 			ServerConnect.SetString("label", "Rejoindre la partie sélectionnée");
 			ServerConnect.SetBool("enabled", false);
 			break;
 		case ('PlayerConnectButton'):
-			PlayerConnect = GFxClikWidget(Widget);
-			PlayerConnect.AddEventListener('CLIK_click', OnPlayerConnect);
+			PlayerConnect = GetLiveWidget(Widget, 'CLIK_click', OnPlayerConnect);
 			PlayerConnect.SetString("label", "Se connecter à DeepVoid.eu");
 			break;
 		case ('ResolutionList'):
 			ResListMC = GFxClikWidget(Widget);
 			UpdateResList();
+			break;
+		
+		// Keys settings
+		case ('Key1'):
+		case ('Key2'):
+		case ('Key3'):
+		case ('Key4'):
+		case ('Key5'):
+		case ('Key6'):
+		case ('Key7'):
+		case ('Key8'):
+		case ('Key9'):
+		case ('Key10'):
+			TempObject = GFxClikWidget(Widget);
+			TempObject.AddEventListener('CLIK_click', EditKey);
 			break;
 		
 		// Various
@@ -502,8 +577,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			SaveVideoSettings.SetString("label", "Sauvegarder les réglages");
 			break;
 			
-		default:
-			return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
+		default: return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
 	}
 	return true;
 }
@@ -565,6 +639,8 @@ defaultproperties
 	
 	MenuListData=("Parties","Statistiques","Réglages","Quitter")
 	ResListData=("Ecran HDReady (720p)","Ecran HD (1080p)","Défaut (max)")
+	KeyListData=("Avancer","Reculer","Aller à gauche","Aller à droite","Sauter","Se baisser","Désactiver le pointeur", "Afficher les scores", "Parler")
+	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk")
 	
 	ServerURL="deepvoid.eu"
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
@@ -584,4 +660,15 @@ defaultproperties
 	
 	WidgetBindings(13)={(WidgetName="Leaderboard",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(14)={(WidgetName="Leaderboard2",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(15)={(WidgetName="Key1",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(16)={(WidgetName="Key2",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(17)={(WidgetName="Key3",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(18)={(WidgetName="Key4",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(19)={(WidgetName="Key5",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(20)={(WidgetName="Key6",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(21)={(WidgetName="Key7",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(22)={(WidgetName="Key8",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(23)={(WidgetName="Key9",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(24)={(WidgetName="Key10",WidgetClass=class'GFxClikWidget')}
 }
