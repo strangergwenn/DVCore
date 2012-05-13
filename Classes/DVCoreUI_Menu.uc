@@ -47,6 +47,22 @@ var string								ServerURL;
 	PAGE 1 : SERVERS
 ----------------------------------------------------------*/
 
+/*--- First actions ---*/
+simulated function GetServerContent()
+{
+	// Init
+	`log("GetServerContent");
+	OpenConnectionDialog(false);
+	HidePopup(true);
+	
+	// Labels
+	SetLabel("MenuTitle", "Parties en ligne", true);
+	SetLabel("MapTitle", "Parties en solo", true);
+	SetLabel("ServerTitle", "Parties en ligne", true);
+	SetLabel("ButtonsTitle", "Actions", true);
+}
+
+
 /*--- Add a possibly new server to the local database ---*/
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
 {
@@ -154,6 +170,28 @@ function OpenServer(GFxClikWidget.EventData evtd)
 }
 
 
+/*--- Display the server connection state ---*/
+function SetConnectState(bool bIsButtonDisabled, optional int Level)
+{
+	local string Message;
+	
+	PlayerConnect.SetBool("enabled", !bIsButtonDisabled);
+	switch (Level)
+	{
+		case (0):
+			Message = "Se connecter à DeepVoid.eu";
+			break; 
+		case (1):
+			Message = "Connexion...";
+			break; 
+		case (2):
+			Message = "Connexion réussie";
+			break; 
+	}
+	PlayerConnect.SetString("label", Message);
+}
+
+
 /*--- Player connexion event ---*/
 function OnPlayerConnect(GFxClikWidget.EventData evtd)
 {
@@ -197,21 +235,6 @@ function OpenConnectionDialog(bool bShowRegister)
 }
 
 
-/*--- Language ---*/
-simulated function GetServerContent()
-{
-	`log("GetServerContent");
-	
-	SetLabel("MenuTitle", "Parties en ligne", true);
-	SetLabel("MapTitle", "Parties en solo", true);
-	SetLabel("ServerTitle", "Parties en ligne", true);
-	SetLabel("ButtonsTitle", "Actions", true);
-	
-	OpenConnectionDialog(false);
-	HidePopup(true);
-}
-
-
 /*--- Popup button 1 : action ---*/
 function OnPButton1(GFxClikWidget.EventData evtd)
 {
@@ -232,11 +255,13 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 		PC.SaveIDs(Result[0], Result[1]);
 		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
 		SetPopupStatus("Connexion...");
+		SetConnectState(true, 1);
 	}
 	else
 	{
 		PC.MasterServerLink.RegisterUser(Result[0], Result[3], Result[1]);
 		SetPopupStatus("Enregistrement...");
+		SetConnectState(true, 1);
 	}
 }
 
@@ -261,6 +286,7 @@ function GetPopupResult(bool bSuccess, string Msg)
 	else	
 	{
 		SetPopupStatus((Msg != "") ? Msg : "Un problème s'est produit");
+		SetConnectState(false, 0);
 	}
 }
 

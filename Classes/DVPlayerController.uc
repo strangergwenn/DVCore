@@ -78,7 +78,10 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	
 	// Get back the stats
 	if (Command == "CONNECT")
+	{
+		DVHUD_Menu(myHUD).SignalConnected();
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+	}
 }
 
 
@@ -425,7 +428,7 @@ reliable client simulated function HideScores()
 
 
 /*----------------------------------------------------------
-	Statistics database
+	Statistics database and ranking
 ----------------------------------------------------------*/
 
 /*--- Remember client ---*/

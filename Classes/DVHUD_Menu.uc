@@ -9,16 +9,23 @@ class DVHUD_Menu extends UDKHUD;
 
 
 /*----------------------------------------------------------
-	Attributes
+	Public attributes
+----------------------------------------------------------*/
+
+var (CoreUI) const class<DVCoreUI_Menu>	HUDClass;
+
+var (CoreUI) const float				PopupTimer;
+var (CoreUI) const float				AutoconnectDelay;
+
+
+/*----------------------------------------------------------
+	Private attributes
 ----------------------------------------------------------*/
 
 var DVUserStats						LocalStats;
 var DVUserStats						GlobalStats;
 
-var const class<DVCoreUI_Menu>		HUDClass;
 var DVCoreUI_Menu   				HudMovie;
-
-var float							PopupTimer;
 
 
 /*----------------------------------------------------------
@@ -42,6 +49,7 @@ simulated function PostBeginPlay()
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
 	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
+	SetTimer(AutoconnectDelay, false, 'AutoConnect');
 	
 	// Debug
 	AddServerInfo(
@@ -55,11 +63,31 @@ simulated function PostBeginPlay()
 }
 
 
+/*--- Launch autoconnection ---*/
+simulated function AutoConnect()
+{
+	if (Len(LocalStats.UserName) > 3 && Len(LocalStats.Password) > 3)
+	{
+		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
+			LocalStats.UserName, LocalStats.Password);
+		HudMovie.SetConnectState(true, 1);
+	}
+}
+
+
 /*--- Show a command response code ---*/
 function DisplayResponse (bool bSuccess, string Msg)
 {
 	HudMovie.DisplayResponse(bSuccess, Msg);
 	SetTimer(PopupTimer, false, 'HidePopup');
+}
+
+
+/*--- Called when the connection has been established ---*/
+function SignalConnected()
+{
+	HudMovie.SetConnectState(true, 2);
+	HidePopup();
 }
 
 
@@ -86,5 +114,6 @@ function AddServerInfo(string ServerName, string Level, string IP, string Game, 
 defaultproperties
 {
 	PopupTimer=2.0
+	AutoconnectDelay=0.5
 	HUDClass=class'DVCoreUI_Menu'
 }
