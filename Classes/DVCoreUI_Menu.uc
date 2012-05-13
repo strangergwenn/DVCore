@@ -174,6 +174,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 /*--- Server connection ---*/
 function OpenServer(GFxClikWidget.EventData evtd)
 {
+	PlayUISound(ClickSound);
 	ConsoleCommand("open " $ ServerURL);
 }
 
@@ -203,6 +204,7 @@ function SetConnectState(bool bIsButtonDisabled, optional int Level)
 /*--- Player connexion event ---*/
 function OnPlayerConnect(GFxClikWidget.EventData evtd)
 {
+	PlayUISound(ClickSound);
 	OpenConnectionDialog(false);
 }
 
@@ -463,6 +465,7 @@ function SetKeyPressed(string KeyName)
 		bIsKeyEditing = false;
 		bCaptureInput = true;
 	}
+	PlayUISound(ClickSound);
 }
 
 
@@ -482,6 +485,7 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	`log("Clicked resolution " $ res);
 	
 	// Application
+	PlayUISound(ClickSound);
 	flag = (IsChecked("OptionCB3") ? "f" : "w");
 	res = Repl(res, "(", "");
 	res = Repl(res, ")", "");

@@ -31,6 +31,7 @@ var (DVPawn) const float			DeathFlickerFrequency;
 var (DVPawn) const LinearColor		OffLight;
 
 var (DVPawn) const SoundCue			FootStepSound;
+var (DVPawn) const SoundCue			HitSound;
 
 var (DVPawn) const ParticleSystem	HitPSCTemplate;
 var (DVPawn) const ParticleSystem	LargeHitPSCTemplate;
@@ -542,6 +543,10 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 				FireParticleSystem(BloodDecalPSCTemplate, BloodImpact, rotator(BloodNormal));
 		}
 	}
+	
+	// Sound
+	if (HitSound != None)
+		PlaySound(HitSound, false, true, false, Location);
 	
 	Super.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType, HitInfo, DamageCauser);
 }
