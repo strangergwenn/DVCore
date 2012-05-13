@@ -29,6 +29,8 @@ var GFxObject 				ChatTextMC;
 
 var string 					NewWeaponName;
 
+var bool					bFirstConnection;
+
 
 /*----------------------------------------------------------
 	Core methods
@@ -53,7 +55,6 @@ simulated function InitParts()
 	ChatTextMC.SetVisible(false);
 	bCaptureInput = false;
 	ChatMC.SetText("");
-	SetupButtons();
 }
 
 
@@ -100,17 +101,6 @@ simulated function UpdateScore(int s1, int s2)
 }
 
 
-/*--- Prepare the respawn menu ---*/
-simulated function SetupButtons()
-{
-	// Menu labels
-	SetWidgetLabel("Restart", "Respawn", false);
-	SetWidgetLabel("Resume", "Reprendre", false);
-	SetWidgetLabel("QuitMenu", "Quitter la partie", false);
-	SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
-}
-
-
 /*--- Open the player list ---*/
 reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 {
@@ -121,8 +111,11 @@ reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 	FillPlayerList(ScoreListRed, PRList, 0);
 	FillPlayerList(ScoreListBlue, PRList, 1);
 	
-	SetupButtons();
-	ResumeButtonMC.SetVisible(PC.Pawn.Health > 0);
+	// Button hide
+	if (SwitchTeamButtonMC != None && bFirstConnection)
+	{
+		SwitchTeamButtonMC.SetVisible(false);
+	}
 }
 
 
@@ -153,7 +146,7 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 		if (PRList[i].Team.TeamIndex == TeamIndex)
 		{
 			TempObj = CreateObject("Object");
-			TempObj.SetString("label", PRList[i].PlayerName $ " - "$ PRList[i].KillCount $ " victimes");
+			TempObj.SetString("label", PRList[i].PlayerName $ " : "$ PRList[i].KillCount $ " victimes");
 			DataProvider.SetElementObject(j, TempObj);
 			j++;
 		}
@@ -183,8 +176,12 @@ reliable client function UpdateWeaponList()
 	// List update
 	WeaponListMC.SetObject("dataProvider", DataProvider);
 	WeaponListMC.SetFloat("rowCount", i);
-	SetupButtons();
-	ResumeButtonMC.SetVisible(PC.Pawn.Health > 0);
+	
+	// Button hide
+	if (bFirstConnection)
+	{
+		SwitchTeamButtonMC.SetVisible(false);
+	}
 }
 
 
@@ -200,17 +197,21 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Buttons
 		case ('Resume'):
 			ResumeButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnResume);
+			ResumeButtonMC.SetVisible(false);
+			SetWidgetLabel("Resume", "Reprendre", false);
 			break;
 		case ('QuitMenu'):
 			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
+			SetWidgetLabel("QuitMenu", "Quitter la partie", false);
 			break;
 		case ('Restart'):
 			RestartButtonMC = GFxClikWidget(Widget);
 			RestartButtonMC.SetVisible(false);
+			SetWidgetLabel("Restart", "Respawn", false);
 			break;
 		case ('SwitchTeam'):
-			RestartButtonMC = GFxClikWidget(Widget);
-			RestartButtonMC.SetVisible(false);
+			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnSwitchTeam);
+			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
 			break;
 		
 		/// Lists
@@ -255,6 +256,8 @@ function OnWeaponClick(GFxClikWidget.EventData ev)
 	SetGameUnPaused();
 	PC.HUDRespawn(NewWeapon);
 	bCaptureInput = false;
+	bFirstConnection = false;
+	//SwitchTeamButtonMC.SetVisible(true);
 }
 
 
@@ -274,6 +277,14 @@ function OnResume(GFxClikWidget.EventData evtd)
 }
 
 
+/*--- Change team ---*/
+function OnSwitchTeam(GFxClikWidget.EventData evtd)
+{
+	PC.SwitchTeam();
+	ConsoleCommand("quit");
+}
+
+
 /*--- Quit to menu ---*/
 function OnExit(GFxClikWidget.EventData evtd)
 {
@@ -290,6 +301,7 @@ function OnExit(GFxClikWidget.EventData evtd)
 defaultproperties
 {
 	// HUD Settings
+	bFirstConnection = true;
 	MovieInfo=SwfMovie'DV_CoreUI.HUD'
 	
 	// Bindings

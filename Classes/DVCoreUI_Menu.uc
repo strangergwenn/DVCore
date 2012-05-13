@@ -26,6 +26,9 @@ var GFxClikWidget 						MenuListMC;
 var GFxClikWidget 						ServerListMC;
 var GFxClikWidget 						ResListMC;
 
+var GFxClikWidget 						LeaderboardMC;
+var GFxClikWidget 						Leaderboard2MC;
+
 var GFxClikWidget 						ServerConnect;
 var GFxClikWidget 						PlayerConnect;
 var GFxClikWidget 						SaveVideoSettings;
@@ -186,8 +189,11 @@ function OpenConnectionDialog(bool bShowRegister)
 		Text[6] = "Retour";
 		SetPopup(Text, 2, 3);
 	}
-	SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
-	SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
+	if (PC != None)
+	{
+		SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
+		SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
+	}
 }
 
 
@@ -217,7 +223,7 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	// Checking
 	if (Len(Result[0]) < 4 || (bIsInRegisterPopup && Len(Result[3]) < 10))
 		SetPopupStatus("Données incorrectes");
-	else if (Result[1] != Result[2])
+	else if (bIsInRegisterPopup && Result[1] != Result[2])
 		SetPopupStatus("Mots de passe différents");
 	
 	// Actions
@@ -277,6 +283,7 @@ simulated function GetStatsContent()
 	SetLabel("StatGenTitle1", "Statistiques globales", true);
 	SetLabel("StatGenTitle2", "Dernière partie", true);
 	SetLabel("StatGenTitle3", "DeepVoid rank", true);
+	SetLabel("StatGenTitle4", "Meilleurs joueurs", true);
 	
 	// Stat block 1
 	SetLabel("StatTitle1", "Efficacité", true);
@@ -310,6 +317,27 @@ simulated function GetStatsContent()
 		RankInfo = "Vous n'êtes pas classé";
 	SetLabel("Stat40", RankInfo, false);
 	SetLabel("Stat41", "Vous avez " $ string(GStats.Points) $ " points", false);
+}
+
+
+/*--- Get a generic leaderboard structure ---*/
+simulated function UpdateLeaderboard(GFxObject List, bool bIsLocal)
+{
+	local byte 			i;
+	local GFxObject 	TempObj;
+	local GFxObject 	DataProvider;
+	local array<string>	PlayerList;
+	
+	PlayerList = PC.GetBestPlayers(bIsLocal);
+	DataProvider = List.GetObject("dataProvider");
+	for (i = 0; i < PlayerList.Length; i++)
+	{
+		TempObj = CreateObject("Object");
+		TempObj.SetString("label", PlayerList[i]);
+		DataProvider.SetElementObject(i, TempObj);
+	}
+	List.SetObject("dataProvider", DataProvider);
+	List.SetInt("selectedIndex", (bIsLocal ? PC.LocalLeaderBoardOffset - 1 : 0));
 }
 
 
@@ -415,6 +443,14 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			UpdateMenuList();
 			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
 			break;
+		case ('Leaderboard'):
+			LeaderboardMC = GFxClikWidget(Widget);
+			UpdateLeaderboard(LeaderboardMC, false);
+			break;
+		case ('Leaderboard2'):
+			Leaderboard2MC = GFxClikWidget(Widget);
+			UpdateLeaderboard(Leaderboard2MC, true);
+			break;
 		
 		// Buttons
 		case ('OpenServerButton'):
@@ -519,4 +555,7 @@ defaultproperties
 	WidgetBindings(10)={(WidgetName="OptionCB1",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(11)={(WidgetName="OptionCB2",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(12)={(WidgetName="OptionCB3",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(13)={(WidgetName="Leaderboard",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(14)={(WidgetName="Leaderboard2",WidgetClass=class'GFxClikWidget')}
 }

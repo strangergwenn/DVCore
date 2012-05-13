@@ -67,6 +67,7 @@ function DisplayResponse (bool bSuccess, string Msg)
 function HidePopup()
 {
 	HudMovie.HidePopup(true);
+	HudMovie.bIsInRegisterPopup = false;
 }
 
 

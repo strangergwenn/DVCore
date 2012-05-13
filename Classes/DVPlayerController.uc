@@ -16,6 +16,9 @@ var (DVPC) const SoundCue			HitSound;
 
 var (DVPC) const float 				ScoreLength;
 
+var (DVPC) const int 				LeaderBoardLength;
+var (DVPC) const int 				LocalLeaderBoardOffset;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -33,6 +36,9 @@ var byte							WeaponListLength;
 var bool							bLocked;
 
 var string 							DebugField;
+
+var array<string>					LeaderBoardStructure;
+var array<string>					LeaderBoardStructure2;
 
 
 /*----------------------------------------------------------
@@ -68,7 +74,11 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 {
 	// Standard response if useful
 	if (myHUD.IsA('DVHUD_Menu'))
-		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);	
+		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);
+	
+	// Get back the stats
+	if (Command == "CONNECT")
+		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 }
 
 
@@ -100,6 +110,20 @@ reliable client event TcpGetStats(array<string> Data)
 				GStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
 			}
 			break;
+	}
+}
+
+
+/*--- Player rank info ---*/
+reliable client event AddBestPlayer(string PlayerName, int Rank, int PlayerPoints, bool bIsLocal)
+{
+	if (bIsLocal)
+	{
+		LeaderBoardStructure.AddItem(PlayerName $ " : " $ PlayerPoints $ " points");
+	}
+	else
+	{
+		LeaderBoardStructure2.AddItem(PlayerName $ " : " $ PlayerPoints $ " points");
 	}
 }
 
@@ -475,7 +499,7 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetBoolValue("bHasLeft", bLeaving);
-	LStats.SetIntValue("Rank", GetLocalRank() - (bLeaving ? 1 : 2)); // Pre-game or leaving deaths
+	LStats.SetIntValue("Rank", GetLocalRank());
 	LStats.SaveConfig();
 	
 	MasterServerLink.SaveGame(
@@ -529,6 +553,21 @@ simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
 }
 
 
+/*--- Get the leaderboard structure ---*/
+simulated function array<string> GetBestPlayers(bool bIsLocal)
+{
+	local byte i;
+	local array<string> Result;
+	
+	for (i = 0; i < LeaderBoardLength; i++)
+	{
+		Result.AddItem((bIsLocal?i+142:i+1) $ ". " $ "Player" $ " : " $ ((bIsLocal?1561:6373)-173*i) $ " pts");
+	}
+	
+	return Result;
+}
+
+
 /*----------------------------------------------------------
 	States
 ----------------------------------------------------------*/
@@ -556,6 +595,10 @@ state RoundEnded
 defaultproperties
 {
 	bLocked=true
+	
 	ScoreLength=4.0
+	LeaderBoardLength=10
+	LocalLeaderBoardOffset=4
+
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
 }

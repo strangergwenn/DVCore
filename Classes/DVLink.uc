@@ -56,7 +56,6 @@ simulated function ConnectToMaster(string Username, string Password)
 	Params.AddItem(Username);
 	Params.AddItem(Password);
 	SendServerCommand("CONNECT", Params, false);
-	GetStats();
 }
 
 
@@ -114,13 +113,15 @@ simulated function GetServers(optional string GameName, optional string MapName)
 
 
 /*--- Get the best players ---*/
-simulated function GetLeaderboard(int Count)
+simulated function GetLeaderboard(int PlayerCount, int LocalOffset)
 {
 	local array<string> Params;
 	
 	`log("GetLeaderboard");
-	Params.AddItem(""$Count);
+	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
+	Params.AddItem(""$LocalOffset);
+	SendServerCommand("LOC_PLAYERS", Params, false);
 }
 
 
@@ -232,6 +233,7 @@ simulated function ProcessACK(string Param)
 		case "CONNECT":
 			CurrentID = int(Param);
 			bIsConnected = true;
+			GetStats();
 			break;
 	 }
 	SignalController(LastCommandSent, true, "Requête validée !");
@@ -318,8 +320,12 @@ event ReceivedLine(string Line)
 			SignalController(LastCommandSent, false, "Requête refusée");
 			break;
 		
-		// Leaderboard
+		// Leaderboards
 		case "TOP_PLAYER":
+			PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
+			break;
+		case "LOC_PLAYER":
+			PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
 			break;
 		
 		// Server list
