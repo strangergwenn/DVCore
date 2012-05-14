@@ -163,15 +163,10 @@ function UpdateMapList()
 /*--- Map click ---*/
 function OnMapItemClick(GFxClikWidget.EventData ev)
 {
-    local GFxObject button;//, TempIcon;
+    local GFxObject button;
     button = ev._this.GetObject("itemRenderer");
 	ServerURL = button.GetString("label");
 	ServerConnect.SetBool("enabled", true);
-	
-	/*
-	TempIcon = button.GetObject("imageLoader");
-	TempIcon.SetString("source", "img://IcoThumbs.Textures.TX_THUMBNAIL_Level01");
-	*/
 }
 
 
@@ -348,7 +343,7 @@ simulated function GetStatsContent()
 	SetAlignedLabel("Stat31", "Rang final", string(LStats.Rank));
 	SetAlignedLabel("Stat32", "Victimes", string(LStats.Kills));
 	SetAlignedLabel("Stat33", "Morts", string(LStats.Deaths));
-	SetAlignedLabel("Stat34", "Tirs effecté", string(LStats.ShotsFired));
+	SetAlignedLabel("Stat34", "Tirs effectués", string(LStats.ShotsFired));
 	
 	// Stat block 4
 	if (GStats.Rank > 0)
@@ -415,7 +410,7 @@ simulated function GetOptionsContent()
 	for (i = 0; i < KeyListData.Length; i++)
 	{
 		Key = DVPlayerInput(PC.PlayerInput).GetKeyBinding(BindListData[i]);
-		SetLabel("Key" $(i + 1), Key $ " - " $ KeyListData[i], false);
+		SetLabel("Key" $(i + 1), Key $ "   |   " $ KeyListData[i], false);
 	}
 }
 
@@ -451,7 +446,7 @@ function EditKey(GFxClikWidget.EventData ev)
 	{
 	    button = ev._this.GetObject("target");
 	    
-		KeyBeingEdited = (IsInArray(Split(button.GetString("text"), " - ", true), KeyListData, true) + 1);
+		KeyBeingEdited = (IsInArray(Split(button.GetString("text"), "   |   ", true), KeyListData, true) + 1);
 		SetLabel("Key" $KeyBeingEdited, "Attente de la nouvelle touche", false);
 		
 		bIsKeyEditing = true;
@@ -465,7 +460,7 @@ function SetKeyPressed(string KeyName)
 {
 	if (bIsKeyEditing)
 	{
-		SetLabel("Key" $KeyBeingEdited, KeyName $ " - " $KeyListData[KeyBeingEdited - 1], false);
+		SetLabel("Key" $KeyBeingEdited, KeyName $ "   |   " $KeyListData[KeyBeingEdited - 1], false);
 		bIsKeyEditing = false;
 		bCaptureInput = true;
 	}
@@ -506,7 +501,7 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	for (i = 0; i < KeyListData.Length; i++)
 	{
 		button = GetSymbol("Key" $(i + 1));
-		res = Left(button.GetString("text"), InStr(button.GetString("text"), " - "));
+		res = Left(button.GetString("text"), InStr(button.GetString("text"), "   |   "));
 		DVPlayerInput(PC.PlayerInput).SetKeyBinding(name(res), BindListData[i]);
 	}
 }

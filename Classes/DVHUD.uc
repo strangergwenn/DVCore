@@ -54,7 +54,7 @@ event PostRender()
 	TI1 = myOwner.EnemyTeamInfo;
 	if (TI0 != None && TI1 != None)
 	{
-		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore());
+		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore(), DVGame(WorldInfo.Game).MaxScore);
 	}
 	
 	// End

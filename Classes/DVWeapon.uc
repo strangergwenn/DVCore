@@ -302,10 +302,13 @@ simulated function FireAmmunition()
 	PC = DVPlayerController(Instigator.Controller);
 	if (PC == None) return;
 	P = DVPawn(Owner);
-	if (bWeaponEmpty)
-		return;
 	
 	// Empty ammo ?
+	if (bWeaponEmpty)
+	{
+		PlaySound(WeaponEmptySound, false, true, false, P.Location);
+		return;
+	}
 	else if (AmmoCount <= 0)
 	{
 		PlaySound(WeaponEmptySound, false, true, false, P.Location);

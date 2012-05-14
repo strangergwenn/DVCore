@@ -23,9 +23,13 @@ var GFxClikWidget 			ScoreListBlue;
 
 var GFxObject 				AmmoMC;
 var GFxObject 				ChatMC;
-var GFxObject 				ScoreMC;
 var GFxObject 				HealthMC;
 var GFxObject 				ChatTextMC;
+
+var GFxObject 				Score1MC;
+var GFxObject 				Score2MC;
+var GFxObject 				Progress1MC;
+var GFxObject 				Progress2MC;
 
 var string 					NewWeaponName;
 
@@ -44,11 +48,15 @@ simulated function InitParts()
 	
 	// Get symbols
 	AmmoMC = GetSymbol("Ammo");
-	ScoreMC = GetSymbol("Score");
 	Banner = GetSymbol("Banner");
 	ChatMC = GetSymbol("ChatBox");
 	HealthMC = GetSymbol("Health");
 	ChatTextMC = GetSymbol("ChatInput");
+	
+	Score1MC = GetSymbol("T0.Score");
+	Score2MC = GetSymbol("T1.Score");
+	Progress1MC = GetSymbol("T0.Progress");
+	Progress2MC = GetSymbol("T1.Progress");
 	
 	// Various init
 	ScoreListBlue.SetVisible(false);
@@ -132,9 +140,12 @@ simulated function UpdateChat(string text)
 
 
 /*--- Score update ---*/
-simulated function UpdateScore(int s1, int s2)
+simulated function UpdateScore(int s1, int s2, int max)
 {
-	ScoreMC.SetText(""$ s1 $" points - Equipe adverse : "$ s2 $ " points");
+	Score1MC.SetText("" $ s1 @ "points sur "@max);
+	Score2MC.SetText("" $ s1 @ "points sur "@max);
+	Progress1MC.GotoAndStopI(100.0 * float(s1 / max));
+	Progress2MC.GotoAndStopI(100.0 * float(s2 / max));
 }
 
 
@@ -232,12 +243,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	switch(WidgetName)
 	{
 		// Buttons
-		case ('Resume'):
-			ResumeButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnResume);
-			ResumeButtonMC.SetVisible(false);
-			SetWidgetLabel("Resume", "Reprendre", false);
-			break;
-		case ('QuitMenu'):
+		case ('ExitMenu'):
 			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
 			SetWidgetLabel("QuitMenu", "Quitter la partie", false);
 			break;
@@ -342,10 +348,9 @@ defaultproperties
 	MovieInfo=SwfMovie'DV_CoreUI.HUD'
 	
 	// Bindings
-	WidgetBindings(1)={(WidgetName="Resume",	WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(2)={(WidgetName="Restart",	WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(3)={(WidgetName="SwitchTeam",WidgetClass=class'GFxClikWidget')}
-	WidgetBindings(4)={(WidgetName="QuitMenu",	WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(4)={(WidgetName="ExitMenu",	WidgetClass=class'GFxClikWidget')}
 	
 	WidgetBindings(5)={(WidgetName="WeaponList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(6)={(WidgetName="ScoreListRed",WidgetClass=class'GFxClikWidget')}
