@@ -48,9 +48,9 @@ simulated function InitParts()
 	// Get symbols
 	AmmoMC = GetSymbol("Ammo");
 	Banner = GetSymbol("Banner");
-	ChatMC = GetSymbol("ChatBox");
+	ChatMC = GetSymbol("ChatBox.Text");
 	HealthMC = GetSymbol("Health");
-	ChatTextMC = GetSymbol("ChatInput");
+	ChatTextMC = GetSymbol("ChatBox.Input");
 	
 	Score1MC = GetSymbol("T0.Score");
 	Score2MC = GetSymbol("T1.Score");
@@ -73,14 +73,14 @@ simulated function InitParts()
 /*--- Health bar ---*/
 simulated function UpdateHealth(int amount)
 {
-	//HealthMC.GotoAndStopI(amount);
+	HealthMC.GotoAndStopI(amount);
 }
 
 
 /*--- Ammo bar ---*/
 simulated function UpdateAmmo(int amount)
 {
-	//AmmoMC.GotoAndStopI(amount);
+	AmmoMC.GotoAndStopI(amount);
 }
 
 
