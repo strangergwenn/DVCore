@@ -306,7 +306,6 @@ simulated function FireAmmunition()
 	// Empty ammo ?
 	if (bWeaponEmpty)
 	{
-		PlaySound(WeaponEmptySound, false, true, false, P.Location);
 		return;
 	}
 	else if (AmmoCount <= 0)

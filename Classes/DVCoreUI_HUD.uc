@@ -46,21 +46,19 @@ simulated function InitParts()
 	super.InitParts();
 	
 	// Get symbols
-	AmmoMC = GetSymbol("Ammo");
-	Banner = GetSymbol("Banner");
-	ChatMC = GetSymbol("ChatBox.Text");
-	HealthMC = GetSymbol("Health");
-	ChatTextMC = GetSymbol("ChatBox.Input");
-	
-	Score1MC = GetSymbol("T0.Score");
-	Score2MC = GetSymbol("T1.Score");
-	Progress1MC = GetSymbol("T0.Progress");
-	Progress2MC = GetSymbol("T1.Progress");
+	Banner = 		GetSymbol("Banner");
+	AmmoMC = 		GetSymbol("InfoBox.Ammo");
+	HealthMC = 		GetSymbol("InfoBox.Health");
+	ChatMC = 		GetSymbol("ChatBox.Text");
+	ChatTextMC = 	GetSymbol("ChatBox.Input");
+	Score1MC = 		GetSymbol("T0.Score");
+	Score2MC = 		GetSymbol("T1.Score");
+	Progress1MC = 	GetSymbol("T0.Progress");
+	Progress2MC = 	GetSymbol("T1.Progress");
 	
 	// Various init
 	ScoreListBlue.SetVisible(false);
 	ScoreListRed.SetVisible(false);
-	ChatTextMC.SetVisible(false);
 	bCaptureInput = false;
 	ChatMC.SetText("");
 }
@@ -90,9 +88,8 @@ simulated function StartTalking()
 	if (!bChatting)
 	{
 		PlayUISound(ClickSound);
-		ChatTextMC.SetVisible(true);
-		ChatTextMC.SetString("text", " ");
 		ChatTextMC.SetBool("focused", true);
+		ChatTextMC.SetString("text", "");
 		bCaptureInput = true;
 		bChatting = true;
 	}
@@ -108,13 +105,14 @@ simulated function SendChatMessage()
 	if (bChatting)
 	{
 		PlayUISound(ClickSound);
-		ChatTextMC.SetVisible(false);
-		ChatTextMC.SetBool("focused", false);
 		bChatting = false;
 		
 		text = ChatTextMC.GetString("text");
 		if (text != "")
 			ConsoleCommand("Say"@text);
+		
+		ChatTextMC.SetString("text", "...");
+		ChatMC.SetBool("focused", true);
 	}
 }
 
