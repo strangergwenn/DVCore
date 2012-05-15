@@ -775,8 +775,6 @@ defaultproperties
 	// Zoom
 	bZoomed=false
 	DefaultFOV=90
-	ZoomedGroundSpeed=300
-	UnzoomedGroundSpeed=750
 	
 	// Weapons
 	EyeSocket=EyeSocket
@@ -787,19 +785,11 @@ defaultproperties
 	BloodDecalPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodDecal'
 	LargeHitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit_Large'
 	
-	// Jumping
-	JumpZ=620.0
-	AirSpeed=850.0
-	MaxJumpHeight=100.0
-	HeadshotMultiplier=1.5
-	JumpDamageMultiplier=1.3
-	
 	// Gameplay
 	bDVLog=false
 	bWasHS=false
 	bJumping=false
 	RecoilAngle=0.0
-	RecoilLength=7000.0
 	bHasGotTeamColors=false
 	UserName="SOMEONE"
 	KillerName="HIMSELF"
