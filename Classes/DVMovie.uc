@@ -378,6 +378,16 @@ function GFxObject GetSymbol(string SymbolName)
 }
 
 
+/*--- Get a list item name ---*/
+function string GetListItemClicked(GFxClikWidget.EventData ev)
+{
+	local GFxObject button;
+	
+	button = ev._this.GetObject("itemRenderer");
+	return button.GetString("label");
+}
+
+
 /*--- Get an event-connected widget ---*/
 function GFxClikWidget GetLiveWidget(GFxObject Widget, name type, delegate<GFxClikWidget.EventListener> listener)
 {

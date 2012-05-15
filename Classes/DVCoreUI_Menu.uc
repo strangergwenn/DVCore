@@ -114,13 +114,7 @@ function string FormatServerInfo(string ServerName, string Level, string Game, i
 /*--- Server selection ---*/
 function OnServerItemClick(GFxClikWidget.EventData ev)
 {
-    local GFxObject button;
-    local string ServerString;
-    
-    button = ev._this.GetObject("itemRenderer");
-	ServerString = button.GetString("label");
-	
-	ServerURL = IPList[ServerList.Find(ServerString)];
+	ServerURL = IPList[ServerList.Find(GetListItemClicked(ev))];
 	ServerConnect.SetBool("enabled", true);
 }
 
@@ -163,9 +157,7 @@ function UpdateMapList()
 /*--- Map click ---*/
 function OnMapItemClick(GFxClikWidget.EventData ev)
 {
-    local GFxObject button;
-    button = ev._this.GetObject("itemRenderer");
-	ServerURL = button.GetString("label");
+	ServerURL = GetListItemClicked(ev);
 	ServerConnect.SetBool("enabled", true);
 }
 
@@ -174,7 +166,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 function OpenServer(GFxClikWidget.EventData evtd)
 {
 	PlayUISound(ClickSound);
-	ConsoleCommand("open " $ ServerURL);
+	ConsoleCommand("open " $ ServerURL $ "?game=");
 }
 
 
@@ -520,19 +512,16 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	{
 		// Lists
 		case ('MapList'):
-			MapListMC = GFxClikWidget(Widget);
+			MapListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnMapItemClick);
 			UpdateMapList();
-			MapListMC.AddEventListener('CLIK_itemClick', OnMapItemClick);
 			break;
 		case ('ServerList'):
-			ServerListMC = GFxClikWidget(Widget);
+			ServerListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnServerItemClick);
 			UpdateServerList();
-			ServerListMC.AddEventListener('CLIK_itemClick', OnServerItemClick);
 			break;
 		case ('MenuList'):
-			MenuListMC = GFxClikWidget(Widget);
+			MenuListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnMenuItemClick);
 			UpdateMenuList();
-			MenuListMC.AddEventListener('CLIK_itemClick', OnMenuItemClick);
 			break;
 		case ('Leaderboard'):
 			LeaderboardMC = GFxClikWidget(Widget);

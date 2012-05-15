@@ -33,7 +33,6 @@ var GFxObject 				Progress2MC;
 
 var string 					NewWeaponName;
 
-var bool					bFirstConnection;
 var bool					bChatting;
 
 
@@ -70,18 +69,6 @@ simulated function InitParts()
 /*----------------------------------------------------------
 	Game methods
 ----------------------------------------------------------*/
-
-/*--- Respawn menu ---*/
-reliable client simulated function OpenRespawnMenu()
-{
-	SetGamePaused();
-	bChatting = false;
-	bCaptureInput = true;
-	Scene.GotoAndPlayI(2);
-	Banner = GetSymbol("Banner");
-	OpenPlayerList(PC.GetPlayerList());
-}
-
 
 /*--- Health bar ---*/
 simulated function UpdateHealth(int amount)
@@ -153,17 +140,10 @@ simulated function UpdateScore(int s1, int s2, int max)
 reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 {
 	`log("OpenPlayerList");
-	
 	ScoreListRed.SetVisible(true);
 	ScoreListBlue.SetVisible(true);
 	FillPlayerList(ScoreListRed, PRList, 0);
 	FillPlayerList(ScoreListBlue, PRList, 1);
-	
-	// Button hide
-	if (SwitchTeamButtonMC != None && bFirstConnection)
-	{
-		SwitchTeamButtonMC.SetVisible(false);
-	}
 }
 
 
@@ -176,6 +156,10 @@ reliable client function ClosePlayerList()
 }
 
 
+/*----------------------------------------------------------
+	Data
+----------------------------------------------------------*/
+
 /*--- PLayer list filling ---*/
 reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> PRList, byte TeamIndex)
 {
@@ -183,18 +167,15 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 	local GFxObject TempObj;
 	local GFxObject DataProvider;
 	
-	// Init
-	j = 0;
-	`log("FillPlayerList");
-	DataProvider = List.GetObject("dataProvider");
-	
 	// Player filtering
+	j = 0;
+	DataProvider = List.GetObject("dataProvider");
 	for (i = 0; i < PRList.Length; i++)
 	{
 		if (PRList[i].Team.TeamIndex == TeamIndex)
 		{
 			TempObj = CreateObject("Object");
-			TempObj.SetString("label", PRList[i].PlayerName $ " : "$ PRList[i].KillCount $ " victimes");
+			TempObj.SetString("label", PRList[i].PlayerName $ " : "$ PRList[i].KillCount $ " K, "$ PRList[i].DeathCount $ " D");
 			DataProvider.SetElementObject(j, TempObj);
 			j++;
 		}
@@ -224,12 +205,6 @@ reliable client function UpdateWeaponList()
 	// List update
 	WeaponListMC.SetObject("dataProvider", DataProvider);
 	WeaponListMC.SetFloat("rowCount", i);
-	
-	// Button hide
-	if (bFirstConnection)
-	{
-		SwitchTeamButtonMC.SetVisible(false);
-	}
 }
 
 
@@ -245,16 +220,12 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Buttons
 		case ('ExitMenu'):
 			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
-			SetWidgetLabel("QuitMenu", "Quitter la partie", false);
-			break;
-		case ('Restart'):
-			RestartButtonMC = GFxClikWidget(Widget);
-			RestartButtonMC.SetVisible(false);
-			SetWidgetLabel("Restart", "Respawn", false);
+			SetWidgetLabel("ExitMenu", "Quitter la partie", false);
 			break;
 		case ('SwitchTeam'):
 			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnSwitchTeam);
 			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
+			SwitchTeamButtonMC.SetVisible(false);
 			break;
 		
 		/// Lists
@@ -269,8 +240,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			ScoreListBlue = GFxClikWidget(Widget);
 			break;
 			
-		default:
-			return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
+		default: return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
 	}
 	return true;
 }
@@ -279,14 +249,11 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 /*--- Weapon selection ---*/
 function OnWeaponClick(GFxClikWidget.EventData ev)
 {
-	// init
 	local int i;
-	local GFxObject button;
 	local class<DVWeapon> NewWeapon;
-	button = ev._this.GetObject("itemRenderer");
-	NewWeaponName = button.GetString("label");
 	
 	// List data usage
+	NewWeaponName = GetListItemClicked(ev);
 	for (i = 0; i < PC.WeaponListLength; i++)
 	{
 		if (InStr(NewWeaponName, PC.WeaponList[i].name) != -1)
@@ -299,8 +266,19 @@ function OnWeaponClick(GFxClikWidget.EventData ev)
 	SetGameUnPaused();
 	PC.HUDRespawn(NewWeapon);
 	bCaptureInput = false;
-	bFirstConnection = false;
-	//SwitchTeamButtonMC.SetVisible(true);
+}
+
+
+/*--- Respawn menu ---*/
+reliable client simulated function OpenRespawnMenu()
+{
+	SetGamePaused();
+	bChatting = false;
+	bCaptureInput = true;
+	Scene.GotoAndPlayI(2);
+	Banner = GetSymbol("Banner");
+	OpenPlayerList(PC.GetPlayerList());
+	SwitchTeamButtonMC.SetVisible(true);
 }
 
 
@@ -309,6 +287,7 @@ function TogglePause()
 {
 	SetGamePaused();
 	bCaptureInput = true;
+	SwitchTeamButtonMC.SetVisible(true);
 }
 
 
@@ -323,15 +302,14 @@ function OnResume(GFxClikWidget.EventData evtd)
 /*--- Change team ---*/
 function OnSwitchTeam(GFxClikWidget.EventData evtd)
 {
-	PC.SwitchTeam();
 	ConsoleCommand("quit");
+	PC.SwitchTeam();
 }
 
 
 /*--- Quit to menu ---*/
 function OnExit(GFxClikWidget.EventData evtd)
 {
-	`log("Loading...");
 	PC.SaveGameStatistics(false, true);
 	ConsoleCommand("open UDKFrontEndMap?game=DVCore.DVGame_Menu");
 }
@@ -343,12 +321,8 @@ function OnExit(GFxClikWidget.EventData evtd)
 
 defaultproperties
 {
-	// HUD Settings
-	bFirstConnection = true;
 	MovieInfo=SwfMovie'DV_CoreUI.HUD'
 	
-	// Bindings
-	WidgetBindings(2)={(WidgetName="Restart",	WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(3)={(WidgetName="SwitchTeam",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(4)={(WidgetName="ExitMenu",	WidgetClass=class'GFxClikWidget')}
 	
