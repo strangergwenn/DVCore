@@ -305,9 +305,7 @@ defaultproperties
 {
 	// Settings
 	bTeamGame=true
-	MaxScore=5
 	EndGameTick=0.5
-	RestartTimer=10.0
 	
 	// Classes
 	HUDType=class'DVHUD'

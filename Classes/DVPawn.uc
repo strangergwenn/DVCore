@@ -51,7 +51,6 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
-var string 							DebugField;
 var string			 				KillerName;
 var string							UserName;
 
@@ -363,15 +362,9 @@ simulated function rotator GetSmoothedRotation()
 	
 	// Smoothing calculation
 	SmoothRot.Pitch = (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
-	SmoothRot.Yaw = (GetCorrectedFloat(BaseAim.Yaw) - CurRot.Yaw) ;
-	
-	// Very curious things happen here, should be <~ 1000
-	if (abs(SmoothRot.Yaw) > 10000) SmoothRot.Yaw = 0;
-	
-	SmoothRot.Yaw *= SmoothingFactor;
+	SmoothRot.Yaw = (BaseAim.Yaw - CurRot.Yaw) ;
 	SmoothRot.Roll = (CurRot.Pitch - GetCorrectedFloat(BaseAim.Pitch)) * SmoothingFactor;
 	
-	//DebugField=""$ SmoothRot.Yaw $ " = " $ GetCorrectedFloat(BaseAim.Yaw) $ " - " $ CurRot.Yaw;
 	// Final checks
 	if (abs(GetCorrectedFloat(BaseAim.Pitch)) > 12000)
 		return rotator(vect(0, 0, 0));

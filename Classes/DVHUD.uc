@@ -50,17 +50,21 @@ event PostRender()
 	}
 	
 	// Score
-	TI0 = DVTeamInfo(myOwner.PlayerReplicationInfo.Team);
-	TI1 = myOwner.EnemyTeamInfo;
-	if (TI0 != None && TI1 != None)
+	if (myOwner.PlayerReplicationInfo.Team != None)
 	{
-		HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore(), DVGame(WorldInfo.Game).MaxScore);
+		TI0 = DVTeamInfo(myOwner.PlayerReplicationInfo.Team);
+		TI1 = myOwner.EnemyTeamInfo;
+		if (TI0 != None && TI1 != None)
+		{
+			HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore(), myOwner.GetTargetScore());
+		}
 	}
 	
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
-	//PutShadedText(BlueColor, DVPawn(myOwner.Pawn).DebugField, 20, 30);
+	
+	//PutShadedText(BlueColor, DVPawn(myOwner.Pawn).DebugField, 20, 100);
 }
 
 

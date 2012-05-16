@@ -35,8 +35,6 @@ var byte							WeaponListLength;
 
 var bool							bLocked;
 
-var string 							DebugField;
-
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
@@ -411,6 +409,17 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 	if (bShouldKill && Pawn != None)
 		Pawn.Destroy();
 	UserChoiceWeapon = NewWeapon;
+}
+
+
+/*--- Return the server score target ---*/
+reliable client simulated function int GetTargetScore()
+{
+	return ServerGetTargetScore();
+}
+reliable server simulated function int ServerGetTargetScore()
+{
+	return DVGame(WorldInfo.Game).MaxScore;
 }
 
 
