@@ -99,6 +99,14 @@ simulated exec function SetKeyBinding(name BindName, string Command)
 }
 
 
+/*--- Permit to lock movement when stuck ---*/
+simulated function PostProcessInput(float DeltaTime)
+{
+	if (bShouldStop && aBaseY > 0.0)
+		aBaseY = 0.0;
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/

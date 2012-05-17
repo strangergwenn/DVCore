@@ -36,6 +36,7 @@ var int								MaxScore;
 var byte							WeaponListLength;
 
 var bool							bLocked;
+var bool							bShouldStop;
 
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
@@ -188,6 +189,31 @@ exec function TeamTalk()
 {}
 
 
+/*--- Tick tick tick ---*/
+event PlayerTick(float DeltaTime)
+{
+	local vector StartTrace, EndTrace, HitLocation, HitNormal;
+	local rotator TraceDir;
+	local DVPawn P;
+	local Actor Target;
+	
+	if (Pawn != None)
+	{
+		// Data
+		P = DVPawn(Pawn);
+		P.Mesh.GetSocketWorldLocationAndRotation(P.EyeSocket, StartTrace, TraceDir);
+		EndTrace = DVWeapon(P.Weapon).GetEffectLocation();
+		
+		// Should we lock input ?
+		Target = None;
+		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
+		bShouldStop = (Target != None);
+		DebugField = "" @bShouldStop;
+	}
+	super.PlayerTick(DeltaTime);
+}
+
+
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
@@ -262,7 +288,7 @@ unreliable client simulated function PlayHitSound()
 simulated function LockCamera(bool NewState)
 {
 	bLocked = NewState;
-	IgnoreMoveInput(NewState);
+	IgnoreMoveInput(bLocked);
 }
 
 
