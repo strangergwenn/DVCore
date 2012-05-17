@@ -88,7 +88,7 @@ simulated event ReplicatedEvent(name VarName)
 	if ( VarName == 'TeamLight')
 	{
 		if (PlayerReplicationInfo.Team != None)
-			UpdateTeamColor(DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex);
+			UpdateTeamColor(GetTeamIndex());
 		return;
 	}
 	else
@@ -139,6 +139,16 @@ simulated function UpdateTeamColor(byte TeamIndex)
 		}
 	}
 	`log("Updated "$ self $" color with index " $ TeamIndex);
+}
+
+
+/*--- Team ID ---*/
+simulated function byte GetTeamIndex()
+{
+	if (PlayerReplicationInfo != None)
+		return DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex;
+	else
+		return 0;
 }
 
 
@@ -531,9 +541,12 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (InstigatedBy != None)
 	{
 		Attacker = DVPlayerController(InstigatedBy);
-		KillerName = Attacker.GetPlayerName();
-		if (Attacker.Pawn != None)
-			Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
+		if (Attacker != None)
+		{
+			KillerName = Attacker.GetPlayerName();
+			if (Attacker.Pawn != None)
+				Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
+		}
 	}
 	if (Controller != None)
 		UserName = DVPlayerController(Controller).GetPlayerName();
@@ -788,7 +801,7 @@ defaultproperties
 	// Default
 	DefaultFOV=90
 	RecoilAngle=0.0
-	UserName="SOMEONE"
-	KillerName="HIMSELF"
+	UserName="Quelqu'un"
+	KillerName="lui-même"
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

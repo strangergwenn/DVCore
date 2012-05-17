@@ -112,8 +112,11 @@ function OnRender(Canvas C)
 	C.SetOrigin(TextOffsetX, TextOffsetY);
 	
 	offset += DrawLine(C, MarkerText1, offset);
-	offset += DrawLine(C, "KILLED BY", offset);
-	offset += DrawLine(C, MarkerText2, offset);
+	if (MarkerText2 != "")
+	{
+		offset += DrawLine(C, "tué par", offset);
+		offset += DrawLine(C, MarkerText2, offset);
+	}
 	
 	CanvasTexture.bNeedsUpdate = true;
 }

@@ -15,30 +15,25 @@ class DVTurret extends Pawn
 	Public attributes
 ----------------------------------------------------------*/
 
+var (DVTurret) const  ParticleSystem		MuzzleFlashEmitter;
 var (DVTurret) const SoundCue 				FireSound;
 var (DVTurret) const class<Projectile> 		ProjClass;
 var (DVTurret) const int 					RoundsPerSec;
 
+var (DVTurret) const byte 					TeamIndex;
+
 var (DVTurret) const name 					GunControllerName;
 var (DVTurret) const name 					MainControllerName;
 var (DVTurret) const name 					FireSocket;
+
+var (DVTurret) const string					KillString;
 
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
-struct TurretEmitterGroup
-{
-	var() ParticleSystem					MuzzleFlashEmitter;
-	var() float 							MuzzleFlashDuration;
-	var() float 							MuzzleFlashSize;
-};
-
 var DynamicLightEnvironmentComponent 		LightEnvironment;
-
-var TurretEmitterGroup 						TurretEmitters;
-var ParticleSystemComponent 				MuzzleFlashEffect;
 
 var SkelControlSingleBone 					GunController;
 var SkelControlSingleBone 					MainController;
@@ -80,20 +75,11 @@ event PostBeginPlay()
 
 	GunController=SkelControlSingleBone(Mesh.FindSkelControl(GunControllerName));
 	MainController=SkelControlSingleBone(Mesh.FindSkelControl(MainControllerName));
-
 	Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
-	MuzzleFlashEffect.DeactivateSystem();
-	MuzzleFlashEffect.SetTemplate(TurretEmitters.MuzzleFlashEmitter);
-	MuzzleFlashEffect.SetScale(TurretEmitters.MuzzleFlashSize);
-	Mesh.AttachComponentToSocket(MuzzleFlashEffect, FireSocket);
 }
 
 
 /*--- Firing management ---*/
-function StopMuzzleFlash()
-{
-	MuzzleFlashEffect.DeactivateSystem();
-}
 function TimedFire()
 {
 	local Projectile Proj;
@@ -102,22 +88,25 @@ function TimedFire()
 	if(Proj != None && !Proj.bDeleteMe )
 	{
 		Proj.Init(Vector(FireRotation));
-		if(TurretEmitters.MuzzleFlashEmitter != None)
+		if(MuzzleFlashEmitter != None)
 		{
-			MuzzleFlashEffect.ActivateSystem();
-			SetTimer(TurretEmitters.MuzzleFlashDuration,false,'StopMuzzleFlash');
+			WorldInfo.MyEmitterPool.SpawnEmitter(
+				MuzzleFlashEmitter,
+				FireLocation,
+				FireRotation);
 		}
 		if(FireSound != None)
 			PlaySound(FireSound);
 	}
 }
 
+
 /*----------------------------------------------------------
 	Targeting
 ----------------------------------------------------------*/
 
 /*--- Find the ennemy ---*/
-simulated function bool GetNearestEnnemy (name ClassToFilter)
+simulated function bool GetNearestEnnemy ()
 {
 	// Vars
 	local int 			index, bestIndex, distance, bestDistance;
@@ -127,13 +116,10 @@ simulated function bool GetNearestEnnemy (name ClassToFilter)
 	// All valid pawns
 	foreach WorldInfo.AllPawns(class'Pawn', targetPawn)
 	{
-		//if(FastTrace(targetPawn.Location,FireLocation))
-		//{
-			if(IsValidTarget(targetPawn) && targetPawn.isA(ClassToFilter) && targetPawn.Health > 0)
-			{
-				ResultPawns.AddItem(DVPawn(targetPawn));
-			}
-		//}
+		if(IsValidTarget(targetPawn))
+		{
+			ResultPawns.AddItem(DVPawn(targetPawn));
+		}
 	}
 	if (ResultPawns.Length == 0)
 		return false;
@@ -157,11 +143,13 @@ simulated function bool GetNearestEnnemy (name ClassToFilter)
 }
 
 
-/*--- Friendly fire avoidance ---*/
+/*--- Friendly fire avoidance, not shooting dead things either ---*/
 simulated function bool IsValidTarget(Pawn P)
 {
-	if (P != None && P.isA('DVPawn'))
-		return true;
+	if (P != None && FastTrace(P.Location, FireLocation))
+	{
+		return (P.isA('DVPawn') && P.Health > 0 && TeamIndex != DVPawn(P).GetTeamIndex());
+	}
 	else
 		return false;
 }
@@ -225,7 +213,7 @@ function Tick(Float Delta)
 	{
 		// Target search
 		GElapsedTime = 0.0;
-		bHasAcquiredTarget = GetNearestEnnemy('DVPawn');
+		bHasAcquiredTarget = GetNearestEnnemy();
 
 		// Firing management
 		Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
@@ -238,8 +226,8 @@ function Tick(Float Delta)
 	else GElapsedTime += Delta;
 
 	// Targetting confirmation and timing calculation
-	if (EnemyTarget != None)
-		result = CalculateInterpTime(EnemyTarget.Location + vect(0,0,100));
+	if (EnemyTarget != None && IsValidTarget(EnemyTarget))
+		result = CalculateInterpTime(EnemyTarget.Location);
 	else
 	{
 		ClearTimer('TimedFire');
@@ -260,7 +248,7 @@ function Tick(Float Delta)
 	else						YawRotationAlpha = FClamp(ElapsedTime / YawInterpTime,0.0,1.0);
 	MainController.BoneRotation.Yaw = Lerp(StartYaw, TargetYaw, YawRotationAlpha);
 
-	Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
+	Mesh.GetSocketWorldLocationAndRotation(FireSocket, FireLocation, FireRotation);
 }
 
 
@@ -319,7 +307,8 @@ defaultproperties
 	GunControllerName=GunController
 	MainControllerName=MainController
 	
-	// Physics
+	// Settings
+	Health=65000
 	Physics=PHYS_RigidBody
 	bEdShouldSnap=true
 	bStatic=false
