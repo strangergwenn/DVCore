@@ -114,6 +114,16 @@ simulated function StartTalking()
 }
 
 
+/*--- Score update ---*/
+simulated function UpdateScore(int s1, int s2, int max)
+{
+	Score1MC.SetText("" $ s1 @ "points sur "@max);
+	Score2MC.SetText("" $ s1 @ "points sur "@max);
+	Progress1MC.GotoAndStopI(round(100.0 * (float(s1) / float(max))));
+	Progress2MC.GotoAndStopI(round(100.0 * (float(s2) / float(max))));
+}
+
+
 /*--- Open chat ---*/
 simulated function SendChatMessage()
 {
@@ -139,16 +149,6 @@ simulated function SendChatMessage()
 simulated function UpdateChat(string text)
 {
 	ChatMC.SetText(text);
-}
-
-
-/*--- Score update ---*/
-simulated function UpdateScore(int s1, int s2, int max)
-{
-	Score1MC.SetText("" $ s1 @ "points sur "@max);
-	Score2MC.SetText("" $ s1 @ "points sur "@max);
-	Progress1MC.GotoAndStopI(100.0 * float(s1 / max));
-	Progress2MC.GotoAndStopI(100.0 * float(s2 / max));
 }
 
 

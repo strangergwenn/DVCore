@@ -41,8 +41,6 @@ var bool							bShouldStop;
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
-var string 							DebugField;
-
 
 /*----------------------------------------------------------
 	Replication
@@ -171,6 +169,7 @@ exec function StartFire(optional byte FireModeNum = 0)
 /*--- Team switch ---*/
 exec function SwitchTeam()
 {
+	SetEnemyTeamInfo(DVTeamInfo(PlayerReplicationInfo.Team));
 	super.Switchteam();
 	DVHUD(myHUD).GameplayMessage("Changement d'équipe");	
 }
@@ -197,7 +196,7 @@ event PlayerTick(float DeltaTime)
 	local DVPawn P;
 	local Actor Target;
 	
-	if (Pawn != None)
+	if (Pawn != None && Pawn.Weapon != None)
 	{
 		// Data
 		P = DVPawn(Pawn);
@@ -208,7 +207,6 @@ event PlayerTick(float DeltaTime)
 		Target = None;
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
 		bShouldStop = (Target != None);
-		DebugField = "" @bShouldStop;
 	}
 	super.PlayerTick(DeltaTime);
 }
@@ -272,6 +270,8 @@ unreliable client simulated function ShowEmptyAmmo()
 /*--- Show a generic message ---*/ 
 unreliable client simulated function ShowGenericMessage(string text)
 {
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	DVHUD(myHUD).GameplayMessage(text);
 }
 
@@ -417,7 +417,14 @@ simulated function string GetPlayerName()
 
 
 /*--- Get module name for dynamic loading ---*/
-simulated function string GameModuleName()
+reliable client simulated function string GameModuleName()
+{
+	return ServerGameModuleName();
+}
+
+
+/*--- Server-side version ---*/
+reliable server simulated function string ServerGameModuleName()
 {
 	return DVGame(WorldInfo.Game).default.ModuleName;
 }
@@ -532,6 +539,8 @@ reliable server function ServerSuicide()
 reliable client simulated function SaveIDs(string User, string Pass)
 {
 	local DVUserStats LStats;
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	LStats = DVHUD_Menu(myHUD).LocalStats;
 	LStats.SetStringValue("UserName", User);
 	LStats.SetStringValue("PassWord", Pass);
@@ -543,6 +552,8 @@ reliable client simulated function SaveIDs(string User, string Pass)
 reliable client simulated function RegisterDeath()
 {
 	local DVUserStats LStats;
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetIntValue("Deaths" , LStats.Deaths + 1);
 }
@@ -552,6 +563,8 @@ reliable client simulated function RegisterDeath()
 reliable client simulated function RegisterShot()
 {
 	local DVUserStats LStats;
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetIntValue("ShotsFired" , LStats.ShotsFired + 1);
 }
@@ -562,6 +575,8 @@ reliable client simulated function RegisterKill(optional bool bTeamKill)
 {
 	local DVUserStats LStats;
 	local int index;
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	
 	LStats = DVHUD(myHUD).LocalStats;
 	index = GetCurrentWeaponIndex();
@@ -596,6 +611,8 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 reliable client simulated function SaveGameStatistics(bool bHasWon, optional bool bLeaving)
 {
 	local DVUserStats LStats;
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
 	
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetBoolValue("bHasLeft", bLeaving);

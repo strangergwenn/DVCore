@@ -16,11 +16,14 @@ class DVTurret extends Pawn
 ----------------------------------------------------------*/
 
 var (DVTurret) const  ParticleSystem		MuzzleFlashEmitter;
-var (DVTurret) const SoundCue 				FireSound;
 var (DVTurret) const class<Projectile> 		ProjClass;
-var (DVTurret) const int 					RoundsPerSec;
+var (DVTurret) const SoundCue 				FireSound;
 
 var (DVTurret) const byte 					TeamIndex;
+
+var (DVTurret) const int 					RoundsPerSec;
+var (DVTurret) const int 					MinTurretRotRate;
+var (DVTurret) const int 					MaxTurretRotRate;
 
 var (DVTurret) const name 					GunControllerName;
 var (DVTurret) const name 					MainControllerName;
@@ -46,8 +49,6 @@ var vector 									FireLocation;
 var vector 									LastEnemyDir;
 var vector 									EnemyDir;
 
-var int 									MinTurretRotRate;
-var int 									MaxTurretRotRate;
 var float 									GElapsedTime;
 var float 									ElapsedTime;
 var float 									FullRevTime;
@@ -62,6 +63,16 @@ var float 									PitchInterpTime;
 var int 									StartPitch;
 var int 									TargetPitch;
 
+
+/*----------------------------------------------------------
+	Replication
+----------------------------------------------------------*/
+
+replication
+{
+	if ( bNetDirty )
+		EnemyTarget, LastEnemyTarget, TargetYaw, TargetPitch, FireRotation, FireLocation;
+}
 
 
 /*----------------------------------------------------------
@@ -88,7 +99,7 @@ function TimedFire()
 	if(Proj != None && !Proj.bDeleteMe )
 	{
 		Proj.Init(Vector(FireRotation));
-		if(MuzzleFlashEmitter != None)
+		if(MuzzleFlashEmitter != None && WorldInfo.NetMode != NM_DedicatedServer)
 		{
 			WorldInfo.MyEmitterPool.SpawnEmitter(
 				MuzzleFlashEmitter,
@@ -106,7 +117,7 @@ function TimedFire()
 ----------------------------------------------------------*/
 
 /*--- Find the ennemy ---*/
-simulated function bool GetNearestEnnemy ()
+reliable server simulated function bool GetNearestEnnemy ()
 {
 	// Vars
 	local int 			index, bestIndex, distance, bestDistance;
@@ -137,7 +148,6 @@ simulated function bool GetNearestEnnemy ()
 			bestIndex = index;
 		}
 	}
-	`log("Acquired ennemy "@targetPawn@self);
 	EnemyTarget = ResultPawns[bestIndex];
 	return true;
 }
@@ -160,7 +170,7 @@ simulated function bool IsValidTarget(Pawn P)
 ----------------------------------------------------------*/
 
 /*--- Launch rotation ---*/
-function DoRotation(Rotator NewRotation, Float InterpTime)
+reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
 {
 	StartYaw = MainController.BoneRotation.Yaw;
 	TargetYaw = NewRotation.Yaw;
@@ -172,8 +182,8 @@ function DoRotation(Rotator NewRotation, Float InterpTime)
 	PitchRotationAlpha = 0.0;
 	PitchInterpTime = InterpTime;
 
-	SetTimer(0.033,true,'RotateYawTimer');
-	SetTimer(0.033,true,'RotatePitchTimer');
+	SetTimer(0.033, true, 'RotateYawTimer');
+	SetTimer(0.033, true, 'RotatePitchTimer');
 }
 
 
@@ -220,7 +230,7 @@ function Tick(Float Delta)
 		if (bHasAcquiredTarget)
 		{
 			DoRotation(Rotator((EnemyTarget.Location - FireLocation + vect(0,0,100)) << Rotation), 1.0);
-			SetTimer(1.0/RoundsPerSec,true,'TimedFire');
+			SetTimer(1.0/RoundsPerSec, true, 'TimedFire');
 		}
 	}
 	else GElapsedTime += Delta;
@@ -288,20 +298,22 @@ defaultproperties
 	LightEnvironment=MyLightEnvironment
 	Components.Add(MyLightEnvironment)
 	
-	// Mesh settings
+	// Mesh
 	Begin Object class=SkeletalMeshComponent name=TurretMesh
 		LightEnvironment=MyLightEnvironment
-		BlockActors=true
-		BlockZeroExtent=true
-		BlockRigidBody=true
-		BlockNonzeroExtent=true
-		CollideActors=true
 		bUseSingleBodyPhysics=1
-		bNotifyRigidBodyCollision=true
+		BlockActors=true
+		CollideActors=true
+		BlockRigidBody=true
 		bUseAsOccluder=true
+		BlockZeroExtent=true
+		BlockNonzeroExtent=true
+		bNotifyRigidBodyCollision=true
 	End Object
 	Components.Add(TurretMesh)
 	CollisionComponent=TurretMesh
+	
+	// Mesh settings
 	Mesh=TurretMesh
 	FireSocket=FireLocation
 	GunControllerName=GunController
@@ -309,12 +321,16 @@ defaultproperties
 	
 	// Settings
 	Health=65000
-	Physics=PHYS_RigidBody
-	bEdShouldSnap=true
 	bStatic=false
-	bCollideActors=true
-	bCollideWorld=true
 	bProjTarget=true
 	bBlockActors=true
+	bCollideWorld=true
+	bEdShouldSnap=true
+	bCollideActors=true
 	bPathColliding=true
+	
+	// Modes
+	Physics=PHYS_Interpolating
+	TickGroup=TG_PostAsyncWork
+	RemoteRole=ROLE_SimulatedProxy
 }

@@ -55,7 +55,7 @@ event PostRender()
 		TI1 = myOwner.EnemyTeamInfo;
 		if (TI0 != None && TI1 != None)
 		{
-			HudMovie.UpdateScore( TI0.GetScore(), TI1.GetScore(), myOwner.GetTargetScore());
+			HudMovie.UpdateScore(TI0.GetScore(), TI1.GetScore(), myOwner.GetTargetScore());
 		}
 	}
 	
@@ -63,7 +63,7 @@ event PostRender()
 	ToggleRespawnMenu();
 	super.PostRender();
 	
-	PutShadedText(BlueColor, myOwner.DebugField, 20, 200);
+	//PutShadedText(BlueColor, myOwner.DebugField, 20, 200);
 }
 
 

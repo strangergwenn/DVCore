@@ -80,7 +80,6 @@ simulated function TimeWeaponEquipping()
 	AmmoCount = MaxAmmo;
 	Mesh.SetHidden(false);
 	
-	`log("TimeWeaponEquipping " $ self $ "for " $ ZP);
 	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) && ZP != None)
 	{
 		ZP.CurrentWeaponClass = self.class;
@@ -97,7 +96,6 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	local DVPawn target;
 	target = DVPawn(Owner);
 	
-	`log("AttachWeaponTo " $ self);
 	if (SocketName == '')
 		SocketName = target.WeaponSocket;
 	if (SkeletalMeshComponent(Mesh) == None)
@@ -146,7 +144,6 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 /*--- Detach weapon from pawn ---*/
 simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 {
-	`log("DetachFrom " $ MeshCpnt);
 	if (Mesh != None)
 	{
 		Mesh.SetShadowParent(None);
@@ -188,13 +185,11 @@ simulated function Tick(float DeltaTime)
 	{
 		if (UseBeam() && !bBeamActive)
 		{
-			`log("Activating beam");
 			BeamPSC.ActivateSystem();
 			bBeamActive = true;
 		}
 		else if (!UseBeam() && bBeamActive)
 		{
-			`log("Deactivating beam");
 			BeamPSC.DeactivateSystem();
 			bBeamActive = false;
 		}

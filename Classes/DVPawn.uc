@@ -138,7 +138,6 @@ simulated function UpdateTeamColor(byte TeamIndex)
 			TeamMaterial.GetVectorParameterValue('LightColor', TeamLight);
 		}
 	}
-	`log("Updated "$ self $" color with index " $ TeamIndex);
 }
 
 
@@ -181,7 +180,6 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 /*--- Replicated weapon switch ---*/
 simulated function WeaponClassChanged()
 {
-	`log("WeaponClassChanged for " $ self);
 	if (Mesh != None && (Weapon == None || Weapon.Class != CurrentWeaponClass))
 	{
 		if (Weapon != None)
@@ -208,7 +206,6 @@ simulated function WeaponChanged(DVWeapon NewWeapon)
 {
 	if (Mesh != None && NewWeapon.Mesh != None && Weapon != None)
 	{
-		`log("WeaponChanged, attaching mesh");
 		DVWeapon(Weapon).AttachWeaponTo(Mesh);
 	}
 	OldWeaponReference = NewWeapon;
@@ -221,7 +218,6 @@ simulated function SwitchToWeapon(class<DVWeapon> WpClass)
 	if (WorldInfo.NetMode == NM_DedicatedServer && InvManager != None)
 	{
 		CurrentWeaponClass = WpClass;
-		`log("SwitchToWeapon " $ CurrentWeaponClass);
 	}
 }
 
