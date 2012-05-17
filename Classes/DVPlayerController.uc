@@ -385,10 +385,10 @@ simulated function string GameModuleName()
 ----------------------------------------------------------*/
 
 /*--- Call this to respawn the player ---*/
-reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon)
+reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
-	ServerSetUserChoice(NewWeapon, true);
-	SetUserChoice(NewWeapon, true);
+	ServerSetUserChoice(NewWeapon, bShouldKill);
+	SetUserChoice(NewWeapon);
 	ServerReStartPlayer();
 }
 
@@ -396,26 +396,24 @@ reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon)
 /*--- Register the weapon to use on respawn ---*/
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
-	if (bShouldKill && Pawn != None)
-		Pawn.Destroy();
+	if (Pawn != None)
+	{
+		if (bShouldKill)
+			Pawn.KilledBy(Pawn);
+		else
+		{
+			Pawn.Destroy();	
+			Pawn.SetHidden(True);
+		}
+	}
 	UserChoiceWeapon = NewWeapon;
 }
 
 
 /* Client weapon switch */
-reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
+reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon)
 {
 	`log("Player choosed " $ NewWeapon);
-	
-	// Survivors will be shot again
-	if (bShouldKill && Pawn != None)
-	{
-		if (Pawn.Health > 0)
-		{
-			Pawn.KilledBy(Pawn);
-		}
-		Pawn.SetHidden(True);
-	}
 	UserChoiceWeapon = NewWeapon;
 }
 
@@ -470,6 +468,16 @@ reliable server function SetWeaponList(class<DVWeapon> NewList[8], byte NewWeapo
 reliable client simulated function HideScores()
 {
 	DVHUD(myHUD).HidePlayerList();
+}
+
+
+/*--- Suicide ---*/
+reliable server function ServerSuicide()
+{
+	if (Pawn != None)
+	{
+		Pawn.Suicide();
+	}
 }
 
 
