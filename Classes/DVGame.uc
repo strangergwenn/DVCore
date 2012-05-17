@@ -175,13 +175,11 @@ function ScoreKill(Controller Killer, Controller Other)
 	}
 	
 	// Death
-	if (OtherPRI != None)
+	if (OtherPRI != None && OtherPRI != KillerPRI)
 	{
 		DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName, bIsTeamKill);
 		OtherPRI.ScoreDeath();
 	}
-	else
-		`log("ScoreKill could not store repinfo " $ self);
 }
 
 

@@ -252,7 +252,6 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnSwitchTeam);
 			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
 			SwitchTeamButtonMC.SetVisible(!bFirstFrame && PC.Pawn.Health <= 0);
-			bFirstFrame=false;
 			break;
 		
 		/// Lists
@@ -278,6 +277,14 @@ function OnWeaponClick(GFxClikWidget.EventData ev)
 {
 	local int i;
 	local class<DVWeapon> NewWeapon;
+	
+	// Suicide if needed
+	if (PC.Pawn != None && !bFirstFrame)
+	{
+		if (PC.Pawn.Health > 0)
+			PC.Pawn.KilledBy(PC.Pawn);
+	}
+	bFirstFrame = false;
 	
 	// List data usage
 	NewWeaponName = GetListItemClicked(ev);

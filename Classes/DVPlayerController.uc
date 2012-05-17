@@ -417,7 +417,6 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 		Pawn.SetHidden(True);
 	}
 	UserChoiceWeapon = NewWeapon;
-	MaxScore = DVGame(WorldInfo.Game).MaxScore;
 }
 
 
@@ -436,6 +435,7 @@ reliable server simulated function UpdatePawnColor()
 		if (i != -1)
 			DVPawn(Pawn).UpdateTeamColor(i);
 	}
+	MaxScore = DVGame(WorldInfo.Game).MaxScore;
 }
 
 
