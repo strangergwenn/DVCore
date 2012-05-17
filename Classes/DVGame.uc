@@ -64,13 +64,16 @@ event PostLogin (PlayerController NewPlayer)
 	
 	if (LocalPlayer(NewPlayer.Player) == None)
 		return;
+	
 	foreach AllActors(class'Actor', A)
 		A.NotifyLocalPlayerTeamReceived();
+	
 	foreach AllActors(class'DVPlayerController', P)
 	{
 		if (P != NewPlayer)
 			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
 	}
+	DVPlayerController(NewPlayer).MaxScore = MaxScore;
 }
 
 

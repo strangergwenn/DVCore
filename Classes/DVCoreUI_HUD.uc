@@ -7,6 +7,12 @@
 
 class DVCoreUI_HUD extends DVMovie;
 
+/*----------------------------------------------------------
+	Public attributes
+----------------------------------------------------------*/
+
+var (HUD) const int			WarningThreshold;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -24,6 +30,8 @@ var GFxClikWidget 			ScoreListBlue;
 var GFxObject 				AmmoMC;
 var GFxObject 				ChatMC;
 var GFxObject 				HealthMC;
+var GFxObject 				WarningMC;
+var GFxObject 				CounterMC;
 var GFxObject 				ChatTextMC;
 
 var GFxObject 				Score1MC;
@@ -34,6 +42,7 @@ var GFxObject 				Progress2MC;
 var string 					NewWeaponName;
 
 var bool					bChatting;
+var bool 					bFirstFrame;
 
 
 /*----------------------------------------------------------
@@ -45,12 +54,16 @@ simulated function InitParts()
 {
 	super.InitParts();
 	
-	// Get symbols
+	// Player info
 	Banner = 		GetSymbol("Banner");
+	WarningMC = 	GetSymbol("WarningLight");
 	AmmoMC = 		GetSymbol("InfoBox.Ammo");
 	HealthMC = 		GetSymbol("InfoBox.Health");
+	CounterMC = 	GetSymbol("InfoBox.Counter");
 	ChatMC = 		GetSymbol("ChatBox.Text");
 	ChatTextMC = 	GetSymbol("ChatBox.Input");
+	
+	// Score
 	Score1MC = 		GetSymbol("T0.Score");
 	Score2MC = 		GetSymbol("T1.Score");
 	Progress1MC = 	GetSymbol("T0.Progress");
@@ -59,6 +72,7 @@ simulated function InitParts()
 	// Various init
 	ScoreListBlue.SetVisible(false);
 	ScoreListRed.SetVisible(false);
+	WarningMC.SetVisible(false);
 	bCaptureInput = false;
 	ChatMC.SetText("");
 }
@@ -68,17 +82,19 @@ simulated function InitParts()
 	Game methods
 ----------------------------------------------------------*/
 
-/*--- Health bar ---*/
-simulated function UpdateHealth(int amount)
+/*--- Ammo & health bars ---*/
+simulated function UpdateInfo(int health, int ammo, int max)
 {
-	HealthMC.GotoAndStopI(amount);
-}
-
-
-/*--- Ammo bar ---*/
-simulated function UpdateAmmo(int amount)
-{
-	AmmoMC.GotoAndStopI(amount);
+	// Bars
+	HealthMC.GotoAndStopI(health);
+	AmmoMC.GotoAndStopI(100.0 * (float(ammo) / float(max)));
+	
+	// Text
+	CounterMC.SetText(ammo @"/" @max @"      " @health @"pv");
+	
+	// Health warning
+	if (health <= WarningThreshold)
+		WarningMC.SetVisible(true);
 }
 
 
@@ -137,7 +153,6 @@ simulated function UpdateScore(int s1, int s2, int max)
 /*--- Open the player list ---*/
 reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 {
-	`log("OpenPlayerList");
 	ScoreListRed.SetVisible(true);
 	ScoreListBlue.SetVisible(true);
 	FillPlayerList(ScoreListRed, PRList, 0);
@@ -148,7 +163,6 @@ reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 /*--- Close the player list ---*/
 reliable client function ClosePlayerList()
 {
-	`log("ClosePlayerList");
 	ScoreListRed.SetVisible(false);
 	ScoreListBlue.SetVisible(false);
 }
@@ -221,9 +235,10 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			SetWidgetLabel("ExitMenu", "Quitter la partie", false);
 			break;
 		case ('SwitchTeam'):
-			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnSwitchTeam);
+			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnSwitchTeam);
 			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
-			SwitchTeamButtonMC.SetVisible(false);
+			SwitchTeamButtonMC.SetVisible(!bFirstFrame && PC.Pawn.Health <= 0);
+			bFirstFrame=false;
 			break;
 		
 		/// Lists
@@ -270,13 +285,13 @@ function OnWeaponClick(GFxClikWidget.EventData ev)
 /*--- Respawn menu ---*/
 reliable client simulated function OpenRespawnMenu()
 {
-	SetGamePaused();
 	bChatting = false;
-	bCaptureInput = true;
+	bCaptureInput = false;
+	
+	SetGamePaused();
 	Scene.GotoAndPlayI(2);
 	Banner = GetSymbol("Banner");
 	OpenPlayerList(PC.GetPlayerList());
-	SwitchTeamButtonMC.SetVisible(true);
 }
 
 
@@ -284,8 +299,7 @@ reliable client simulated function OpenRespawnMenu()
 function TogglePause()
 {
 	SetGamePaused();
-	bCaptureInput = true;
-	SwitchTeamButtonMC.SetVisible(true);
+	bCaptureInput = false;
 }
 
 
@@ -300,7 +314,6 @@ function OnResume(GFxClikWidget.EventData evtd)
 /*--- Change team ---*/
 function OnSwitchTeam(GFxClikWidget.EventData evtd)
 {
-	ConsoleCommand("quit");
 	PC.SwitchTeam();
 }
 
@@ -319,6 +332,8 @@ function OnExit(GFxClikWidget.EventData evtd)
 
 defaultproperties
 {
+	bFirstFrame=true
+	WarningThreshold=20
 	MovieInfo=SwfMovie'DV_CoreUI.HUD'
 	
 	WidgetBindings(3)={(WidgetName="SwitchTeam",WidgetClass=class'GFxClikWidget')}

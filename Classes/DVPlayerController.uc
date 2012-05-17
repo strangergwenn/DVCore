@@ -31,6 +31,8 @@ var DVTeamInfo						EnemyTeamInfo;
 
 var DVLink							MasterServerLink;
 
+var int								MaxScore;
+
 var byte							WeaponListLength;
 
 var bool							bLocked;
@@ -46,7 +48,7 @@ var array<string>					LeaderBoardStructure2;
 replication
 {
 	if ( bNetDirty )
-		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength;
+		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength, MaxScore;
 }
 
 
@@ -151,15 +153,6 @@ exec function Use()
 }
 
 
-/*--- Switch weapon class ---*/
-exec simulated function ChangeWeaponClass(class<DVWeapon> NewWeapon)
-{
-	`log("SwitchToWeaponClass choice : " $ NewWeapon);
-	SetUserChoice(NewWeapon, false);
-	ServerSetUserChoice(NewWeapon, false);
-}
-
-
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {
@@ -172,10 +165,17 @@ exec function StartFire(optional byte FireModeNum = 0)
 }
 
 
+/*--- Team switch ---*/
+exec function SwitchTeam()
+{
+	super.Switchteam();
+	DVHUD(myHUD).GameplayMessage("Changement d'équipe");	
+}
+
+
 /*--- Send text ---*/
 exec function Talk()
 {
-	//super.Talk();
 	`log("Talk");
 	DVHUD(myHUD).HudMovie.StartTalking();
 }
@@ -243,6 +243,7 @@ unreliable client simulated function PlayHitSound()
 simulated function LockCamera(bool NewState)
 {
 	bLocked = NewState;
+	IgnoreMoveInput(NewState);
 }
 
 
@@ -295,6 +296,17 @@ simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRota
 }
 
 
+/*--- Launch crouching ---*/
+function CheckJumpOrDuck()
+{
+	super.CheckJumpOrDuck();
+	if ( Pawn.Physics != PHYS_Falling && Pawn.bCanCrouch )
+	{
+		Pawn.ShouldCrouch(bDuck != 0);
+	}
+}
+
+
 /*--- No TTS ---*/
 simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI )
 {}
@@ -317,16 +329,21 @@ reliable client simulated function SignalEndGame(bool bHasWon)
 }
 
 
-/*--- Ammo ---*/
-simulated function float GetAmmoPercentage()
+/*--- Ammo count ---*/
+simulated function int GetAmmoCount()
 {
 	local DVWeapon wp;
 	wp = DVWeapon(Pawn.Weapon);
-	
-	if (wp != None)
-		return 100.0 * wp.GetAmmoRatio();
-	else
-		return 0.0;	
+	return ((wp != None) ? wp.GetAmmoCount() : 0);
+}
+
+
+/*--- Ammo count maximum ---*/
+simulated function int GetAmmoMax()
+{
+	local DVWeapon wp;
+	wp = DVWeapon(Pawn.Weapon);
+	return ((wp != None) ? wp.GetAmmoMax() : 0);
 }
 
 
@@ -367,6 +384,15 @@ reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon)
 }
 
 
+/*--- Register the weapon to use on respawn ---*/
+reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
+{
+	if (bShouldKill && Pawn != None)
+		Pawn.Destroy();
+	UserChoiceWeapon = NewWeapon;
+}
+
+
 /* Client weapon switch */
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
@@ -382,6 +408,7 @@ reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon, bool
 		Pawn.SetHidden(True);
 	}
 	UserChoiceWeapon = NewWeapon;
+	MaxScore = DVGame(WorldInfo.Game).MaxScore;
 }
 
 
@@ -403,23 +430,10 @@ reliable server simulated function UpdatePawnColor()
 }
 
 
-/*--- Register the weapon to use on respawn ---*/
-reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
-{
-	if (bShouldKill && Pawn != None)
-		Pawn.Destroy();
-	UserChoiceWeapon = NewWeapon;
-}
-
-
 /*--- Return the server score target ---*/
 reliable client simulated function int GetTargetScore()
 {
-	return ServerGetTargetScore();
-}
-reliable server simulated function int ServerGetTargetScore()
-{
-	return DVGame(WorldInfo.Game).MaxScore;
+	return MaxScore;
 }
 
 

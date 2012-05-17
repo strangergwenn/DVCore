@@ -473,10 +473,17 @@ simulated function PlayFiringSound()
 }
 
 
-/*--- Ammo for HUD ---*/
-simulated function float GetAmmoRatio()
+/*--- Ammo for HUD : current ---*/
+simulated function int GetAmmoCount()
 {
-	return float(AmmoCount) / float(MaxAmmo);
+	return AmmoCount;
+}
+
+
+/*--- Ammo for HUD : max---*/
+simulated function int GetAmmoMax()
+{
+	return MaxAmmo;
 }
 
 

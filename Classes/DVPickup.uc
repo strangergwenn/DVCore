@@ -89,6 +89,8 @@ auto state Pickup
 	
 	function bool ValidTouch(Pawn Other)
 	{
+		local DVPlayerController PC;
+		
 		if (Other == None)
 		{
 			return false;
@@ -98,7 +100,11 @@ auto state Pickup
 			SetTimer( 0.2, false, nameof(RecheckValidTouch) );
 			return false;
 		}
-		return (DVPlayerController(Other.Controller).GetAmmoPercentage() != 100.0);
+		else
+		{
+			PC = DVPlayerController(Other.Controller);
+			return (PC.GetAmmoCount() != PC.GetAmmoMax());
+		}
 	}
 	
 	event BeginState(name PreviousStateName)

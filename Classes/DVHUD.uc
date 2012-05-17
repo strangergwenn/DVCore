@@ -45,8 +45,7 @@ event PostRender()
 	myOwner = DVPlayerController(PlayerOwner);
 	if (myOwner.Pawn != None)
 	{
-		HudMovie.UpdateHealth(myOwner.Pawn.Health);
-		HudMovie.UpdateAmmo(myOwner.GetAmmoPercentage());
+		HudMovie.UpdateInfo(myOwner.Pawn.Health, myOwner.GetAmmoCount(), myOwner.GetAmmoMax());
 	}
 	
 	// Score
@@ -101,6 +100,7 @@ simulated function GameplayMessage(string text)
 	HudMovie.ShowBannerInfo(true, text);
 	PlaySound(HudMovie.BipSound);
 	SetTimer(GameplayMessageTime, false, 'ShutdownMessage');
+	AddConsoleMessage(text, class'LocalMessage', PlayerOwner.PlayerReplicationInfo); 
 }
 
 

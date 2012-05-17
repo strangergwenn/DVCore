@@ -753,9 +753,6 @@ defaultproperties
 	Mesh=SkeletalMeshComponent0
 	Components.Add(SkeletalMeshComponent0)
 	
-	// Materials
-	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
-	
 	// Cylinder
 	Begin Object Name=CollisionCylinder
 		CollisionRadius=40.0
@@ -764,10 +761,6 @@ defaultproperties
 	End Object
 	CylinderComponent=CollisionCylinder
 	CollisionComponent=CollisionCylinder
-	
-	// Zoom
-	bZoomed=false
-	DefaultFOV=90
 	
 	// Weapons
 	EyeSocket=EyeSocket
@@ -781,9 +774,15 @@ defaultproperties
 	// Gameplay
 	bDVLog=false
 	bWasHS=false
+	bZoomed=false
 	bJumping=false
-	RecoilAngle=0.0
+	bCanCrouch=true
 	bHasGotTeamColors=false
+	
+	// Default
+	DefaultFOV=90
+	RecoilAngle=0.0
 	UserName="SOMEONE"
 	KillerName="HIMSELF"
+	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

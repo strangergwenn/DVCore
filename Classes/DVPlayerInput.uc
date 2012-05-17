@@ -8,9 +8,50 @@
 class DVPlayerInput extends UDKPlayerInput within DVPlayerController
 	config(Input);
 
+
 /*----------------------------------------------------------
-	Public attributes
+	Private attributes
 ----------------------------------------------------------*/
+
+var float 							LastDuckTime;
+var bool  							bHoldDuck;
+
+
+/*----------------------------------------------------------
+	Public methods
+----------------------------------------------------------*/
+
+/*--- Duck duck duck ---*/
+simulated exec function Duck()
+{
+	if (DVPawn(Pawn) != None)
+	{
+		if (bHoldDuck)
+		{
+			bHoldDuck = false;
+			bDuck = 0;
+			return;
+		}
+		
+		bDuck=1;
+		
+		if (WorldInfo.TimeSeconds - LastDuckTime < DoubleClickTime)
+		{
+			bHoldDuck = true;
+		}
+		LastDuckTime = WorldInfo.TimeSeconds;
+	}
+}
+
+/*--- Stop ducking ---*/
+simulated exec function UnDuck()
+{
+	if (!bHoldDuck)
+	{
+		bDuck = 0;
+	}
+}
+
 
 /*--- Key pressed delegate ---*/
 function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float AmountDepressed, optional bool bGamepad)
