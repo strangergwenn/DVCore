@@ -24,23 +24,20 @@ var bool  							bHoldDuck;
 /*--- Duck duck duck ---*/
 simulated exec function Duck()
 {
-	if (DVPawn(Pawn) != None)
+	if (bHoldDuck)
 	{
-		if (bHoldDuck)
-		{
-			bHoldDuck = false;
-			bDuck = 0;
-			return;
-		}
-		
-		bDuck=1;
-		
-		if (WorldInfo.TimeSeconds - LastDuckTime < DoubleClickTime)
-		{
-			bHoldDuck = true;
-		}
-		LastDuckTime = WorldInfo.TimeSeconds;
+		bHoldDuck = false;
+		bDuck = 0;
+		return;
 	}
+	
+	bDuck=1;
+	
+	if (WorldInfo.TimeSeconds - LastDuckTime < DoubleClickTime)
+	{
+		bHoldDuck = true;
+	}
+	LastDuckTime = WorldInfo.TimeSeconds;
 }
 
 /*--- Stop ducking ---*/
