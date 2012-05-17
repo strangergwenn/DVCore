@@ -192,6 +192,23 @@ exec function TeamTalk()
 	Methods
 ----------------------------------------------------------*/
 
+/*--- Start music based on settings ---*/
+reliable client simulated function StartMusicIfAvailable()
+{
+	local int i;
+	local Sequence GameSeq;
+	local array<SequenceObject> AllSeqEvents;
+	
+	GameSeq = WorldInfo.GetGameSequence();
+	if(GameSeq != None && DVHUD(myHUD).LocalStats.bBackgroundMusic)
+	{
+		GameSeq.FindSeqObjectsByClass(class'DVKismetMusicStart', true, AllSeqEvents);
+		for(i = 0; i < AllSeqEvents.Length; i++)
+			DVKismetMusicStart(AllSeqEvents[i]).CheckActivate(WorldInfo, None);
+	}
+}
+
+
 /*--- Notify a new player ---*/ 
 unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)
 {

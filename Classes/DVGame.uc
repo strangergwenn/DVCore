@@ -76,6 +76,7 @@ event PostLogin (PlayerController NewPlayer)
 			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
 	}
 	DVPlayerController(NewPlayer).MaxScore = MaxScore;
+	DVPlayerController(NewPlayer).StartMusicIfAvailable();
 }
 
 
