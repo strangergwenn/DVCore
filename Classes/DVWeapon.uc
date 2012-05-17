@@ -35,6 +35,9 @@ var (DVWeapon) const name					WeaponFireAnim;
 var (DVWeapon) const array<name> 			EffectSockets;
 var (DVWeapon) name							ZoomSocket;
 
+var (DVWeapon) string						WeaponName;
+var (DVWeapon) string						WeaponIcon;
+
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
 var (DVWeapon) class<DVWeaponAddon>			AddonClass1;
@@ -51,8 +54,6 @@ var ParticleSystemComponent		BeamPSC;
 var bool						bWeaponEmpty;
 var bool						bBeamActive;
 var bool						bZoomed;
-
-var string 						DebugField;
 
 
 /*----------------------------------------------------------

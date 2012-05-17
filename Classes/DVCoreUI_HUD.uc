@@ -85,12 +85,14 @@ simulated function InitParts()
 /*--- Ammo & health bars ---*/
 simulated function UpdateInfo(int health, int ammo, int max)
 {
+	if (max == 0) max = 1;
+	
 	// Bars
 	HealthMC.GotoAndStopI(health);
 	AmmoMC.GotoAndStopI(100.0 * (float(ammo) / float(max)));
 	
 	// Text
-	CounterMC.SetText(ammo @"/" @max @"      " @health @"pv");
+	CounterMC.SetText(ammo @"/" @max @"           " @health $"pv");
 	
 	// Health warning
 	if (health <= WarningThreshold)
@@ -200,23 +202,35 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 /*--- Update the weapon list ---*/
 reliable client function UpdateWeaponList()
 {
+	// Vars
 	local byte i;
 	local GFxObject TempObj;
 	local GFxObject DataProvider;
+	local class<DVWeapon> wpClass;
+	local string WeaponClassToLoad;
+	
 	`log("UpdateWeaponList");
 	
 	// Actual menu setting
 	DataProvider = WeaponListMC.GetObject("dataProvider");
+	`log(""$DataProvider @WeaponListMC.GetFloat("rowCount"));
 	for (i = 0; i < PC.WeaponListLength; i++)
 	{
+		// Load a weapon class
+		WeaponClassToLoad = PC.GameModuleName() $"." $ PC.WeaponList[i];
+		wpClass = class<DVWeapon>(DynamicLoadObject(WeaponClassToLoad, class'Class', false));
+		`log(""$wpClass.default.WeaponName);
+		
+		// List item	
 		TempObj = CreateObject("Object");
-		TempObj.SetString("label", string(PC.WeaponList[i]));
+		TempObj.SetString("label", wpClass.default.WeaponName);
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	
 	// List update
+	`log("WeaponListMC = "@WeaponListMC);
 	WeaponListMC.SetObject("dataProvider", DataProvider);
-	WeaponListMC.SetFloat("rowCount", i);
+	WeaponListMC.SetInt("rowCount", i);
 }
 
 

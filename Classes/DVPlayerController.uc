@@ -40,6 +40,8 @@ var bool							bLocked;
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
+var string 							DebugField;
+
 
 /*----------------------------------------------------------
 	Replication
@@ -368,6 +370,13 @@ simulated function string GetPlayerName()
 	local string PlayerName;
 	PlayerName = PlayerReplicationInfo != None ? PlayerReplicationInfo.PlayerName : "UNNAMED";
 	return PlayerName;
+}
+
+
+/*--- Get module name for dynamic loading ---*/
+simulated function string GameModuleName()
+{
+	return DVGame(WorldInfo.Game).default.ModuleName;
 }
 
 

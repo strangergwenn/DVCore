@@ -21,6 +21,7 @@ var (DVPawn) const name				WeaponSocket2;
 var (DVPawn) const float 			DefaultFOV;
 var (DVPawn) const float 			HeadBobbingFactor;
 var (DVPawn) const float 			StandardEyeHeight;
+
 var (DVPawn) const float			ZoomedGroundSpeed;
 var (DVPawn) const float			UnzoomedGroundSpeed;
 
@@ -386,6 +387,31 @@ simulated function int GetCorrectedFloat(int input)
 }
 
 
+/*--- Jump management ---*/
+function bool DoJump( bool bUpdating )
+{
+	bJumping = true;
+	ServerLogAction("JUMP");
+	return super.DoJump(bUpdating);
+}
+
+
+/*--- Jump end ---*/
+event Landed(vector HitNormal, Actor FloorActor)
+{
+	super.Landed(HitNormal, FloorActor);
+	bJumping = false;
+	ServerLogAction("LAND");
+}
+
+
+/*--- Damage multiplier when jumping ---*/
+simulated function float GetJumpingFactor()
+{
+	return (bJumping ? JumpDamageMultiplier : 1.0);
+}
+
+
 /*--- Beam status update ---*/
 reliable client simulated function bool GetBeamStatus()
 {
@@ -702,27 +728,6 @@ simulated State Dying
 }
 
 
-/*--- Jump management ---*/
-function bool DoJump( bool bUpdating )
-{
-	bJumping = true;
-	ServerLogAction("JUMP");
-	return super.DoJump(bUpdating);
-}
-
-event Landed(vector HitNormal, Actor FloorActor)
-{
-	super.Landed(HitNormal, FloorActor);
-	bJumping = false;
-	ServerLogAction("LAND");
-}
-
-simulated function float GetJumpingFactor()
-{
-	return (bJumping ? JumpDamageMultiplier : 1.0);
-}
-
-
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
@@ -777,6 +782,7 @@ defaultproperties
 	bZoomed=false
 	bJumping=false
 	bCanCrouch=true
+	bLimitFallAccel=true
 	bHasGotTeamColors=false
 	
 	// Default

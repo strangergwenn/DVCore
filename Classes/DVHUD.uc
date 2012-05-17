@@ -63,7 +63,7 @@ event PostRender()
 	ToggleRespawnMenu();
 	super.PostRender();
 	
-	//PutShadedText(BlueColor, DVPawn(myOwner.Pawn).DebugField, 20, 100);
+	PutShadedText(BlueColor, myOwner.DebugField, 20, 200);
 }
 
 
