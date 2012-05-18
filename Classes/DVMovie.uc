@@ -178,16 +178,18 @@ function SetupWeaponWidget(string WidgetName, string WeaponClass)
 	// Vars
 	local class<DVWeapon> wpClass;
 	local string WeaponClassToLoad;
+	local string IconPath;
 
 	// Load a weapon class
 	WeaponClassToLoad = "zGame." $ WeaponClass;
 	wpClass = class<DVWeapon>(DynamicLoadObject(WeaponClassToLoad, class'Class', false));
+	IconPath = wpClass.static.GetWeaponPath() $ string(wpClass.static.GetWeaponIcon());
 	
 	// Data
 	SetLabel(WidgetName $".WName", 	wpClass.default.WeaponName, true);
 	SetLabel(WidgetName $".WDesc", 	wpClass.default.WeaponDesc, false);
 	SetLabel(WidgetName $".WStats", wpClass.default.WeaponDamage, false);
-	SetupIcon(WidgetName$".WIcon",	wpClass.default.WeaponIcon);
+	SetupIcon(WidgetName$".WIcon",	IconPath);
 }
 
 

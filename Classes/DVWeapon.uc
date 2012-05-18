@@ -35,10 +35,11 @@ var (DVWeapon) const name					WeaponFireAnim;
 var (DVWeapon) const array<name> 			EffectSockets;
 var (DVWeapon) name							ZoomSocket;
 
+var (DVWeapon) Texture2D					WeaponIcon;
 var (DVWeapon) string						WeaponName;
-var (DVWeapon) string						WeaponIcon;
 var (DVWeapon) string						WeaponDesc;
 var (DVWeapon) string						WeaponDamage;
+var (DVWeapon) string						WeaponIconPath;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
@@ -490,6 +491,20 @@ simulated function int GetAmmoCount()
 simulated function int GetAmmoMax()
 {
 	return MaxAmmo;
+}
+
+
+/*--- Texture icon ---*/
+function static Texture2D GetWeaponIcon()
+{
+	return default.WeaponIcon;
+}
+
+
+/*--- Texture icon path---*/
+function static string GetWeaponPath()
+{
+	return "img://" $ default.WeaponIconPath $ ".Icon.";
 }
 
 
