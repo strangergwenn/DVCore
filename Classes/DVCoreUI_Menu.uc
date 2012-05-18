@@ -300,8 +300,8 @@ function GetPopupResult(bool bSuccess, string Msg)
 simulated function GetStatsContent()
 {
 	// Init
-	local DVUserStats LStats, GStats;
 	local string RankInfo;
+	local DVUserStats LStats, GStats;
 	LStats = DVHUD_Menu(PC.myHUD).LocalStats;
 	GStats = DVHUD_Menu(PC.myHUD).GlobalStats;
 	
@@ -314,17 +314,18 @@ simulated function GetStatsContent()
 	
 	// Stat block 1
 	SetLabel("StatTitle1", "Efficacité", true);
-	SetAlignedLabel("Stat10", "Victimes", string(GStats.Kills));
-	SetAlignedLabel("Stat11", "Précision", string(GStats.Kills / GStats.ShotsFired) $ "%");
-	SetAlignedLabel("Stat12", "Ratio K/D", string(GStats.Kills / GStats.Deaths));
-	SetPieChart("PieStat1", "Stat13", "Team-kill", (GStats.TeamKills / (GStats.Kills + GStats.TeamKills)));
+	SetLabel("Stat10", string(GStats.Kills) @"victimes", false);
+	SetLabel("Stat11", string(GStats.Kills / GStats.ShotsFired) $"% de précision", false);
+	SetLabel("Stat12", string(GStats.Kills / GStats.Deaths) @"K/D", false);
+	SetPieChart("PieStat2", "Stat23", "Headshots", GStats.Headshots / GStats.Kills);
 	
 	// Stat block 2
-	SetLabel("StatTitle2", "Victimes par arme", true);
-	SetAlignedLabel("Stat20", "Fusil d'assaut", string(GStats.WeaponScores[0]));
-	SetAlignedLabel("Stat21", "Sniper",  string(GStats.WeaponScores[1]));
-	SetAlignedLabel("Stat22", "Shotgun",  string(GStats.WeaponScores[2]));
-	SetPieChart("PieStat2", "Stat23", "Headshots", GStats.Headshots / GStats.Kills);
+	SetLabel("StatTitle2", "Efficacité par arme", true);
+	SetLabel("Stat20", "Fusil d'assaut: " @string(GStats.WeaponScores[0]) @"victimes", false);
+	SetLabel("Stat21", "Sniper :" @string(GStats.WeaponScores[1]) @"victimes", false);
+	SetLabel("Stat22", "Shotgun :" @string(GStats.WeaponScores[2]) @"victimes", false);
+	SetLabel("Stat23", "Canon plasma :" @string(GStats.WeaponScores[3]) @"victimes", false);
+	SetLabel("Stat24", "Lance-grenades :" @string(GStats.WeaponScores[4]) @"victimes", false);
 	
 	// Stat block 3
 	if (LStats.bHasLeft)
@@ -332,10 +333,10 @@ simulated function GetStatsContent()
 	else
 		SetLabel("Stat30", "Votre équipe a " $ (LStats.bHasWon ? "gagné" : "perdu"), false);
 	
-	SetAlignedLabel("Stat31", "Rang final", string(LStats.Rank));
-	SetAlignedLabel("Stat32", "Victimes", string(LStats.Kills));
-	SetAlignedLabel("Stat33", "Morts", string(LStats.Deaths));
-	SetAlignedLabel("Stat34", "Tirs effectués", string(LStats.ShotsFired));
+	SetLabel("Stat31", "Terminée au rang" @string(LStats.Rank), false);
+	SetLabel("Stat32", string(LStats.Kills) @"victimes", false);
+	SetLabel("Stat33", string(LStats.Deaths) @"morts", false);
+	SetLabel("Stat34", string(LStats.ShotsFired) @"tirs effectués", false);
 	
 	// Stat block 4
 	if (GStats.Rank > 0)

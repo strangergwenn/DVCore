@@ -261,12 +261,12 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Weapon widgets
 		case ('Weapon0'):
 		case ('Weapon1'):
-		case ('Weapon2'):
+		case ('Weapon2'):/*
 		case ('Weapon3'):
 		case ('Weapon4'):
 		case ('Weapon5'):
 		case ('Weapon6'):
-		case ('Weapon7'):
+		case ('Weapon7'):*/
 			TempObject = GFxClikWidget(Widget);
 			TempObject.AddEventListener('CLIK_click', OnWeaponWidgetClick);
 			break;

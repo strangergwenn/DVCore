@@ -173,7 +173,6 @@ function ApplyResolutionSetting(string code, string flag)
 ----------------------------------------------------------*/
 
 /*--- Set up a weapon widget ---*/
-//DEBUG
 function SetupWeaponWidget(string WidgetName, string WeaponClass)
 {
 	// Vars

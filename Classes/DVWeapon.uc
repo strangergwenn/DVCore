@@ -161,9 +161,9 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 /*--- Laser pointer end --*/
 simulated function Tick(float DeltaTime)
 {
-	local vector EndTrace, SocketLocation;
+	local vector EndTrace, SocketLocation, Unused;
 	local rotator SocketRotation;
-	local ImpactInfo Impact;
+	local vector Impact;
 	local DVPawn target;
 	
 	// Init
@@ -179,8 +179,8 @@ simulated function Tick(float DeltaTime)
 	
 	// Impact location calculation
 	SocketLocation = DVPawn(Owner).GetZoomViewLocation(); // ignore previous result !
-	EndTrace = SocketLocation + vector(SocketRotation) * 3000.0;
-	Impact = CalcWeaponFire(SocketLocation, EndTrace);
+	EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
+	Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
 	
 	// Laser pointer
 	if (BeamPSC != None)
@@ -197,7 +197,7 @@ simulated function Tick(float DeltaTime)
 		}
 		if (bBeamActive)
 		{
-			BeamPSC.SetVectorParameter('BeamEnd', Impact.HitLocation);
+			BeamPSC.SetVectorParameter('BeamEnd', Impact);
 		}
 	}
 }

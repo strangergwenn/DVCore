@@ -148,35 +148,37 @@ simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 /*--- Killed set ---*/
 function ScoreKill(Controller Killer, Controller Other)
 {
+	// Init
 	local DVPlayerRepInfo KillerPRI, OtherPRI;
 	local bool bIsTeamKill;
-	
-	// Init
-	`log(Killer $ " ScoreKill " $ Other);
 	KillerPRI = DVPlayerRepInfo(Killer.PlayerReplicationInfo);
 	OtherPRI = DVPlayerRepInfo(Other.PlayerReplicationInfo);
 	
 	// Score kill
-	`log(self $ " KilledBy " $ KillerPRI);
 	if (KillerPRI != None)
 	{
+		// Team kill data
 		if (KillerPRI.Team != None && DVPlayerController(Other) != None)
-		{
-			bIsTeamKill = (	(Killer == Other)
-						 || (DVPlayerController(Killer).GetTeamIndex() == DVPlayerController(Other).GetTeamIndex()));
-		}
+			bIsTeamKill = (DVPlayerController(Killer).GetTeamIndex() == DVPlayerController(Other).GetTeamIndex());
 		else
-			bIsTeamKill = (Killer == Other);
+			bIsTeamKill = false;
 		
-		`log(Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
-		KillerPRI.ScorePoint(bIsTeamKill);
+		// Kill indication to player
+		if (OtherPRI != KillerPRI)
+		{
+			KillerPRI.ScorePoint(bIsTeamKill);
+		}
 		DVPlayerController(Other).ShowKilledBy(KillerPRI.PlayerName);
+		`log(Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
 	}
 	
-	// Death
-	if (OtherPRI != None && OtherPRI != KillerPRI)
+	// Death indication to other player
+	if (OtherPRI != None)
 	{
-		DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName, bIsTeamKill);
+		if (OtherPRI != KillerPRI)
+		{
+			DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName, bIsTeamKill);
+		}
 		OtherPRI.ScoreDeath();
 	}
 }
