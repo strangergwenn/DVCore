@@ -23,7 +23,6 @@ var GFxClikWidget 			RestartButtonMC;
 var GFxClikWidget 			SwitchTeamButtonMC;
 var GFxClikWidget 			ExitButtonMC;
 
-var GFxClikWidget 			WeaponListMC;
 var GFxClikWidget 			ScoreListRed;
 var GFxClikWidget 			ScoreListBlue;
 
@@ -203,26 +202,24 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 /*--- Update the weapon list ---*/
 reliable client function UpdateWeaponList()
 {
-	// Vars
 	local byte i;
-	local GFxObject TempObj;
-	local GFxObject DataProvider;
+	local GFxObject TempObject;
 	
-	// Actual menu setting
-	DataProvider = WeaponListMC.GetObject("dataProvider");
+	// Title
+	SetLabel("WeaponTitle", "Choisissez une arme...", false);
+	
+	// Weapon list
 	for (i = 0; i < PC.WeaponListLength; i++)
 	{
 		SetupWeaponWidget("Weapon"$i, string(PC.WeaponList[i]));
-		
-		// List item	
-		TempObj = CreateObject("Object");
-		TempObj.SetString("label", string(PC.WeaponList[i]));
-		DataProvider.SetElementObject(i, TempObj);
 	}
 	
-	// List update
-	WeaponListMC.SetObject("dataProvider", DataProvider);
-	WeaponListMC.SetInt("rowCount", 1);
+	// Invisible items
+	for (i = PC.WeaponListLength; i < 8; i++)
+	{
+		TempObject = GetSymbol("Weapon"$i);
+		TempObject.SetVisible(false);
+	}
 }
 
 
@@ -237,11 +234,16 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	
 	switch(WidgetName)
 	{
-		// Buttons
+		// Exit
 		case ('ExitMenu'):
 			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
 			SetWidgetLabel("ExitMenu", "Quitter la partie", false);
+			
+			// By the way...
+			UpdateWeaponList();
 			break;
+		
+		// Team switch
 		case ('SwitchTeam'):
 			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnSwitchTeam);
 			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
@@ -249,10 +251,6 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			break;
 		
 		/// Lists
-		case ('WeaponList'):
-			WeaponListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnWeaponClick);
-			PC.UpdateWeaponList();
-			break;
 		case ('ScoreListRed'):
 			ScoreListRed = GFxClikWidget(Widget);
 			break;
@@ -280,30 +278,6 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 
 
 /*--- Weapon selection ---*/
-function OnWeaponClick(GFxClikWidget.EventData ev)
-{
-	local int i;
-	local class<DVWeapon> NewWeapon;
-	
-	// List data usage
-	NewWeaponName = GetListItemClicked(ev);
-	for (i = 0; i < PC.WeaponListLength; i++)
-	{
-		if (InStr(NewWeaponName, PC.WeaponList[i].name) != -1)
-		{
-			NewWeapon = PC.WeaponList[i];
-		}
-	}
-	
-	// Restart
-	SetGameUnPaused();
-	PC.HUDRespawn(!bFirstFrame, NewWeapon);
-	bCaptureInput = false;
-	bFirstFrame = false;
-}
-
-
-/*--- Weapon selection ---*/
 function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 {
 	// Vars
@@ -327,10 +301,18 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 /*--- Respawn menu ---*/
 reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
+	// Settings
 	bChatting = false;
 	bCaptureInput = false;
 	bWasKilled = bKilledMenu;
 	
+	// Pawn
+	if (bFirstFrame)
+	{
+		DVPawn(PC.Pawn).HideMesh(true);
+	}
+	
+	// Actions
 	SetGamePaused();
 	Scene.GotoAndPlayI(2);
 	Banner = GetSymbol("Banner");
@@ -349,9 +331,14 @@ function TogglePause()
 /*--- Pause end ---*/
 function OnResume(GFxClikWidget.EventData evtd)
 {
+	// Whoah, take something man.
+	if (bFirstFrame)
+		return;
+	
+	// Respawn or just resume
 	if (bWasKilled)
 	{
-		PC.HUDRespawn(!bFirstFrame);
+		PC.HUDRespawn(true);
 	}
 	SetGameUnPaused();
 	bCaptureInput = false;
@@ -386,7 +373,6 @@ defaultproperties
 	WidgetBindings(3)={(WidgetName="SwitchTeam",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(4)={(WidgetName="ExitMenu",	WidgetClass=class'GFxClikWidget')}
 	
-	WidgetBindings(5)={(WidgetName="WeaponList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(6)={(WidgetName="ScoreListRed",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(7)={(WidgetName="ScoreListBlue",WidgetClass=class'GFxClikWidget')}
 	
