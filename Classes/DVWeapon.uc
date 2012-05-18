@@ -37,6 +37,8 @@ var (DVWeapon) name							ZoomSocket;
 
 var (DVWeapon) string						WeaponName;
 var (DVWeapon) string						WeaponIcon;
+var (DVWeapon) string						WeaponDesc;
+var (DVWeapon) string						WeaponDamage;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
@@ -68,7 +70,7 @@ replication
 
 
 /*----------------------------------------------------------
-	Methods
+	Various methods
 ----------------------------------------------------------*/
 
 /* --- Attachment ---*/
@@ -228,6 +230,31 @@ reliable client simulated function bool UseBeam()
 }
 
 
+/*----------------------------------------------------------
+	Zoom methods
+----------------------------------------------------------*/
+
+/*--- Zoom location ---*/
+simulated function vector GetZoomViewLocation()
+{
+	local vector loc, X, Y, Z;
+	local rotator rot;
+	
+	if (Mesh != None)
+	{
+		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(ZoomSocket, loc, rot))
+			`warn("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
+		
+		GetAxes(rot, X, Y, Z);
+		return loc + ZoomOffset.X * X +  ZoomOffset.Y * Y +  ZoomOffset.Z * Z;
+	}
+	else
+	{
+		return Location;
+	}
+}
+
+
 /*--- Zoom managment ---*/
 simulated function bool IsZoomed()
 {
@@ -246,6 +273,10 @@ simulated function ZoomOut()
 	bZoomed = false;
 }
 
+
+/*----------------------------------------------------------
+	Firing methods
+----------------------------------------------------------*/
 
 /*--- Tracing ---*/
 simulated function vector InstantFireStartTrace()
@@ -399,27 +430,6 @@ simulated function PlayImpactEffects(vector HitLocation)
 			HitNormal = normal(FireDir - ( 2 *  HitNormal * (FireDir dot HitNormal) ) ) ;
 			FireParticleSystem(ImpactEffect.ParticleTemplate, HitLocation, rotator(HitNormal));
 		}
-	}
-}
-
-
-/*--- Zoom location ---*/
-simulated function vector GetZoomViewLocation()
-{
-	local vector loc, X, Y, Z;
-	local rotator rot;
-	
-	if (Mesh != None)
-	{
-		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(ZoomSocket, loc, rot))
-			`warn("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
-		
-		GetAxes(rot, X, Y, Z);
-		return loc + ZoomOffset.X * X +  ZoomOffset.Y * Y +  ZoomOffset.Z * Z;
-	}
-	else
-	{
-		return Location;
 	}
 }
 

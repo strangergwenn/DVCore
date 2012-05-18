@@ -143,7 +143,7 @@ function ToggleRespawnMenu()
 	
 	if (P == None && !bRespawnOpened)
 	{
-		HudMovie.OpenRespawnMenu();
+		HudMovie.OpenRespawnMenu(true);
 		bRespawnOpened = true;
 	}
 	if (P != None && bRespawnOpened)
@@ -171,6 +171,16 @@ function DisplayConsoleMessages()
 	HUDMovie.UpdateChat(text);
 }
 
+
+/*--- Launch weapon list update ---*/
+function UpdateLists()
+{
+	SetTimer(0.01, false, 'UpdateWeaponList');
+}
+function UpdateWeaponList()
+{
+	HudMovie.UpdateWeaponList();
+}
 
 
 /*--- TEMPORARY ---*/

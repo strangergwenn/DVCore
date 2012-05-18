@@ -43,6 +43,7 @@ var string 					NewWeaponName;
 
 var bool					bChatting;
 var bool 					bFirstFrame;
+var bool					bWasKilled;
 
 
 /*----------------------------------------------------------
@@ -206,31 +207,22 @@ reliable client function UpdateWeaponList()
 	local byte i;
 	local GFxObject TempObj;
 	local GFxObject DataProvider;
-	local class<DVWeapon> wpClass;
-	local string WeaponClassToLoad;
-	
-	`log("UpdateWeaponList");
 	
 	// Actual menu setting
 	DataProvider = WeaponListMC.GetObject("dataProvider");
-	`log(""$DataProvider @WeaponListMC.GetFloat("rowCount"));
 	for (i = 0; i < PC.WeaponListLength; i++)
 	{
-		// Load a weapon class
-		WeaponClassToLoad = PC.GameModuleName() $"." $ PC.WeaponList[i];
-		wpClass = class<DVWeapon>(DynamicLoadObject(WeaponClassToLoad, class'Class', false));
-		`log(""$wpClass.default.WeaponName);
+		SetupWeaponWidget("Weapon"$i, string(PC.WeaponList[i]));
 		
 		// List item	
 		TempObj = CreateObject("Object");
-		TempObj.SetString("label", wpClass.default.WeaponName);
+		TempObj.SetString("label", string(PC.WeaponList[i]));
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	
 	// List update
-	`log("WeaponListMC = "@WeaponListMC);
 	WeaponListMC.SetObject("dataProvider", DataProvider);
-	WeaponListMC.SetInt("rowCount", i);
+	WeaponListMC.SetInt("rowCount", 1);
 }
 
 
@@ -241,6 +233,8 @@ reliable client function UpdateWeaponList()
 /*--- Buttons ---*/
 event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget)
 {
+	local GFxClikWidget TempObject;
+	
 	switch(WidgetName)
 	{
 		// Buttons
@@ -257,7 +251,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		/// Lists
 		case ('WeaponList'):
 			WeaponListMC = GetLiveWidget(Widget, 'CLIK_itemClick', OnWeaponClick);
-			UpdateWeaponList();
+			PC.UpdateWeaponList();
 			break;
 		case ('ScoreListRed'):
 			ScoreListRed = GFxClikWidget(Widget);
@@ -265,7 +259,20 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		case ('ScoreListBlue'):
 			ScoreListBlue = GFxClikWidget(Widget);
 			break;
-			
+		
+		// Weapon widgets
+		case ('Weapon0'):
+		case ('Weapon1'):
+		case ('Weapon2'):
+		case ('Weapon3'):
+		case ('Weapon4'):
+		case ('Weapon5'):
+		case ('Weapon6'):
+		case ('Weapon7'):
+			TempObject = GFxClikWidget(Widget);
+			TempObject.AddEventListener('CLIK_click', OnWeaponWidgetClick);
+			break;
+		
 		default: return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
 	}
 	return true;
@@ -290,17 +297,39 @@ function OnWeaponClick(GFxClikWidget.EventData ev)
 	
 	// Restart
 	SetGameUnPaused();
-	PC.HUDRespawn(NewWeapon, !bFirstFrame);
+	PC.HUDRespawn(!bFirstFrame, NewWeapon);
+	bCaptureInput = false;
+	bFirstFrame = false;
+}
+
+
+/*--- Weapon selection ---*/
+function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
+{
+	// Vars
+	local int i;
+	local GFxObject button;
+	local class<DVWeapon> NewWeapon;
+	
+	// Weapon ID
+	button = ev._this.GetObject("target");
+	i = int(Right(button.GetString("name"), 1));
+	NewWeapon = PC.WeaponList[i];
+	
+	// Restart
+	SetGameUnPaused();
+	PC.HUDRespawn(!bFirstFrame, NewWeapon);
 	bCaptureInput = false;
 	bFirstFrame = false;
 }
 
 
 /*--- Respawn menu ---*/
-reliable client simulated function OpenRespawnMenu()
+reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
 	bChatting = false;
 	bCaptureInput = false;
+	bWasKilled = bKilledMenu;
 	
 	SetGamePaused();
 	Scene.GotoAndPlayI(2);
@@ -320,6 +349,10 @@ function TogglePause()
 /*--- Pause end ---*/
 function OnResume(GFxClikWidget.EventData evtd)
 {
+	if (bWasKilled)
+	{
+		PC.HUDRespawn(!bFirstFrame);
+	}
 	SetGameUnPaused();
 	bCaptureInput = false;
 }
@@ -356,4 +389,13 @@ defaultproperties
 	WidgetBindings(5)={(WidgetName="WeaponList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(6)={(WidgetName="ScoreListRed",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(7)={(WidgetName="ScoreListBlue",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(8)={(WidgetName="Weapon0",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(9)={(WidgetName="Weapon1",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(10)={(WidgetName="Weapon2",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(11)={(WidgetName="Weapon3",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(12)={(WidgetName="Weapon4",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(13)={(WidgetName="Weapon5",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(14)={(WidgetName="Weapon6",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(15)={(WidgetName="Weapon7",WidgetClass=class'GFxClikWidget')}
 }

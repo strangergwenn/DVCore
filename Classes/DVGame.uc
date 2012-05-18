@@ -19,8 +19,6 @@ var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
 
-var (DVGame) const string 				ModuleName;
-
 
 /*----------------------------------------------------------
 	Private attributes
@@ -310,7 +308,6 @@ defaultproperties
 	// Settings
 	bTeamGame=true
 	EndGameTick=0.5
-	ModuleName="DVCore"
 	
 	// Classes
 	HUDType=class'DVHUD'

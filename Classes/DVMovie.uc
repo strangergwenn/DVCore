@@ -166,7 +166,31 @@ function ApplyResolutionSetting(string code, string flag)
 	}	
 	
 }
- 
+
+
+/*----------------------------------------------------------
+	Weapon widget
+----------------------------------------------------------*/
+
+/*--- Set up a weapon widget ---*/
+//DEBUG
+function SetupWeaponWidget(string WidgetName, string WeaponClass)
+{
+	// Vars
+	local class<DVWeapon> wpClass;
+	local string WeaponClassToLoad;
+
+	// Load a weapon class
+	WeaponClassToLoad = "zGame." $ WeaponClass;
+	wpClass = class<DVWeapon>(DynamicLoadObject(WeaponClassToLoad, class'Class', false));
+	
+	// Data
+	SetLabel(WidgetName $".WName", 	wpClass.default.WeaponName, true);
+	SetLabel(WidgetName $".WDesc", 	wpClass.default.WeaponDesc, false);
+	SetLabel(WidgetName $".WStats", wpClass.default.WeaponDamage, false);
+	SetupIcon(WidgetName$".WIcon",	wpClass.default.WeaponIcon);
+}
+
 
 /*----------------------------------------------------------
 	Popup management
@@ -298,6 +322,23 @@ function OnPButton2(GFxClikWidget.EventData evtd)
 /*----------------------------------------------------------
 	Various interface widgets
 ----------------------------------------------------------*/
+
+/*--- Set the loader content ---*/
+simulated function SetupIcon(string IconName, string ImageData)
+{
+	// Vars
+	local GFxObject Icon;
+	local array<ASValue> Args;
+	local ASValue ASVal;
+	
+	// Data
+	ASVal.Type = AS_String;
+	ASVal.s = ImageData;
+	Args[0] = ASVal;
+	Icon = GetSymbol(IconName);
+	Icon.Invoke("LoadIcon", Args);
+}
+
 
 /*--- Set a pie chart and associated label ---*/
 function SetPieChart(string PieName, string LabelName, string LabelText, float x)

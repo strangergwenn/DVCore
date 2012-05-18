@@ -53,6 +53,12 @@ replication
 }
 
 
+/*--- Update the weapon list on HUD ---*/
+function UpdateWeaponList()
+{
+	DVHUD(myHUD).UpdateLists();
+}
+
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
@@ -416,27 +422,17 @@ simulated function string GetPlayerName()
 }
 
 
-/*--- Get module name for dynamic loading ---*/
-reliable client simulated function string GameModuleName()
-{
-	return ServerGameModuleName();
-}
-
-
-/*--- Server-side version ---*/
-reliable server simulated function string ServerGameModuleName()
-{
-	return DVGame(WorldInfo.Game).default.ModuleName;
-}
-
-
 /*----------------------------------------------------------
 	Reliable client/server code
 ----------------------------------------------------------*/
 
 /*--- Call this to respawn the player ---*/
-reliable server simulated function HUDRespawn(class<DVWeapon> NewWeapon, bool bShouldKill)
+reliable server simulated function HUDRespawn(bool bShouldKill, optional class<DVWeapon> NewWeapon)
 {
+	if (NewWeapon == None)
+	{
+		NewWeapon = UserChoiceWeapon;
+	}
 	ServerSetUserChoice(NewWeapon, bShouldKill);
 	SetUserChoice(NewWeapon);
 	ServerReStartPlayer();

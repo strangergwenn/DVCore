@@ -71,7 +71,7 @@ var int 									TargetPitch;
 replication
 {
 	if ( bNetDirty )
-		EnemyTarget, LastEnemyTarget, TargetYaw, TargetPitch, FireRotation, FireLocation;
+		TeamIndex, EnemyTarget, LastEnemyTarget, LastEnemyDir, EnemyDir;
 }
 
 
@@ -123,7 +123,11 @@ reliable server simulated function bool GetNearestEnnemy ()
 	local int 			index, bestIndex, distance, bestDistance;
 	local Pawn 			targetPawn, tempPawn;
 	local array<Pawn>	ResultPawns;
-
+	
+	// Check
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+		return false;
+	
 	// All valid pawns
 	foreach WorldInfo.AllPawns(class'Pawn', targetPawn)
 	{

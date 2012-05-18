@@ -54,7 +54,7 @@ var int									KeyBeingEdited;
 ----------------------------------------------------------*/
 
 /*--- First actions ---*/
-simulated function GetServerContent()
+function GetServerContent()
 {
 	// Init
 	`log("GetServerContent");
