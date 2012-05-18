@@ -29,9 +29,11 @@ var GFxClikWidget 			ScoreListBlue;
 var GFxObject 				AmmoMC;
 var GFxObject 				ChatMC;
 var GFxObject 				HealthMC;
-var GFxObject 				WarningMC;
 var GFxObject 				CounterMC;
 var GFxObject 				ChatTextMC;
+
+var GFxObject 				WarningMC;
+var GFxObject 				SniperMC;
 
 var GFxObject 				Score1MC;
 var GFxObject 				Score2MC;
@@ -56,12 +58,15 @@ simulated function InitParts()
 	
 	// Player info
 	Banner = 		GetSymbol("Banner");
-	WarningMC = 	GetSymbol("WarningLight");
 	AmmoMC = 		GetSymbol("InfoBox.Ammo");
 	HealthMC = 		GetSymbol("InfoBox.Health");
 	CounterMC = 	GetSymbol("InfoBox.Counter");
 	ChatMC = 		GetSymbol("ChatBox.Text");
 	ChatTextMC = 	GetSymbol("ChatBox.Input");
+	
+	// Overlays
+	WarningMC = 	GetSymbol("WarningLight");
+	SniperMC = 		GetSymbol("SniperEffect");
 	
 	// Score
 	Score1MC = 		GetSymbol("T0.Score");
@@ -73,6 +78,7 @@ simulated function InitParts()
 	ScoreListBlue.SetVisible(false);
 	ScoreListRed.SetVisible(false);
 	WarningMC.SetVisible(false);
+	SniperMC.SetVisible(false);
 	bCaptureInput = false;
 	ChatMC.SetText("");
 }
@@ -149,6 +155,13 @@ simulated function SendChatMessage()
 simulated function UpdateChat(string text)
 {
 	ChatMC.SetText(text);
+}
+
+
+/*--- Should we using the sniper effect ---*/
+simulated function SetSniperState(bool bZooming)
+{
+	SniperMC.SetVisible(bZooming);
 }
 
 

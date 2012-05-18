@@ -92,6 +92,13 @@ simulated function PostBeginPlay()
 }
 
 
+/*--- Should we using the sniper effect ---*/
+simulated function SetSniperState(bool bZooming)
+{
+	HudMovie.SetSniperState(bZooming);
+}
+
+
 /*--- Put an on-screen message for some time ---*/
 simulated function GameplayMessage(string text)
 {
