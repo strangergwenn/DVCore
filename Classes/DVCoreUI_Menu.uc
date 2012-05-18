@@ -315,9 +315,9 @@ simulated function GetStatsContent()
 	// Stat block 1
 	SetLabel("StatTitle1", "Efficacité", true);
 	SetLabel("Stat10", string(GStats.Kills) @"victimes", false);
-	SetLabel("Stat11", string(GStats.Kills / GStats.ShotsFired) $"% de précision", false);
+	SetLabel("Stat11", string(100 * (GStats.Headshots) / GStats.Kills) $"% de headshots", false);
 	SetLabel("Stat12", string(GStats.Kills / GStats.Deaths) @"K/D", false);
-	SetPieChart("PieStat1", "Stat13", "Headshots", GStats.Headshots / GStats.Kills);
+	SetPieChart("PieStat1", "Stat13", "Tirs mortels", GStats.Kills / GStats.ShotsFired);
 	
 	// Stat block 2
 	SetLabel("StatTitle2", "Efficacité par arme", true);

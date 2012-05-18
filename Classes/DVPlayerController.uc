@@ -662,11 +662,6 @@ simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
 /*--- Get the leaderboard structure ---*/
 simulated function array<string> GetBestPlayers(bool bIsLocal)
 {
-	//DEBUG
-	AddBestPlayer("Master Gamer", 1, 4873, false);
-	AddBestPlayer("n00b_k3v", 134, 23, true);
-	//DEBUG
-	
 	return (bIsLocal) ? LeaderBoardStructure : LeaderBoardStructure2;
 }
 
