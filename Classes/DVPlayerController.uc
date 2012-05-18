@@ -53,12 +53,6 @@ replication
 }
 
 
-/*--- Update the weapon list on HUD ---*/
-function UpdateWeaponList()
-{
-	DVHUD(myHUD).UpdateLists();
-}
-
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
@@ -67,7 +61,6 @@ function UpdateWeaponList()
 event Possess(Pawn aPawn, bool bVehicleTransition)
 {
 	local string TeamName;
-	
 	super.Possess(aPawn, bVehicleTransition);
 	UpdatePawnColor();
 	
@@ -129,11 +122,11 @@ reliable client event AddBestPlayer(string PlayerName, int Rank, int PlayerPoint
 {
 	if (bIsLocal)
 	{
-		LeaderBoardStructure.AddItem(PlayerName $ " : " $ PlayerPoints $ " points");
+		LeaderBoardStructure.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
 	}
 	else
 	{
-		LeaderBoardStructure2.AddItem(PlayerName $ " : " $ PlayerPoints $ " points");
+		LeaderBoardStructure2.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
 	}
 }
 
@@ -669,15 +662,12 @@ simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
 /*--- Get the leaderboard structure ---*/
 simulated function array<string> GetBestPlayers(bool bIsLocal)
 {
-	local byte i;
-	local array<string> Result;
+	//DEBUG
+	AddBestPlayer("Master Gamer", 1, 4873, false);
+	AddBestPlayer("n00b_k3v", 134, 23, true);
+	//DEBUG
 	
-	for (i = 0; i < LeaderBoardLength; i++)
-	{
-		Result.AddItem((bIsLocal?i+142:i+1) $ ". " $ "Player" $ " : " $ ((bIsLocal?1561:6373)-173*i) $ " pts");
-	}
-	
-	return Result;
+	return (bIsLocal) ? LeaderBoardStructure : LeaderBoardStructure2;
 }
 
 

@@ -62,8 +62,6 @@ event PostRender()
 	// End
 	ToggleRespawnMenu();
 	super.PostRender();
-	
-	//PutShadedText(BlueColor, myOwner.DebugField, 20, 200);
 }
 
 
@@ -169,42 +167,6 @@ function DisplayConsoleMessages()
 		text $= "\n";
 	}
 	HUDMovie.UpdateChat(text);
-}
-
-
-/*--- Launch weapon list update ---*/
-function UpdateLists()
-{
-	SetTimer(0.01, false, 'UpdateWeaponList');
-}
-function UpdateWeaponList()
-{
-	HudMovie.UpdateWeaponList();
-}
-
-
-/*--- TEMPORARY ---*/
-function PutShadedText(LinearColor col, string StringMessage2, float ScreenX, float ScreenY)
-{
-	PutText(col ,StringMessage2, ScreenX, ScreenY, true);
-	PutText(col ,StringMessage2, ScreenX, ScreenY, false);
-}
-function PutText(LinearColor col, string StringMessage2, float ScreenX, float ScreenY, bool bIsShade)
-{
-	Canvas.Font = GetFontSizeIndex(2);
-	
-	if (bIsShade)
-	{
-		Canvas.SetPos(ScreenX + 1.5, ScreenY);
-		Canvas.SetDrawColor(0,0,0,255);
-		Canvas.DrawText(StringMessage2, false, 1.00, 1.15, TextRenderInfo );
-	}
-	else
-	{
-		Canvas.SetPos(ScreenX, ScreenY);
-		Canvas.SetDrawColor(col.R, col.G, col.B, 255);
-		Canvas.DrawText(StringMessage2, false, , , TextRenderInfo );
-	}
 }
 
 
