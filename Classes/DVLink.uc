@@ -363,7 +363,6 @@ defaultproperties
 	TimeoutLength=5.0
 	ServerListUpdateFrequency=20.0
 	
-	MasterServerIP="server2.arbona.eu"
+	MasterServerIP="master.deepvoid.eu"
 	MasterServerPort=1337
 }
-

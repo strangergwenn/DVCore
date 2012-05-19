@@ -26,6 +26,13 @@ var (DVKillMarker) MaterialInstanceConstant MarkerMaterial2;
 
 
 /*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (DVKillMarker) localized string	lKilledBy;
+
+
+/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -114,7 +121,7 @@ function OnRender(Canvas C)
 	offset += DrawLine(C, MarkerText1, offset);
 	if (MarkerText2 != "")
 	{
-		offset += DrawLine(C, "tué par", offset);
+		offset += DrawLine(C, lKilledBy, offset);
 		offset += DrawLine(C, MarkerText2, offset);
 	}
 	

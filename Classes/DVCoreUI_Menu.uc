@@ -13,11 +13,72 @@ class DVCoreUI_Menu extends DVMovie;
 ----------------------------------------------------------*/
 
 var (CoreUI) const array<string>		IgnoredMaps;
-var (CoreUI) const array<string>		MenuListData;
-var (CoreUI) const array<string>		ResListData;
-
-var (CoreUI) const array<string>		KeyListData;
 var (CoreUI) const array<string>		BindListData;
+
+/*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (CoreUI) localized string			lGameStats;
+var (CoreUI) localized string			lGlobalStats;
+var (CoreUI) localized string			lLastGame;
+var (CoreUI) localized string			lRanking;
+var (CoreUI) localized string			lBestPlayers;
+var (CoreUI) localized string			lEfficiency;
+var (CoreUI) localized string			lVictims;
+var (CoreUI) localized string			lDeadlyShots;
+var (CoreUI) localized string			lHeadshots;
+var (CoreUI) localized string			lEffByWeapon;
+var (CoreUI) localized string			lFledGame;
+var (CoreUI) localized string			lTeamHas;
+var (CoreUI) localized string			lWon;
+var (CoreUI) localized string			lLost;
+var (CoreUI) localized string			lLastrank;
+var (CoreUI) localized string			lDeaths;
+var (CoreUI) localized string			lShotsFired;
+var (CoreUI) localized string			lYouAreRanked;
+var (CoreUI) localized string			lYouAreNotRanked;
+var (CoreUI) localized string			lYouHave;
+var (CoreUI) localized string			lPoints;
+var (CoreUI) localized string			lWeapon0;
+var (CoreUI) localized string			lWeapon1;
+var (CoreUI) localized string			lWeapon2;
+var (CoreUI) localized string			lWeapon3;
+var (CoreUI) localized string			lWeapon4;
+var (CoreUI) localized string			lMultiplayerGames;
+var (CoreUI) localized string			lLocalGames;
+var (CoreUI) localized string			lServerList;
+var (CoreUI) localized string			lActions;
+var (CoreUI) localized string			lPlayers;
+var (CoreUI) localized string			lConnect;
+var (CoreUI) localized string			lConnecting;
+var (CoreUI) localized string			lRegistering;
+var (CoreUI) localized string			lConnected;
+var (CoreUI) localized string			lPConnect;
+var (CoreUI) localized string			lPPlayer;
+var (CoreUI) localized string			lPPassword;
+var (CoreUI) localized string			lPConnectButton;
+var (CoreUI) localized string			lPNewPlayer;
+var (CoreUI) localized string			LPNewAccount;
+var (CoreUI) localized string			LPEmail;
+var (CoreUI) localized string			LPRegister;
+var (CoreUI) localized string			lPBack;
+var (CoreUI) localized string			lIncorrectData;
+var (CoreUI) localized string			lWrongPassword;
+var (CoreUI) localized string			lProblem;
+var (CoreUI) localized string			lSettings;
+var (CoreUI) localized string			lVideo;
+var (CoreUI) localized string			lKeys;
+var (CoreUI) localized string			lIngameMusic;
+var (CoreUI) localized string			lImpactIndicator;
+var (CoreUI) localized string			lFullScreen;
+var (CoreUI) localized string			lWaitingForKey;
+var (CoreUI) localized string			lJoinGame;
+var (CoreUI) localized string			lSaveSettings;
+
+var (CoreUI) localized array<string>	MenuListData;
+var (CoreUI) localized array<string>	ResListData;
+var (CoreUI) localized array<string>	KeyListData;
 
 
 /*----------------------------------------------------------
@@ -62,10 +123,10 @@ function GetServerContent()
 	HidePopup(true);
 	
 	// Labels
-	SetLabel("MenuTitle", "Parties en ligne", true);
-	SetLabel("MapTitle", "Parties en solo", true);
-	SetLabel("ServerTitle", "Parties en ligne", true);
-	SetLabel("ButtonsTitle", "Actions", true);
+	SetLabel("MenuTitle", lMultiplayerGames, true);
+	SetLabel("MapTitle", lLocalGames, true);
+	SetLabel("ServerTitle", lServerList, true);
+	SetLabel("ButtonsTitle", lActions, true);
 }
 
 
@@ -107,7 +168,7 @@ function string FormatServerInfo(string ServerName, string Level, string Game, i
 	ServerName = Caps(ServerName);
 	Game = GetRightMost(Game);
 	Level = Caps(Repl(Level, ".udk", "", false));
-	return (ServerName $ "\n" $Players $"/" $MaxPlayers $" joueurs, " $Game $"\n" $Level);
+	return (ServerName $ "\n" $Players $"/" $MaxPlayers @ lPlayers $"," @Game $"\n" $Level);
 }
 
 
@@ -179,13 +240,13 @@ function SetConnectState(bool bIsButtonDisabled, optional int Level)
 	switch (Level)
 	{
 		case (0):
-			Message = "Se connecter à DeepVoid.eu";
+			Message = lConnect;
 			break; 
 		case (1):
-			Message = "Connexion...";
+			Message = lConnecting;
 			break; 
 		case (2):
-			Message = "Connexion réussie";
+			Message = lConnected;
 			break; 
 	}
 	PlayerConnect.SetString("label", Message);
@@ -208,24 +269,24 @@ function OpenConnectionDialog(bool bShowRegister)
 	`log("OpenConnectionDialog");
 	if (!bShowRegister)
 	{
-		Text[0] = "Connexion DeepVoid";
-		Text[1] = "Joueur";
-		Text[2] = "Mot de passe";
+		Text[0] = lPConnect;
+		Text[1] = lPPlayer;
+		Text[2] = lPPassword;
 		Text[3] = "";
 		Text[4] = "";
-		Text[5] = "Connexion";
-		Text[6] = "Nouveau ?";
+		Text[5] = lPConnectButton;
+		Text[6] = lPNewPlayer;
 		SetPopup(Text, 2);
 	}
 	else
 	{
-		Text[0] = "Nouveau compte";
-		Text[1] = "Joueur";
-		Text[2] = "Mot de passe";
-		Text[3] = "Mot de passe";
-		Text[4] = "E-mail";
-		Text[5] = "S'enregistrer";
-		Text[6] = "Retour";
+		Text[0] = lPNewAccount;
+		Text[1] = lPPlayer;
+		Text[2] = lPPassword;
+		Text[3] = lPPassword;
+		Text[4] = LPEmail;
+		Text[5] = LPRegister;
+		Text[6] = lPBack;
 		SetPopup(Text, 2, 3);
 	}
 	if (PC != None)
@@ -246,22 +307,22 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	
 	// Checking
 	if (Len(Result[0]) < 4 || (bIsInRegisterPopup && Len(Result[3]) < 10))
-		SetPopupStatus("Données incorrectes");
+		SetPopupStatus(lIncorrectData);
 	else if (bIsInRegisterPopup && Result[1] != Result[2])
-		SetPopupStatus("Mots de passe différents");
+		SetPopupStatus(lWrongPassword);
 	
 	// Actions
 	else if (!bIsInRegisterPopup)
 	{
 		PC.SaveIDs(Result[0], Result[1]);
 		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
-		SetPopupStatus("Connexion...");
+		SetPopupStatus(lConnecting);
 		SetConnectState(true, 1);
 	}
 	else
 	{
 		PC.MasterServerLink.RegisterUser(Result[0], Result[3], Result[1]);
-		SetPopupStatus("Enregistrement...");
+		SetPopupStatus(lRegistering);
 		SetConnectState(true, 1);
 	}
 }
@@ -286,7 +347,7 @@ function GetPopupResult(bool bSuccess, string Msg)
 	}
 	else	
 	{
-		SetPopupStatus((Msg != "") ? Msg : "Un problème s'est produit");
+		SetPopupStatus((Msg != "") ? Msg : lProblem);
 		SetConnectState(false, 0);
 	}
 }
@@ -306,45 +367,45 @@ simulated function GetStatsContent()
 	GStats = DVHUD_Menu(PC.myHUD).GlobalStats;
 	
 	// General
-	SetLabel("MenuTitle", "Statistiques de jeu", true);
-	SetLabel("StatGenTitle1", "Statistiques globales", true);
-	SetLabel("StatGenTitle2", "Dernière partie", true);
-	SetLabel("StatGenTitle3", "DeepVoid rank", true);
-	SetLabel("StatGenTitle4", "Meilleurs joueurs", true);
+	SetLabel("MenuTitle", lGameStats, true);
+	SetLabel("StatGenTitle1", lGlobalStats, true);
+	SetLabel("StatGenTitle2", lLastGame, true);
+	SetLabel("StatGenTitle3", lRanking, true);
+	SetLabel("StatGenTitle4", lBestPLayers, true);
 	
 	// Stat block 1
-	SetLabel("StatTitle1", "Efficacité", true);
-	SetLabel("Stat10", string(GStats.Kills) @"victimes", false);
-	SetLabel("Stat11", string(100 * (GStats.Headshots) / GStats.Kills) $"% de headshots", false);
+	SetLabel("StatTitle1", lEfficiency, true);
+	SetLabel("Stat10", string(GStats.Kills) @lVictims, false);
+	SetLabel("Stat11", string(100 * (GStats.Headshots) / GStats.Kills) $"%" @lHeadshots, false);
 	SetLabel("Stat12", string(GStats.Kills / GStats.Deaths) @"K/D", false);
-	SetPieChart("PieStat1", "Stat13", "Tirs mortels", GStats.Kills / GStats.ShotsFired);
+	SetPieChart("PieStat1", "Stat13", lDeadlyShots, GStats.Kills / GStats.ShotsFired);
 	
 	// Stat block 2
-	SetLabel("StatTitle2", "Efficacité par arme", true);
-	SetLabel("Stat20", "Fusil d'assaut: " @string(GStats.WeaponScores[0]) @"victimes", false);
-	SetLabel("Stat21", "Sniper :" @string(GStats.WeaponScores[1]) @"victimes", false);
-	SetLabel("Stat22", "Shotgun :" @string(GStats.WeaponScores[2]) @"victimes", false);
-	SetLabel("Stat23", "Canon plasma :" @string(GStats.WeaponScores[3]) @"victimes", false);
-	SetLabel("Stat24", "Lance-grenades :" @string(GStats.WeaponScores[4]) @"victimes", false);
+	SetLabel("StatTitle2", lEffByWeapon, true);
+	SetLabel("Stat20", lWeapon0 @":" @string(GStats.WeaponScores[0]) @lVictims, false);
+	SetLabel("Stat21", lWeapon1 @":" @string(GStats.WeaponScores[1]) @lVictims, false);
+	SetLabel("Stat22", lWeapon2 @":" @string(GStats.WeaponScores[2]) @lVictims, false);
+	SetLabel("Stat23", lWeapon3 @":" @string(GStats.WeaponScores[3]) @lVictims, false);
+	SetLabel("Stat24", lWeapon4 @":" @string(GStats.WeaponScores[4]) @lVictims, false);
 	
 	// Stat block 3
 	if (LStats.bHasLeft)
-		SetLabel("Stat30", "Vous avez fui la partie", false);
+		SetLabel("Stat30", lFledGame, false);
 	else
-		SetLabel("Stat30", "Votre équipe a " $ (LStats.bHasWon ? "gagné" : "perdu"), false);
+		SetLabel("Stat30", lTeamHas $ (LStats.bHasWon ? lWon : lLost), false);
 	
-	SetLabel("Stat31", "Terminée au rang" @string(LStats.Rank), false);
-	SetLabel("Stat32", string(LStats.Kills) @"victimes", false);
-	SetLabel("Stat33", string(LStats.Deaths) @"morts", false);
-	SetLabel("Stat34", string(LStats.ShotsFired) @"tirs effectués", false);
+	SetLabel("Stat31", lLastRank @string(LStats.Rank), false);
+	SetLabel("Stat32", string(LStats.Kills) @lVictims, false);
+	SetLabel("Stat33", string(LStats.Deaths) @lDeaths, false);
+	SetLabel("Stat34", string(LStats.ShotsFired) @lShotsfired, false);
 	
 	// Stat block 4
 	if (GStats.Rank > 0)
-		RankInfo = "Vous êtes classé au rang " $ string(GStats.Rank);
+		RankInfo = lYouAreRanked @ string(GStats.Rank);
 	else
-		RankInfo = "Vous n'êtes pas classé";
+		RankInfo = lYouAreNotRanked;
 	SetLabel("Stat40", RankInfo, false);
-	SetLabel("Stat41", "Vous avez " $ string(GStats.Points) $ " points", false);
+	SetLabel("Stat41", lYouHave $ string(GStats.Points) @lPoints, false);
 }
 
 
@@ -383,18 +444,18 @@ simulated function GetOptionsContent()
 	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// General
-	SetLabel("MenuTitle", "Configuration du jeu", true);
-	SetLabel("OptionGenTitle1", "Audio & Vidéo", true);
-	SetLabel("OptionGenTitle3", "Touches", true);
+	SetLabel("MenuTitle", lSettings, true);
+	SetLabel("OptionGenTitle1", lVideo, true);
+	SetLabel("OptionGenTitle3", lKeys, true);
 	
 	// Unused
 	tmpDisabled = GetSymbol("OptionGenTitle2");
 	tmpDisabled.SetVisible(false);
 	
 	// Option block 1
-	SetWidgetLabel("OptionCB1", "Musique en jeu", false);
-	SetWidgetLabel("OptionCB2", "Indicateur d'impact", false);
-	SetWidgetLabel("OptionCB3", "Plein écran", false);
+	SetWidgetLabel("OptionCB1", lIngameMusic, false);
+	SetWidgetLabel("OptionCB2", lImpactIndicator, false);
+	SetWidgetLabel("OptionCB3", lFullScreen, false);
 	SetChecked("OptionCB1", HInfo.LocalStats.bBackgroundMusic);
 	SetChecked("OptionCB2", HInfo.LocalStats.bUseSoundOnHit);
 	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);
@@ -440,7 +501,7 @@ function EditKey(GFxClikWidget.EventData ev)
 	    button = ev._this.GetObject("target");
 	    
 		KeyBeingEdited = (IsInArray(Split(button.GetString("text"), "   |   ", true), KeyListData, true) + 1);
-		SetLabel("Key" $KeyBeingEdited, "Attente de la nouvelle touche", false);
+		SetLabel("Key" $KeyBeingEdited, lWaitingForKey, false);
 		
 		bIsKeyEditing = true;
 		bCaptureInput = false;
@@ -536,12 +597,12 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Buttons
 		case ('OpenServerButton'):
 			ServerConnect = GetLiveWidget(Widget, 'CLIK_click', OpenServer);
-			ServerConnect.SetString("label", "Rejoindre la partie sélectionnée");
+			ServerConnect.SetString("label", lJoinGame);
 			ServerConnect.SetBool("enabled", false);
 			break;
 		case ('PlayerConnectButton'):
 			PlayerConnect = GetLiveWidget(Widget, 'CLIK_click', OnPlayerConnect);
-			PlayerConnect.SetString("label", "Se connecter à DeepVoid.eu");
+			PlayerConnect.SetString("label", lConnect);
 			break;
 		case ('ResolutionList'):
 			ResListMC = GFxClikWidget(Widget);
@@ -567,7 +628,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		case ('SaveVideoSettings'):
 			SaveVideoSettings = GFxClikWidget(Widget);
 			SaveVideoSettings.AddEventListener('CLIK_click', ValidateSettings);
-			SaveVideoSettings.SetString("label", "Sauvegarder les réglages");
+			SaveVideoSettings.SetString("label", lSaveSettings);
 			break;
 			
 		default: return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
@@ -626,18 +687,14 @@ function DisplayResponse (bool bSuccess, string Msg)
 
 defaultproperties
 {
+	// Game settings
 	bCaptureInput=true
-	 
-	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
-	
-	MenuListData=("Parties","Statistiques","Réglages","Quitter")
-	ResListData=("Ecran HDReady (720p)","Ecran HD (1080p)","Défaut (max)")
-	KeyListData=("Avancer","Reculer","Aller à gauche","Aller à droite","Sauter","Se baisser","Désactiver le pointeur", "Afficher les scores", "Parler")
-	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk")
-	
 	ServerURL="deepvoid.eu"
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
+	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
+	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk")
 	
+	// Bindings
 	WidgetBindings(3)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(4)={(WidgetName="ServerList",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(5)={(WidgetName="MenuList",WidgetClass=class'GFxClikWidget')}

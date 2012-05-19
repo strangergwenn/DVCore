@@ -21,6 +21,21 @@ var (DVPC) const int 				LocalLeaderBoardOffset;
 
 
 /*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (DVPC) localized string			lYouAreInTeam;
+var (DVPC) localized string			lTeamSwitch;
+var (DVPC) localized string			lEmptyWeapon;
+var (DVPC) localized string			lJoinedGame;
+
+var (DVPC) localized string			lKilledBy;
+var (DVPC) localized string			lKilled;
+var (DVPC) localized string			lLost;
+var (DVPC) localized string			lWon;
+
+
+/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -64,8 +79,8 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	super.Possess(aPawn, bVehicleTransition);
 	UpdatePawnColor();
 	
-	TeamName = (GetTeamIndex() == 0) ? "rouge" : "bleue";
-	ShowGenericMessage("Vous êtes dans l'équipe " $ TeamName);
+	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
+	ShowGenericMessage(lYouAreInTeam @ TeamName);
 }
 
 
@@ -170,7 +185,7 @@ exec function SwitchTeam()
 {
 	SetEnemyTeamInfo(DVTeamInfo(PlayerReplicationInfo.Team));
 	super.Switchteam();
-	DVHUD(myHUD).GameplayMessage("Changement d'équipe");	
+	DVHUD(myHUD).GameplayMessage(lTeamSwitch);	
 }
 
 
@@ -239,7 +254,7 @@ unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)
 }
 unreliable client simulated function NotifyNewPlayer(string PlayerName)
 {
-	ShowGenericMessage("" $PlayerName $ " a rejoint la partie");
+	ShowGenericMessage("" $PlayerName @ lJoinedGame);
 }
 
 
@@ -247,7 +262,7 @@ unreliable client simulated function NotifyNewPlayer(string PlayerName)
 unreliable client simulated function ShowKilledBy(string KillerName)
 {
 	RegisterDeath();
-	ShowGenericMessage("Vous avez été tué par " $ KillerName $ " !");
+	ShowGenericMessage(lKilledBy @ KillerName $ " !");
 }
 
 
@@ -255,14 +270,14 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 unreliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
 {
 	RegisterKill(bTeamKill);
-	ShowGenericMessage("Vous avez tué " $ KilledName $ " !");
+	ShowGenericMessage(lKilled @ KilledName $ " !");
 }
 
 
 /*--- Show the killer message ---*/ 
 unreliable client simulated function ShowEmptyAmmo()
 {
-	ShowGenericMessage("Votre arme est vide !");
+	ShowGenericMessage(lEmptyWeapon);
 }
 
 
@@ -363,10 +378,7 @@ reliable client simulated function SignalEndGame(bool bHasWon)
 	DVHUD(myHUD).ShowPlayerList();
 	LockCamera(true);
 	
-	ShowGenericMessage((bHasWon) ? 
-		"Vous avez gagné la partie !" : 
-		"Vous avez perdu la partie !"
-	);
+	ShowGenericMessage((bHasWon) ? lWon : lLost); 
 	
 	SaveGameStatistics(bHasWon);
 	GotoState('RoundEnded');
@@ -452,7 +464,6 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 /* Client weapon switch */
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon)
 {
-	`log("Player choosed " $ NewWeapon);
 	UserChoiceWeapon = NewWeapon;
 }
 

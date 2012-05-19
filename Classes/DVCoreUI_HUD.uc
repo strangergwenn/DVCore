@@ -13,6 +13,12 @@ class DVCoreUI_HUD extends DVMovie;
 
 var (HUD) const int			WarningThreshold;
 
+var (HUD) localized string 	lChooseWeapon;
+var (HUD) localized string 	lSwitchTeam;
+var (HUD) localized string 	lQuitGame;
+var (HUD) localized string 	lPointsOn;
+var (HUD) localized string 	lPV;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -98,7 +104,7 @@ simulated function UpdateInfo(int health, int ammo, int max)
 	AmmoMC.GotoAndStopI(100.0 * (float(ammo) / float(max)));
 	
 	// Text
-	CounterMC.SetText(ammo @"/" @max @"           " @health $"pv");
+	CounterMC.SetText(ammo @"/" @max @"           " @health @ lPV);
 	
 	// Health warning
 	if (health <= WarningThreshold)
@@ -123,8 +129,8 @@ simulated function StartTalking()
 /*--- Score update ---*/
 simulated function UpdateScore(int s1, int s2, int max)
 {
-	Score1MC.SetText("" $ s1 @ "points sur "@max);
-	Score2MC.SetText("" $ s1 @ "points sur "@max);
+	Score1MC.SetText("" $ s1 @ lPointsOn @max);
+	Score2MC.SetText("" $ s1 @ lPointsOn @max);
 	Progress1MC.GotoAndStopI(round(100.0 * (float(s1) / float(max))));
 	Progress2MC.GotoAndStopI(round(100.0 * (float(s2) / float(max))));
 }
@@ -219,7 +225,7 @@ reliable client function UpdateWeaponList()
 	local GFxObject TempObject;
 	
 	// Title
-	SetLabel("WeaponTitle", "Choisissez une arme...", false);
+	SetLabel("WeaponTitle", lChooseWeapon, false);
 	
 	// Weapon list
 	for (i = 0; i < PC.WeaponListLength; i++)
@@ -250,7 +256,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Exit
 		case ('ExitMenu'):
 			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
-			SetWidgetLabel("ExitMenu", "Quitter la partie", false);
+			SetWidgetLabel("ExitMenu", lQuitGame, false);
 			
 			// By the way...
 			UpdateWeaponList();
@@ -259,7 +265,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Team switch
 		case ('SwitchTeam'):
 			SwitchTeamButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnSwitchTeam);
-			SetWidgetLabel("SwitchTeam", "Changer d'équipe", false);
+			SetWidgetLabel("SwitchTeam", lSwitchTeam, false);
 			SwitchTeamButtonMC.SetVisible(!bFirstFrame && PC.Pawn.Health <= 0);
 			break;
 		

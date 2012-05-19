@@ -29,7 +29,7 @@ var (DVTurret) const name 					GunControllerName;
 var (DVTurret) const name 					MainControllerName;
 var (DVTurret) const name 					FireSocket;
 
-var (DVTurret) const string					KillString;
+var (DVTurret) localized string				KillString;
 
 
 /*----------------------------------------------------------

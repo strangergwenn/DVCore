@@ -36,15 +36,21 @@ var (DVWeapon) const array<name> 			EffectSockets;
 var (DVWeapon) name							ZoomSocket;
 
 var (DVWeapon) Texture2D					WeaponIcon;
-var (DVWeapon) string						WeaponName;
-var (DVWeapon) string						WeaponDesc;
-var (DVWeapon) string						WeaponDamage;
 var (DVWeapon) string						WeaponIconPath;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
 var (DVWeapon) class<DVWeaponAddon>			AddonClass1;
 var (DVWeapon) class<DVWeaponAddon>			AddonClass2;
+
+
+/*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (DVWeapon) localized string				lWeaponName;
+var (DVWeapon) localized string				lWeaponDesc;
+var (DVWeapon) localized string				lWeaponDamage;
 
 
 /*----------------------------------------------------------

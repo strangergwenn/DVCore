@@ -41,6 +41,14 @@ var (DVPawn) const array<MaterialInstanceConstant> TeamMaterials;
 
 
 /*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (DVPawn) localized string		lPickedUp;
+var (DVPawn) localized string		lBullets;
+
+
+/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -229,7 +237,7 @@ simulated function AddWeaponAmmo(int amount)
 		Weapon.AddAmmo(amount);
 	
 	if (Controller != None)
-		DVPlayerController(Controller).ShowGenericMessage("Vous avez ramassé " $ amount $ " balles");
+		DVPlayerController(Controller).ShowGenericMessage(lPickedUp @ amount @ lBullets);
 }
 
 
@@ -797,7 +805,5 @@ defaultproperties
 	// Default
 	DefaultFOV=90
 	RecoilAngle=0.0
-	UserName="Quelqu'un"
-	KillerName="lui-même"
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

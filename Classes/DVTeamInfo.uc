@@ -9,6 +9,14 @@ class DVTeamInfo extends TeamInfo;
 
 
 /*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (DVTI) localized string			lName0;
+var (DVTI) localized string			lName1;
+
+
+/*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
 
@@ -30,9 +38,9 @@ reliable server simulated function AddKill(bool bTeamKill)
 simulated function string GetHumanReadableName()
 {
 	if (TeamIndex == 0)
-		return "Red";
+		return lName0;
 	else
-		return "Blue";
+		return lName1;
 }
 
 
