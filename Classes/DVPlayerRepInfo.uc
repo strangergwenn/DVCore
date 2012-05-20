@@ -79,7 +79,6 @@ reliable server simulated function SetBeamState(bool NewStatus)
 /*--- Death scored ---*/
 reliable server simulated function ScoreDeath()
 {
-	DVTeamInfo(Team).AddKill(false);
 	DeathCount += 1;
 	bForceNetUpdate = true;
 }

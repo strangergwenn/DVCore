@@ -183,7 +183,6 @@ exec function StartFire(optional byte FireModeNum = 0)
 /*--- Team switch ---*/
 exec function SwitchTeam()
 {
-	SetEnemyTeamInfo(DVTeamInfo(PlayerReplicationInfo.Team));
 	super.Switchteam();
 	DVHUD(myHUD).GameplayMessage(lTeamSwitch);	
 }

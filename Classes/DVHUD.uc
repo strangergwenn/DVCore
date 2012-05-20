@@ -48,14 +48,17 @@ event PostRender()
 		HudMovie.UpdateInfo(myOwner.Pawn.Health, myOwner.GetAmmoCount(), myOwner.GetAmmoMax());
 	}
 	
-	// Score
+	// Score display using team replication data
 	if (myOwner.PlayerReplicationInfo.Team != None)
 	{
 		TI0 = DVTeamInfo(myOwner.PlayerReplicationInfo.Team);
 		TI1 = myOwner.EnemyTeamInfo;
 		if (TI0 != None && TI1 != None)
 		{
-			HudMovie.UpdateScore(TI0.GetScore(), TI1.GetScore(), myOwner.GetTargetScore());
+			if (TI0.TeamIndex == 0)
+				HudMovie.UpdateScore(TI0.GetScore(), TI1.GetScore(), myOwner.GetTargetScore());
+			else
+				HudMovie.UpdateScore(TI1.GetScore(), TI0.GetScore(), myOwner.GetTargetScore());
 		}
 	}
 	

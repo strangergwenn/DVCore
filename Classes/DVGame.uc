@@ -159,7 +159,10 @@ function ScoreKill(Controller Killer, Controller Other)
 	{
 		// Team kill data
 		if (KillerPRI.Team != None && DVPlayerController(Other) != None)
-			bIsTeamKill = (DVPlayerController(Killer).GetTeamIndex() == DVPlayerController(Other).GetTeamIndex());
+			bIsTeamKill = (
+					DVPlayerController(Killer).GetTeamIndex()
+				 == DVPlayerController(Other).GetTeamIndex()
+			);
 		else
 			bIsTeamKill = false;
 		
