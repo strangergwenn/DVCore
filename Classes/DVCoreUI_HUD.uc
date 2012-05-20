@@ -217,6 +217,16 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 	}
 	List.SetObject("dataProvider", DataProvider);
 	List.SetFloat("rowCount", j);
+	
+	// Current player is selected
+	if (PC == None)
+	{
+		return;
+	}
+	else if (TeamIndex == PC.GetTeamIndex())
+	{
+		List.SetInt("selectedIndex", PC.GetLocalRank() - 1);
+	}
 }
 
 

@@ -641,7 +641,7 @@ reliable client simulated function int GetLocalRank()
 	{
 		`log("Comparing " $ PList[i] $ " to " $ DVPlayerRepInfo(PlayerReplicationInfo));
 		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
-			return i;
+			return i + 1;
 	}
 	return 0;
 }
