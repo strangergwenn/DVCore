@@ -534,14 +534,14 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	// Resolution
 	HInfo = DVHUD_Menu(PC.myHUD);
 	button = GetSymbol("ResolutionList");
-	res = Split(ResListData[int(button.GetString("selectedIndex"))], "(", false);
+	res = Split(ResListData[int(button.GetString("selectedIndex"))], "[", false);
 	`log("Clicked resolution " $ res);
 	
 	// Application
 	PlayUISound(ClickSound);
 	flag = (IsChecked("OptionCB3") ? "f" : "w");
-	res = Repl(res, "(", "");
-	res = Repl(res, ")", "");
+	res = Repl(res, "[", "");
+	res = Repl(res, "]", "");
 	ApplyResolutionSetting(res, flag);
 	
 	// Options

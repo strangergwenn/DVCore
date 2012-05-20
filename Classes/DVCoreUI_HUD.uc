@@ -104,7 +104,7 @@ simulated function UpdateInfo(int health, int ammo, int max)
 	AmmoMC.GotoAndStopI(100.0 * (float(ammo) / float(max)));
 	
 	// Text
-	CounterMC.SetText(ammo @"/" @max @"           " @health @ lPV);
+	CounterMC.SetText(ammo @"/" @max @"         " @health @ lPV);
 	
 	// Health warning
 	if (health <= WarningThreshold)

@@ -152,6 +152,7 @@ function PlayUISound(SoundCue sound)
 /*--- Apply a resolution code ---*/
 function ApplyResolutionSetting(string code, string flag)
 {
+	`log("ApplyResolutionSetting" @code @flag);
 	switch (code)
 	{
 		case ("720p"):
@@ -163,8 +164,7 @@ function ApplyResolutionSetting(string code, string flag)
 		case ("max"):
 			ConsoleCommand("SetRes 6000x3500" $flag);
 			break;
-	}	
-	
+	}
 }
 
 
