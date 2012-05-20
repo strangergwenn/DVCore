@@ -130,7 +130,7 @@ simulated function StartTalking()
 simulated function UpdateScore(int s1, int s2, int max)
 {
 	Score1MC.SetText("" $ s1 @ lPointsOn @max);
-	Score2MC.SetText("" $ s1 @ lPointsOn @max);
+	Score2MC.SetText("" $ s2 @ lPointsOn @max);
 	Progress1MC.GotoAndStopI(round(100.0 * (float(s1) / float(max))));
 	Progress2MC.GotoAndStopI(round(100.0 * (float(s2) / float(max))));
 }
@@ -205,7 +205,9 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 	DataProvider = List.GetObject("dataProvider");
 	for (i = 0; i < PRList.Length; i++)
 	{
-		if (PRList[i].Team.TeamIndex == TeamIndex)
+		if (PRList[i].Team == None)
+			continue;
+		else if (PRList[i].Team.TeamIndex == TeamIndex)
 		{
 			TempObj = CreateObject("Object");
 			TempObj.SetString("label", PRList[i].PlayerName $ " : "$ PRList[i].KillCount $ " K, "$ PRList[i].DeathCount $ " D");
@@ -237,7 +239,8 @@ reliable client function UpdateWeaponList()
 	for (i = PC.WeaponListLength; i < 8; i++)
 	{
 		TempObject = GetSymbol("Weapon"$i);
-		TempObject.SetVisible(false);
+		if (TempObject != None)
+			TempObject.SetVisible(false);
 	}
 }
 

@@ -41,13 +41,13 @@ var DynamicLightEnvironmentComponent 		LightEnvironment;
 var SkelControlSingleBone 					GunController;
 var SkelControlSingleBone 					MainController;
 
-var Pawn 									EnemyTarget;
-var Pawn 									LastEnemyTarget;
+var repnotify Pawn 							EnemyTarget;
+var repnotify Pawn 							LastEnemyTarget;
 
 var rotator 								FireRotation;
 var vector 									FireLocation;
-var vector 									LastEnemyDir;
-var vector 									EnemyDir;
+var repnotify vector 						LastEnemyDir;
+var repnotify vector 						EnemyDir;
 
 var float 									GElapsedTime;
 var float 									ElapsedTime;
@@ -72,6 +72,16 @@ replication
 {
 	if ( bNetDirty )
 		TeamIndex, EnemyTarget, LastEnemyTarget, LastEnemyDir, EnemyDir;
+}
+
+simulated event ReplicatedEvent(name VarName)
+{
+	`log("ReplicatedEvent" @ VarName);
+	if ( VarName == 'EnemyTarget' )
+	{
+		if (EnemyTarget != None && IsValidTarget(EnemyTarget))
+			CalculateInterpTime(EnemyTarget.Location);
+	}
 }
 
 
@@ -117,7 +127,7 @@ function TimedFire()
 ----------------------------------------------------------*/
 
 /*--- Find the ennemy ---*/
-reliable server simulated function bool GetNearestEnnemy ()
+simulated function bool GetNearestEnnemy ()
 {
 	// Vars
 	local int 			index, bestIndex, distance, bestDistance;
@@ -125,7 +135,7 @@ reliable server simulated function bool GetNearestEnnemy ()
 	local array<Pawn>	ResultPawns;
 	
 	// Check
-	if (WorldInfo.NetMode != NM_DedicatedServer)
+	if (WorldInfo.NetMode != NM_DedicatedServer && WorldInfo.NetMode != NM_StandAlone)
 		return false;
 	
 	// All valid pawns
@@ -162,7 +172,11 @@ simulated function bool IsValidTarget(Pawn P)
 {
 	if (P != None && FastTrace(P.Location, FireLocation))
 	{
-		return (P.isA('DVPawn') && P.Health > 0 && TeamIndex != DVPawn(P).GetTeamIndex());
+		return (
+			   P.isA('DVPawn')
+			&& P.Health > 0 
+			&& TeamIndex != DVPawn(P).GetTeamIndex()
+		);
 	}
 	else
 		return false;
@@ -174,8 +188,9 @@ simulated function bool IsValidTarget(Pawn P)
 ----------------------------------------------------------*/
 
 /*--- Launch rotation ---*/
-reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
+function DoRotation(Rotator NewRotation, Float InterpTime)
 {
+	`log("DoRotation" @NewRotation @InterpTime);
 	StartYaw = MainController.BoneRotation.Yaw;
 	TargetYaw = NewRotation.Yaw;
 	YawRotationAlpha = 0.0;
@@ -194,6 +209,7 @@ reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
 /*--- Yaw rotation ---*/
 function RotateYawTimer()
 {
+	`log("RotateYawTimer" @YawRotationAlpha @YawInterpTime);
 	YawRotationAlpha += 0.033;
 	if(YawRotationAlpha <= YawInterpTime)
 	{
@@ -206,6 +222,7 @@ function RotateYawTimer()
 /*--- Pitch rotation ---*/
 function RotatePitchTimer()
 {
+	`log("RotatePitchTimer" @PitchRotationAlpha @PitchInterpTime);
 	PitchRotationAlpha += 0.033;
 	if(PitchRotationAlpha <= PitchInterpTime)
 	{
@@ -269,6 +286,7 @@ function Tick(Float Delta)
 /*--- Interpolation settings ---*/
 simulated function bool CalculateInterpTime(Vector TargetLocation)
 {
+	`log("CalculateInterpTime" @TargetLocation);
 	EnemyDir = TargetLocation - Location;
 	if(EnemyDir != LastEnemyDir || ElapsedTime >= YawInterpTime || ElapsedTime >= PitchInterpTime)
 	{
@@ -332,9 +350,4 @@ defaultproperties
 	bEdShouldSnap=true
 	bCollideActors=true
 	bPathColliding=true
-	
-	// Modes
-	Physics=PHYS_Interpolating
-	TickGroup=TG_PostAsyncWork
-	RemoteRole=ROLE_SimulatedProxy
 }

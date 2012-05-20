@@ -405,7 +405,7 @@ simulated function GetStatsContent()
 	else
 		RankInfo = lYouAreNotRanked;
 	SetLabel("Stat40", RankInfo, false);
-	SetLabel("Stat41", lYouHave $ string(GStats.Points) @lPoints, false);
+	SetLabel("Stat41", lYouHave @ string(GStats.Points) @lPoints, false);
 }
 
 
