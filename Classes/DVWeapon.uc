@@ -171,25 +171,42 @@ simulated function Tick(float DeltaTime)
 	local vector EndTrace, SocketLocation, Unused;
 	local rotator SocketRotation;
 	local vector Impact;
+	local bool bShouldUseDirectAim;
 	local DVPawn target;
 	
 	// Init
 	Super.Tick(DeltaTime);
 	target = DVPawn(Owner);
 	if (target == None)
+	{
 		return;
-	
-	// Mesh
+	}
 	Mesh.SetHidden(false);
-	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
-		`warn("GetSocketWorldLocationAndrotation Tick failed ");
 	
-	// Impact location calculation
-	SocketLocation = DVPawn(Owner).GetZoomViewLocation(); // ignore previous result !
-	EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
-	Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
+	// Should we use direct aim or weapon axis for beam
+	if (IsZoomed())
+	{
+		if (Addon1 != None)
+			bShouldUseDirectAim = Addon1.HasLens();
+		if (!bShouldUseDirectAim && Addon2 != None)
+			bShouldUseDirectAim = Addon2.HasLens();
+	}
 	
-	// Laser pointer
+	// Weapon rotation or direct aim ?
+	if (bShouldUseDirectAim)
+	{
+		SocketLocation = DVPawn(Owner).GetPawnViewLocation();
+		EndTrace = SocketLocation + vector(DVPawn(Owner).GetBaseAimRotation()) * 10000.0;
+	}
+	else
+	{
+		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
+			`warn("GetSocketWorldLocationAndrotation Tick failed ");
+		SocketLocation = DVPawn(Owner).GetZoomViewLocation(); // ignore previous result !
+		EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
+	}
+	
+	// Laser pointer update
 	if (BeamPSC != None)
 	{
 		if (UseBeam() && !bBeamActive)
@@ -204,6 +221,7 @@ simulated function Tick(float DeltaTime)
 		}
 		if (bBeamActive)
 		{
+			Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
 			BeamPSC.SetVectorParameter('BeamEnd', Impact);
 		}
 	}
@@ -262,21 +280,38 @@ simulated function vector GetZoomViewLocation()
 }
 
 
-/*--- Zoom managment ---*/
+/*--- Zoom state ---*/
 simulated function bool IsZoomed()
 {
 	return bZoomed;	
 }
+
+
+/*--- Zoomed sensitivity factor ---*/
 simulated function float GetZoomFactor()
 {
 	return ZoomSensitivity;
 }
+
+
+/*--- Begin zoom state ---*/
 simulated function ZoomIn()
 {
+	if (Addon1 != None)
+		Addon1.StartZoom();
+	if (Addon2 != None)
+		Addon2.StartZoom();
 	bZoomed = true;
 }
+
+
+/*--- End zoom state ---*/
 simulated function ZoomOut()
 {
+	if (Addon1 != None)
+		Addon1.StopZoom();
+	if (Addon2 != None)
+		Addon2.StopZoom();
 	bZoomed = false;
 }
 
@@ -349,6 +384,12 @@ simulated function FireAmmunition()
 		bWeaponEmpty = true;
 		return;
 	}
+	
+	// Addons
+	if (Addon1 != None)
+		Addon1.FireAmmo();
+	if (Addon2 != None)
+		Addon2.FireAmmo();
 	
 	// Logging
 	AmmoCount -= 1;

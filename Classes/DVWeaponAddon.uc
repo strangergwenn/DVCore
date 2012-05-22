@@ -24,6 +24,10 @@ var (Addon) float			AmmoBonus;
 
 var (Addon) name			MountSocket;
 
+var (Addon) bool			bUseLens;
+
+var (Addon) DVWeapon		Weap;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -49,6 +53,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	`log("WPN (" $ Self $ ") Attaching to " $ wp);
 	Mesh.SetShadowParent(wp.Mesh);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket);
+	Weap = wp;
 	
 	// Properties override
 	if (SmoothingFactor != 0.0)
@@ -70,6 +75,34 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.InstantHitDamage[0] *= DamageBonus;
 	if (FireRateBonus != 0.0)
 		wp.FireInterval[0] /= FireRateBonus;
+}
+
+/*--- Zoom lens feature ---*/
+simulated function bool HasLens()
+{
+	return bUseLens;
+}
+
+
+/*--- Called when firing ammos ---*/
+simulated function FireAmmo()
+{}
+
+
+/*--- Called when zoom starts, only if zoom modifier ---*/
+simulated function StartZoom()
+{
+	if (bUseLens)
+	{
+		DVHUD(DVPlayerController(DVPawn(Weap.Owner).Controller).myHUD).SetSniperState(true);
+	}
+}
+
+
+/*--- Called when zoom stops ---*/
+simulated function StopZoom()
+{
+	DVHUD(DVPlayerController(DVPawn(Weap.Owner).Controller).myHUD).SetSniperState(false);
 }
 
 
@@ -104,4 +137,5 @@ defaultproperties
 	DamageBonus=0.0
 	ZoomedFOV=0.0
 	AmmoBonus=0.0
+	bUseLens=false
 }
