@@ -36,8 +36,8 @@ var (DVPawn) const SoundCue			HitSound;
 
 var (DVPawn) const ParticleSystem	HitPSCTemplate;
 var (DVPawn) const ParticleSystem	LargeHitPSCTemplate;
-var (DVPawn) const ParticleSystem	BloodDecalPSCTemplate;
 var (DVPawn) const array<MaterialInstanceConstant> TeamMaterials;
+var (DVPawn) const array<MaterialInstanceConstant> BloodDecals;
 
 
 /*----------------------------------------------------------
@@ -572,12 +572,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (SplatteredActor != None)
 	{
 		if (!SplatteredActor.IsA('Pawn'))
-		{
-			if (bWasHS)
-				FireParticleSystem(LargeHitPSCTemplate, BloodImpact, rotator(BloodNormal));
-			else
-				FireParticleSystem(BloodDecalPSCTemplate, BloodImpact, rotator(BloodNormal));
-		}
+			SpawnBloodDecal(BloodImpact, BloodNormal, HitInfo);
 	}
 	
 	// Sound
@@ -585,6 +580,32 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		PlaySound(HitSound, false, true, false, Location);
 	
 	Super.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType, HitInfo, DamageCauser);
+}
+
+
+/*--- Spawn a blood decal ---*/
+simulated function SpawnBloodDecal(vector BLocation, vector BRotation, TraceHitInfo HitInfo)
+{
+	// Vars
+	local MaterialInstanceConstant DecalTemplate;
+	local MaterialInstanceConstant Decal;
+	local float DecalSize;
+	
+	/*--- Random settings ---*/
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
+	DecalSize = FRand() * 100.0;
+	DecalTemplate = BloodDecals[Rand(BloodDecals.Length - 1)];
+	
+	/*--- Actual settings ---*/
+	Decal = new(Outer) class'MaterialInstanceConstant';
+	Decal.SetParent(DecalTemplate);
+	WorldInfo.MyDecalManager.SpawnDecal(
+		Decal,
+		BLocation,
+		rotator(-BRotation),
+		DecalSize, DecalSize, 100, false,,, true, false
+	);
 }
 
 
@@ -784,13 +805,17 @@ defaultproperties
 	CylinderComponent=CollisionCylinder
 	CollisionComponent=CollisionCylinder
 	
+	// Blood
+	BloodDecals(0)=MaterialInstanceConstant'DV_CoreEffects.Material.MI_Blood1'
+	BloodDecals(1)=MaterialInstanceConstant'DV_CoreEffects.Material.MI_Blood2'
+	BloodDecals(2)=MaterialInstanceConstant'DV_CoreEffects.Material.MI_Blood3'
+	
 	// Weapons
 	EyeSocket=EyeSocket
 	WeaponSocket=WeaponPoint
 	WeaponSocket2=DualWeaponPoint
 	InventoryManagerClass=class'DVCore.DVInventoryManager'
 	HitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit'
-	BloodDecalPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodDecal'
 	LargeHitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit_Large'
 	
 	// Gameplay

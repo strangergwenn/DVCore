@@ -286,7 +286,7 @@ function Tick(Float Delta)
 /*--- Interpolation settings ---*/
 simulated function bool CalculateInterpTime(Vector TargetLocation)
 {
-	`log("CalculateInterpTime" @TargetLocation);
+	//`log("CalculateInterpTime" @TargetLocation);
 	EnemyDir = TargetLocation - Location;
 	if(EnemyDir != LastEnemyDir || ElapsedTime >= YawInterpTime || ElapsedTime >= PitchInterpTime)
 	{
