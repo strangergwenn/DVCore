@@ -572,7 +572,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (SplatteredActor != None)
 	{
 		if (!SplatteredActor.IsA('Pawn'))
-			SpawnBloodDecal(BloodImpact, BloodNormal, HitInfo);
+			SpawnBloodDecal(BloodImpact, BloodNormal);
 	}
 	
 	// Sound
@@ -584,7 +584,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 
 
 /*--- Spawn a blood decal ---*/
-simulated function SpawnBloodDecal(vector BLocation, vector BRotation, TraceHitInfo HitInfo)
+simulated function SpawnBloodDecal(vector BLocation, vector BRotation)
 {
 	// Vars
 	local MaterialInstanceConstant DecalTemplate;
@@ -595,7 +595,7 @@ simulated function SpawnBloodDecal(vector BLocation, vector BRotation, TraceHitI
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	DecalSize = FRand() * 100.0;
-	DecalTemplate = BloodDecals[Rand(BloodDecals.Length - 1)];
+	DecalTemplate = BloodDecals[Rand(BloodDecals.Length)];
 	
 	/*--- Actual settings ---*/
 	Decal = new(Outer) class'MaterialInstanceConstant';
