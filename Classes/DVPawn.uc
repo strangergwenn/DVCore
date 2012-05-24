@@ -368,6 +368,16 @@ simulated function rotator GetSmoothedRotation()
 	local vector CurLoc;
 	local float SmoothingFactor;
 	
+	// Perfect smooth condition
+	if (DVWeapon(Weapon).IsZoomed() && DVWeapon(Weapon).HasLensEffect())
+	{
+		SmoothingFactor = 1.0;
+	}
+	else
+	{
+		SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
+	}
+	
 	// Bone rotation (measure)
 	if (Mesh == None)
 		return rotator(vect(0, 0, 0));

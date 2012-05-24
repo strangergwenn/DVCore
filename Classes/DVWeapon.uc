@@ -29,6 +29,7 @@ var (DVWeapon) float						RecoilAngle;
 var (DVWeapon) float 						ZoomedFOV;
 
 var (DVWeapon) int							MaxAmmo;
+var (DVWeapon) int							TickDivisor;
 
 var (DVWeapon) const name					LaserBeamSocket;
 var (DVWeapon) const name					WeaponFireAnim;
@@ -63,6 +64,7 @@ var ParticleSystemComponent		BeamPSC;
 var bool						bWeaponEmpty;
 var bool						bBeamActive;
 var bool						bZoomed;
+var int							FrameCount;
 
 
 /*----------------------------------------------------------
@@ -168,43 +170,25 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 /*--- Laser pointer end --*/
 simulated function Tick(float DeltaTime)
 {
-	local vector EndTrace, SocketLocation, Unused;
+	local vector Impact, EndTrace, SocketLocation, Unused;
 	local rotator SocketRotation;
-	local vector Impact;
-	local bool bShouldUseDirectAim;
 	local DVPawn target;
 	
 	// Init
+	FrameCount += 1;
 	Super.Tick(DeltaTime);
 	target = DVPawn(Owner);
-	if (target == None)
+	Mesh.SetHidden(false);
+	if (target == None || FrameCount % TickDivisor != 0)
 	{
 		return;
 	}
-	Mesh.SetHidden(false);
 	
-	// Should we use direct aim or weapon axis for beam
-	if (IsZoomed())
-	{
-		if (Addon1 != None)
-			bShouldUseDirectAim = Addon1.HasLens();
-		if (!bShouldUseDirectAim && Addon2 != None)
-			bShouldUseDirectAim = Addon2.HasLens();
-	}
-	
-	// Weapon rotation or direct aim ?
-	if (bShouldUseDirectAim)
-	{
-		SocketLocation = DVPawn(Owner).GetPawnViewLocation();
-		EndTrace = SocketLocation + vector(DVPawn(Owner).GetBaseAimRotation()) * 10000.0;
-	}
-	else
-	{
-		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
-			`warn("GetSocketWorldLocationAndrotation Tick failed ");
-		SocketLocation = DVPawn(Owner).GetZoomViewLocation(); // ignore previous result !
-		EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
-	}
+	// Trace
+	else if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
+		`warn("GetSocketWorldLocationAndrotation Tick failed ");
+	EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
+	Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
 	
 	// Laser pointer update
 	if (BeamPSC != None)
@@ -221,8 +205,7 @@ simulated function Tick(float DeltaTime)
 		}
 		if (bBeamActive)
 		{
-			Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
-			BeamPSC.SetVectorParameter('BeamEnd', Impact);
+			BeamPSC.SetVectorParameter('BeamEnd', VSize(Impact - SocketLocation) * vect(1,0,0));
 		}
 	}
 }
@@ -313,6 +296,18 @@ simulated function ZoomOut()
 	if (Addon2 != None)
 		Addon2.StopZoom();
 	bZoomed = false;
+}
+
+
+/*--- Use lens effect ---*/
+simulated function bool HasLensEffect()
+{
+	local bool bShouldUseDirectAim;
+	if (Addon1 != None)
+		bShouldUseDirectAim = Addon1.HasLens();
+	if (!bShouldUseDirectAim && Addon2 != None)
+		bShouldUseDirectAim = Addon2.HasLens();
+	return bShouldUseDirectAim;
 }
 
 
@@ -607,6 +602,7 @@ defaultproperties
 	Spread(1)=0.0
 
 	// User settings
+	TickDivisor=5
 	ZoomedFOV=60
 	ZoomSocket=Mount2
 	ZoomSensitivity=0.3

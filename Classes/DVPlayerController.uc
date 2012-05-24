@@ -18,6 +18,7 @@ var (DVPC) const float 				ScoreLength;
 
 var (DVPC) const int 				LeaderBoardLength;
 var (DVPC) const int 				LocalLeaderBoardOffset;
+var (DVPC) const int 				TickDivisor;
 
 
 /*----------------------------------------------------------
@@ -47,6 +48,7 @@ var DVTeamInfo						EnemyTeamInfo;
 var DVLink							MasterServerLink;
 
 var int								MaxScore;
+var int								FrameCount;
 
 var byte							WeaponListLength;
 
@@ -209,7 +211,8 @@ event PlayerTick(float DeltaTime)
 	local DVPawn P;
 	local Actor Target;
 	
-	if (Pawn != None && Pawn.Weapon != None)
+	FrameCount += 1;
+	if (Pawn != None && Pawn.Weapon != None && FrameCount % TickDivisor == 0)
 	{
 		// Data
 		P = DVPawn(Pawn);
@@ -704,6 +707,7 @@ defaultproperties
 {
 	bLocked=true
 	
+	TickDivisor=5
 	ScoreLength=4.0
 	LeaderBoardLength=10
 	LocalLeaderBoardOffset=4
