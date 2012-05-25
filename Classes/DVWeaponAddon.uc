@@ -44,13 +44,11 @@ var StaticMeshComponent 	Mesh;
 /*--- Weapon attachment ---*/
 simulated function AttachToWeapon(DVWeapon wp)
 {
-	`log("AttachToWeapon " $ self);
 	if (MountSocket == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
 		return;
 	
 	// Mesh
 	AttachComponent(Mesh);
-	`log("WPN (" $ Self $ ") Attaching to " $ wp);
 	Mesh.SetShadowParent(wp.Mesh);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket);
 	Weap = wp;
@@ -76,6 +74,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (FireRateBonus != 0.0)
 		wp.FireInterval[0] /= FireRateBonus;
 }
+
 
 /*--- Zoom lens feature ---*/
 simulated function bool HasLens()

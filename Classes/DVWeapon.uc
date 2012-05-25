@@ -457,14 +457,14 @@ simulated function PlayImpactEffects(vector HitLocation)
 			CheckHitInfo(HitInfo, Pawn(HitActor).Mesh, -HitNormal, NewHitLoc);
 		}
 		
-		// Sound effects
-		if (ImpactEffect.Sound != None)
-		{
-			PlaySound(ImpactEffect.Sound, true,,, HitLocation);
-		}
+		// Sound effects : default, default, advanced
 		if (DVPawn(HitActor) != None)
 		{
-			DVPlayerController(P.Controller).PlayHitSound();
+			DVPlayerController(DVPawn(HitActor).Controller).PlayHitSound();
+		}
+		else if (HitInfo.PhysMaterial.ImpactSound != None)
+		{
+			PlaySound(HitInfo.PhysMaterial.ImpactSound, false, true, false, HitLocation);
 		}
 		
 		// Particle system template

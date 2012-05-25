@@ -41,27 +41,27 @@ var DynamicLightEnvironmentComponent 		LightEnvironment;
 var SkelControlSingleBone 					GunController;
 var SkelControlSingleBone 					MainController;
 
-var repnotify Pawn 							EnemyTarget;
-var repnotify Pawn 							LastEnemyTarget;
+var Pawn 									EnemyTarget;
+var Pawn 									LastEnemyTarget;
 
 var rotator 								FireRotation;
 var vector 									FireLocation;
-var repnotify vector 						LastEnemyDir;
-var repnotify vector 						EnemyDir;
+var vector 									LastEnemyDir;
+var vector 									EnemyDir;
 
 var float 									GElapsedTime;
 var float 									ElapsedTime;
 var float 									FullRevTime;
 
-var float 									YawRotationAlpha;
-var float 									YawInterpTime;
 var int 									StartYaw;
 var int 									TargetYaw;
+var float 									YawInterpTime;
+var repnotify float 						YawRotationAlpha;
 
-var float 									PitchRotationAlpha;
-var float 									PitchInterpTime;
 var int 									StartPitch;
 var int 									TargetPitch;
+var float 									PitchInterpTime;
+var repnotify float 						PitchRotationAlpha;
 
 
 /*----------------------------------------------------------
@@ -70,17 +70,30 @@ var int 									TargetPitch;
 
 replication
 {
-	if ( bNetDirty )
-		TeamIndex, EnemyTarget, LastEnemyTarget, LastEnemyDir, EnemyDir;
+	if ( bNetDirty && Role == ROLE_Authority)
+		TeamIndex,
+		YawInterpTime, PitchInterpTime,
+		YawRotationAlpha, PitchRotationAlpha,
+		StartYaw, StartPitch,
+		TargetYaw, TargetPitch;
 }
 
 simulated event ReplicatedEvent(name VarName)
 {
 	`log("ReplicatedEvent" @ VarName);
-	if ( VarName == 'EnemyTarget' )
+	
+	// Yaw rotation
+	if (VarName == 'YawRotationAlpha')
 	{
-		if (EnemyTarget != None && IsValidTarget(EnemyTarget))
-			CalculateInterpTime(EnemyTarget.Location);
+		if(YawRotationAlpha <= YawInterpTime)
+   			SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
+	}
+	
+	// Pitch rotation
+	if (VarName == 'PitchRotationAlpha')
+	{
+		if(PitchRotationAlpha <= PitchInterpTime)
+   			SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
 	}
 }
 
@@ -188,7 +201,7 @@ simulated function bool IsValidTarget(Pawn P)
 ----------------------------------------------------------*/
 
 /*--- Launch rotation ---*/
-function DoRotation(Rotator NewRotation, Float InterpTime)
+reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
 {
 	`log("DoRotation" @NewRotation @InterpTime);
 	StartYaw = MainController.BoneRotation.Yaw;
@@ -213,9 +226,23 @@ function RotateYawTimer()
 	YawRotationAlpha += 0.033;
 	if(YawRotationAlpha <= YawInterpTime)
 	{
-   		MainController.BoneRotation.Yaw = Lerp(StartYaw, TargetYaw, YawRotationAlpha);
+   		SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
 	}
    	else ClearTimer('RotateYawTimer');
+}
+
+
+/*--- Yaw rotation update ---*/
+function SetYaw(float Newvalue)
+{
+	MainController.BoneRotation.Yaw = NewValue;
+}
+
+
+/*--- Pitch rotation update ---*/
+function SetPitch(float Newvalue)
+{
+	GunController.BoneRotation.Pitch = NewValue;
 }
 
 
@@ -226,7 +253,7 @@ function RotatePitchTimer()
 	PitchRotationAlpha += 0.033;
 	if(PitchRotationAlpha <= PitchInterpTime)
 	{
-   		GunController.BoneRotation.Pitch = Lerp(StartPitch, TargetPitch, PitchRotationAlpha);
+   		SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
 	}
    	else ClearTimer('RotatePitchTimer');
 }
@@ -237,9 +264,9 @@ function Tick(Float Delta)
 {
 	local bool 			bHasAcquiredTarget;
 	local bool			result;
-
+	
 	if (Health <= 0) return;
-
+	
 	if(GElapsedTime > 1.0)
 	{
 		// Target search
@@ -255,7 +282,7 @@ function Tick(Float Delta)
 		}
 	}
 	else GElapsedTime += Delta;
-
+	
 	// Targetting confirmation and timing calculation
 	if (EnemyTarget != None && IsValidTarget(EnemyTarget))
 		result = CalculateInterpTime(EnemyTarget.Location);
@@ -264,21 +291,21 @@ function Tick(Float Delta)
 		ClearTimer('TimedFire');
 		return;
 	}
-
+	
 	if (EnemyTarget != LastEnemyTarget || result)
 		ElapsedTime = Delta;
 	else
 		ElapsedTime += Delta;
-
+	
 	// Moving to position
 	if(PitchInterpTime == 0)	PitchRotationAlpha = 1.0;
 	else						PitchRotationAlpha = FClamp(ElapsedTime / PitchInterpTime,0.0,1.0);
-	GunController.BoneRotation.Pitch = Lerp(StartPitch, TargetPitch, PitchRotationAlpha);
-
+	SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
+	
 	if(YawInterpTime == 0)		YawRotationAlpha = 1.0;
 	else						YawRotationAlpha = FClamp(ElapsedTime / YawInterpTime,0.0,1.0);
-	MainController.BoneRotation.Yaw = Lerp(StartYaw, TargetYaw, YawRotationAlpha);
-
+	SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
+	
 	Mesh.GetSocketWorldLocationAndRotation(FireSocket, FireLocation, FireRotation);
 }
 
@@ -340,6 +367,8 @@ defaultproperties
 	FireSocket=FireLocation
 	GunControllerName=GunController
 	MainControllerName=MainController
+	RemoteRole=ROLE_SimulatedProxy
+	Physics=PHYS_Interpolating
 	
 	// Settings
 	Health=65000
