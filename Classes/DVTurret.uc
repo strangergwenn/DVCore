@@ -40,7 +40,7 @@ var DynamicLightEnvironmentComponent 		LightEnvironment;
 var SkelControlSingleBone 					GunController;
 var SkelControlSingleBone 					MainController;
 
-var Pawn 									EnemyTarget;
+var repnotify Pawn 							EnemyTarget;
 var Pawn 									LastEnemyTarget;
 
 var rotator 								FireRotation;
@@ -55,12 +55,12 @@ var float 									FullRevTime;
 var int 									StartYaw;
 var int 									TargetYaw;
 var float 									YawInterpTime;
-var repnotify float 						YawRotationAlpha;
+var float 									YawRotationAlpha;
 
 var int 									StartPitch;
 var int 									TargetPitch;
 var float 									PitchInterpTime;
-var repnotify float 						PitchRotationAlpha;
+var float 									PitchRotationAlpha;
 
 
 /*----------------------------------------------------------
@@ -70,26 +70,16 @@ var repnotify float 						PitchRotationAlpha;
 replication
 {
 	if ( bNetDirty && Role == ROLE_Authority)
-		TeamIndex,
-		YawRotationAlpha, PitchRotationAlpha,
-		StartYaw, StartPitch,
-		TargetYaw, TargetPitch;
+		TeamIndex, EnemyTarget;
 }
 
 simulated event ReplicatedEvent(name VarName)
 {
 	`log("ReplicatedEvent" @ VarName);
 	
-	// Yaw rotation
-	if (VarName == 'YawRotationAlpha')
+	if (VarName == 'EnemyTarget')
 	{
-   		SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
-	}
-	
-	// Pitch rotation
-	if (VarName == 'PitchRotationAlpha')
-	{
-   		SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
+		DoRotation(Rotator((EnemyTarget.Location - FireLocation + vect(0,0,100)) << Rotation), 1.0);
 	}
 }
 
@@ -99,7 +89,7 @@ simulated event ReplicatedEvent(name VarName)
 ----------------------------------------------------------*/
 
 /*--- Game start ---*/
-event PostBeginPlay()
+simulated event PostBeginPlay()
 {
 	Super.PostBeginPlay();
 
@@ -110,7 +100,7 @@ event PostBeginPlay()
 
 
 /*--- Firing management ---*/
-function TimedFire()
+reliable server simulated function TimedFire()
 {
 	local Projectile Proj;
 
@@ -118,15 +108,23 @@ function TimedFire()
 	if(Proj != None && !Proj.bDeleteMe )
 	{
 		Proj.Init(Vector(FireRotation));
-		if(MuzzleFlashEmitter != None && WorldInfo.NetMode != NM_DedicatedServer)
-		{
-			WorldInfo.MyEmitterPool.SpawnEmitter(
-				MuzzleFlashEmitter,
-				FireLocation,
-				FireRotation);
-		}
+		ClientFireEffects();
 		if(FireSound != None)
 			PlaySound(FireSound);
+	}
+}
+
+
+/*--- Client-side only effects ---*/
+reliable client simulated function ClientFireEffects()
+{
+	Mesh.GetSocketWorldLocationAndRotation(FireSocket, FireLocation, FireRotation);
+	if(MuzzleFlashEmitter != None && WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		WorldInfo.MyEmitterPool.SpawnEmitter(
+			MuzzleFlashEmitter,
+			FireLocation,
+			FireRotation);
 	}
 }
 
@@ -197,7 +195,7 @@ simulated function bool IsValidTarget(Pawn P)
 ----------------------------------------------------------*/
 
 /*--- Launch rotation ---*/
-reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
+simulated function DoRotation(Rotator NewRotation, Float InterpTime)
 {
 	`log("DoRotation" @NewRotation @InterpTime);
 	StartYaw = MainController.BoneRotation.Yaw;
@@ -216,7 +214,7 @@ reliable server function DoRotation(Rotator NewRotation, Float InterpTime)
 
 
 /*--- Yaw rotation ---*/
-function RotateYawTimer()
+simulated function RotateYawTimer()
 {
 	`log("RotateYawTimer" @YawRotationAlpha @YawInterpTime);
 	YawRotationAlpha += 0.033;
@@ -229,21 +227,21 @@ function RotateYawTimer()
 
 
 /*--- Yaw rotation update ---*/
-function SetYaw(float Newvalue)
+simulated function SetYaw(float Newvalue)
 {
 	MainController.BoneRotation.Yaw = NewValue;
 }
 
 
 /*--- Pitch rotation update ---*/
-function SetPitch(float Newvalue)
+simulated function SetPitch(float Newvalue)
 {
 	GunController.BoneRotation.Pitch = NewValue;
 }
 
 
 /*--- Pitch rotation ---*/
-function RotatePitchTimer()
+simulated function RotatePitchTimer()
 {
 	`log("RotatePitchTimer" @PitchRotationAlpha @PitchInterpTime);
 	PitchRotationAlpha += 0.033;
@@ -256,7 +254,7 @@ function RotatePitchTimer()
 
 
 /*--- Movement ---*/
-function Tick(Float Delta)
+simulated function Tick(Float Delta)
 {
 	local bool 			bHasAcquiredTarget;
 	local bool			result;
@@ -270,7 +268,7 @@ function Tick(Float Delta)
 		bHasAcquiredTarget = GetNearestEnnemy();
 
 		// Firing management
-		Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
+		Mesh.GetSocketWorldLocationAndRotation(FireSocket, FireLocation, FireRotation);
 		if (bHasAcquiredTarget)
 		{
 			DoRotation(Rotator((EnemyTarget.Location - FireLocation + vect(0,0,100)) << Rotation), 1.0);

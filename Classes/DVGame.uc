@@ -40,9 +40,22 @@ var float							RestartTimer;
 /*--- Standard team creation ---*/
 function PreBeginPlay()
 {
+	// Vars
+	local DVTurretController DVTC;
+	local DVTurretSocket PS;
+	
+	// Game
 	super.PreBeginPlay();
 	CreateTeam(0);
 	CreateTeam(1);
+	
+	// Spawn turrets
+	foreach WorldInfo.AllNavigationPoints(class'DVTurretSocket', PS)
+	{
+		DVTC = spawn(PS.TurretControllerClass);
+		SetTeam(DVTC,Teams[PS.TeamIndex], false);
+		RestartPlayer(DVTC);
+	}
 }
 
 
@@ -209,7 +222,7 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	// All player starts
 	foreach WorldInfo.AllNavigationPoints(class'PlayerStart', P)
 	{
-		if ( P.bEnabled )
+		if (P.bEnabled && (Player.IsA('DVTurretController') == P.IsA('DVTurretSocket')))
 			PlayerStarts[PlayerStarts.Length] = P;
 	}
 	RandStart = Rand(PlayerStarts.Length);
