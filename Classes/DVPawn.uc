@@ -604,7 +604,7 @@ simulated function SpawnBloodDecal(vector BLocation, vector BRotation)
 	/*--- Random settings ---*/
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
-	DecalSize = FRand() * 100.0;
+	DecalSize = FRand() * 200.0;
 	DecalTemplate = BloodDecals[Rand(BloodDecals.Length)];
 	
 	/*--- Actual settings ---*/

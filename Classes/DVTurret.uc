@@ -5,8 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class DVTurret extends Pawn
-	placeable
+class DVTurret extends UDKPawn
 	ClassGroup(DeepVoid)
 	hidecategories(Collision, Physics);
 
@@ -72,7 +71,6 @@ replication
 {
 	if ( bNetDirty && Role == ROLE_Authority)
 		TeamIndex,
-		YawInterpTime, PitchInterpTime,
 		YawRotationAlpha, PitchRotationAlpha,
 		StartYaw, StartPitch,
 		TargetYaw, TargetPitch;
@@ -85,15 +83,13 @@ simulated event ReplicatedEvent(name VarName)
 	// Yaw rotation
 	if (VarName == 'YawRotationAlpha')
 	{
-		if(YawRotationAlpha <= YawInterpTime)
-   			SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
+   		SetYaw(Lerp(StartYaw, TargetYaw, YawRotationAlpha));
 	}
 	
 	// Pitch rotation
 	if (VarName == 'PitchRotationAlpha')
 	{
-		if(PitchRotationAlpha <= PitchInterpTime)
-   			SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
+   		SetPitch(Lerp(StartPitch, TargetPitch, PitchRotationAlpha));
 	}
 }
 
@@ -367,7 +363,6 @@ defaultproperties
 	FireSocket=FireLocation
 	GunControllerName=GunController
 	MainControllerName=MainController
-	RemoteRole=ROLE_SimulatedProxy
 	Physics=PHYS_Interpolating
 	
 	// Settings
@@ -379,4 +374,5 @@ defaultproperties
 	bEdShouldSnap=true
 	bCollideActors=true
 	bPathColliding=true
+	ControllerClass=class'DVCore.DVTurretController'
 }

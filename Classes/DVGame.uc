@@ -13,6 +13,7 @@ class DVGame extends UDKGame;
 ----------------------------------------------------------*/
 
 var (DVGame) const class<DVWeapon> 		DefaultWeaponList[8];
+var (DVGame) const class<DVTurret>		DefaultTurretClass;
 
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
@@ -105,6 +106,16 @@ function AddDefaultInventory(Pawn PlayerPawn)
 }
 
 
+/*--- Get the default class for pawns ---*/
+function class<Pawn> GetDefaultPlayerClass(Controller C)
+{
+	if (C.IsA('DVTurretController'))
+		return DefaultTurretClass;
+	else
+		return DefaultPawnClass;
+}
+
+
 /*--- Stub ---*/
 function ScoreUpdated()
 {
@@ -190,7 +201,7 @@ function ScoreKill(Controller Killer, Controller Other)
 /*--- Player start determination ---*/
 function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 {
-	local array<playerstart> PlayerStarts;
+	local array<PlayerStart> PlayerStarts;
 	local PlayerStart 		P, BestStart;
 	local float 			BestRating, NewRating;
 	local int 				i, RandStart;
@@ -207,6 +218,8 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	for (i = RandStart; i < PlayerStarts.Length; i++)
 	{
 		P = PlayerStarts[i];
+		if (!CheckIfOK(P))
+			continue;
 		NewRating = RatePlayerStart(P, InTeam, Player);
 		
 		if ( NewRating >= 30 )
@@ -222,6 +235,8 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	for ( i = 0; i < RandStart; i++)
 	{
 		P = PlayerStarts[i];
+		if (!CheckIfOK(P))
+			continue;
 		NewRating = RatePlayerStart(P, InTeam, Player);
 		
 		if ( NewRating >= 30 )
@@ -233,6 +248,26 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 		}
 	}
 	return BestStart;
+}
+
+
+/*--- Rate a player start so that we don't do stupid things ---*/
+function bool CheckIfOK(PlayerStart PS)
+{
+	local Controller P;
+	
+	foreach WorldInfo.AllControllers(class'Controller', P)
+	{
+		if (P.bIsPlayer && (P.Pawn != None))
+		{
+			if ((Abs(PS.Location.Z - P.Pawn.Location.Z) < PS.CylinderComponent.CollisionHeight + P.Pawn.CylinderComponent.CollisionHeight)
+				&& (VSize2D(PS.Location - P.Pawn.Location) < PS.CylinderComponent.CollisionRadius + P.Pawn.CylinderComponent.CollisionRadius) )
+			{
+				return false;
+			}
+		}
+	}
+	return true;
 }
 
 
