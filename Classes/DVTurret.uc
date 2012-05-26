@@ -75,8 +75,6 @@ replication
 
 simulated event ReplicatedEvent(name VarName)
 {
-	`log("ReplicatedEvent" @ VarName);
-	
 	if (VarName == 'EnemyTarget')
 	{
 		DoRotation(Rotator((EnemyTarget.Location - FireLocation + vect(0,0,100)) << Rotation), 1.0);
@@ -96,6 +94,8 @@ simulated event PostBeginPlay()
 	GunController=SkelControlSingleBone(Mesh.FindSkelControl(GunControllerName));
 	MainController=SkelControlSingleBone(Mesh.FindSkelControl(MainControllerName));
 	Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
+	
+	`log("Spawned" @self);
 }
 
 
@@ -170,6 +170,7 @@ simulated function bool GetNearestEnnemy ()
 		}
 	}
 	EnemyTarget = ResultPawns[bestIndex];
+	`log("Starting fire" @self);
 	return true;
 }
 
@@ -197,7 +198,6 @@ simulated function bool IsValidTarget(Pawn P)
 /*--- Launch rotation ---*/
 simulated function DoRotation(Rotator NewRotation, Float InterpTime)
 {
-	`log("DoRotation" @NewRotation @InterpTime);
 	StartYaw = MainController.BoneRotation.Yaw;
 	TargetYaw = NewRotation.Yaw;
 	YawRotationAlpha = 0.0;
@@ -216,7 +216,6 @@ simulated function DoRotation(Rotator NewRotation, Float InterpTime)
 /*--- Yaw rotation ---*/
 simulated function RotateYawTimer()
 {
-	`log("RotateYawTimer" @YawRotationAlpha @YawInterpTime);
 	YawRotationAlpha += 0.033;
 	if(YawRotationAlpha <= YawInterpTime)
 	{
@@ -243,7 +242,6 @@ simulated function SetPitch(float Newvalue)
 /*--- Pitch rotation ---*/
 simulated function RotatePitchTimer()
 {
-	`log("RotatePitchTimer" @PitchRotationAlpha @PitchInterpTime);
 	PitchRotationAlpha += 0.033;
 	if(PitchRotationAlpha <= PitchInterpTime)
 	{
@@ -307,7 +305,6 @@ simulated function Tick(Float Delta)
 /*--- Interpolation settings ---*/
 simulated function bool CalculateInterpTime(Vector TargetLocation)
 {
-	//`log("CalculateInterpTime" @TargetLocation);
 	EnemyDir = TargetLocation - Location;
 	if(EnemyDir != LastEnemyDir || ElapsedTime >= YawInterpTime || ElapsedTime >= PitchInterpTime)
 	{

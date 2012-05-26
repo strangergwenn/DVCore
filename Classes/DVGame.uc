@@ -222,6 +222,7 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	// All player starts
 	foreach WorldInfo.AllNavigationPoints(class'PlayerStart', P)
 	{
+		if (Player == None) break;
 		if (P.bEnabled && (Player.IsA('DVTurretController') == P.IsA('DVTurretSocket')))
 			PlayerStarts[PlayerStarts.Length] = P;
 	}

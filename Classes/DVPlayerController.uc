@@ -455,8 +455,8 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 			Pawn.KilledBy(Pawn);
 		else
 		{
-			Pawn.Destroy();	
 			Pawn.SetHidden(True);
+			Pawn.Destroy();	
 		}
 	}
 	UserChoiceWeapon = NewWeapon;
