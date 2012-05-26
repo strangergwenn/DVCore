@@ -286,7 +286,7 @@ unreliable client simulated function ShowEmptyAmmo()
 /*--- Show a generic message ---*/ 
 unreliable client simulated function ShowGenericMessage(string text)
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
+	if (WorldInfo.NetMode == NM_DedicatedServer || myHUD == None)
 		return;
 	DVHUD(myHUD).GameplayMessage(text);
 }

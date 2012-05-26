@@ -89,13 +89,29 @@ simulated event ReplicatedEvent(name VarName)
 /*--- Game start ---*/
 simulated event PostBeginPlay()
 {
-	Super.PostBeginPlay();
-
-	GunController=SkelControlSingleBone(Mesh.FindSkelControl(GunControllerName));
-	MainController=SkelControlSingleBone(Mesh.FindSkelControl(MainControllerName));
-	Mesh.GetSocketWorldLocationAndRotation(FireSocket,FireLocation,FireRotation);
+	// Init
+	local vector EndTrace, HitLocation, Unused;
+	local Actor Target;
+	super.PostBeginPlay();
 	
-	`log("Spawned" @self);
+	// Bone control
+	GunController = SkelControlSingleBone(Mesh.FindSkelControl(GunControllerName));
+	MainController = SkelControlSingleBone(Mesh.FindSkelControl(MainControllerName));
+	Mesh.GetSocketWorldLocationAndRotation(FireSocket, FireLocation, FireRotation);
+	
+	// Automatic positionning
+	EndTrace = Location + vect(0,0,1) * 5000.0;
+	Target = Trace(HitLocation, Unused, EndTrace, Location, true,,, TRACEFLAG_Bullet);
+	if (Target != None)
+	{
+		Move(HitLocation - Location);
+		`log("Resetting" @self @"at" @HitLocation);
+	}
+	else
+	{
+		Move(vect(0,0,1) * 170.0);
+	}
+	`log("Spawned" @self @"at" @Location);
 }
 
 
