@@ -14,7 +14,7 @@ class DVTurret extends UDKPawn
 	Public attributes
 ----------------------------------------------------------*/
 
-var (DVTurret) const  ParticleSystem		MuzzleFlashEmitter;
+var (DVTurret) const ParticleSystem			MuzzleFlashEmitter;
 var (DVTurret) const class<Projectile> 		ProjClass;
 var (DVTurret) const SoundCue 				FireSound;
 

@@ -25,4 +25,3 @@ defaultproperties
 {
 	TurretControllerClass=class'DVTurretController'
 }
-
