@@ -228,7 +228,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 function OpenServer(GFxClikWidget.EventData evtd)
 {
 	PlayUISound(ClickSound);
-	ConsoleCommand("open " $ ServerURL $ "?game=");
+	ConsoleCommand("open " $ ServerURL $ "?Name=" $ DVHUD_Menu(PC.myHUD).LocalStats.UserName $ "?game=");
 }
 
 

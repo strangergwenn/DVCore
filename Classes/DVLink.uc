@@ -144,6 +144,7 @@ reliable client simulated function SaveGame(int kills, int deaths, int teamkills
 	Params.AddItem(""$teamkills);
 	Params.AddItem(""$rank);
 	Params.AddItem(""$shots);
+	Params.AddItem("0");
 	SendServerCommand("SAVE_GAME", Params, true);
 	
 	SaveWeaponsStats(WeaponScores);
@@ -156,6 +157,7 @@ reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
 	local array<string> Params;
 	local int i;
 	
+	Params.AddItem(""$CurrentID);
 	`log("DVLINK : SaveWeaponsStats");
 	for (i = 0; i < WeaponScores.Length; i++)
 	{
