@@ -108,6 +108,7 @@ var bool								bIsKeyEditing;
 var string								ServerURL;
 
 var int									KeyBeingEdited;
+var int									StoredLevel;
 
 
 /*----------------------------------------------------------
@@ -232,11 +233,11 @@ function OpenServer(GFxClikWidget.EventData evtd)
 
 
 /*--- Display the server connection state ---*/
-function SetConnectState(bool bIsButtonDisabled, optional int Level)
+function SetConnectState(optional int Level)
 {
 	local string Message;
 	
-	PlayerConnect.SetBool("enabled", !bIsButtonDisabled);
+	PlayerConnect.SetBool("enabled", (Level == 0));
 	switch (Level)
 	{
 		case (0):
@@ -249,6 +250,7 @@ function SetConnectState(bool bIsButtonDisabled, optional int Level)
 			Message = lConnected;
 			break; 
 	}
+	StoredLevel = Level;
 	PlayerConnect.SetString("label", Message);
 }
 
@@ -318,7 +320,7 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 		PC.SaveIDs(Result[0], Result[1]);
 		PC.Connect(Result[0], Result[1]);
 		SetPopupStatus(lConnecting);
-		SetConnectState(true, 1);
+		SetConnectState(1);
 	}
 	else
 	{
@@ -343,11 +345,11 @@ function GetConnectionResult(bool bSuccess)
 	`log("GetConnectionResult" @bSuccess);
 	if (bSuccess)
 	{
-		SetConnectState(false, 2);
+		SetConnectState(2);
 	}
 	else
 	{
-		SetConnectState(false, 0);
+		SetConnectState(0);
 	}
 }
 
@@ -608,7 +610,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 			break;
 		case ('PlayerConnectButton'):
 			PlayerConnect = GetLiveWidget(Widget, 'CLIK_click', OnPlayerConnect);
-			PlayerConnect.SetString("label", lConnect);
+			SetConnectState(StoredLevel);
 			break;
 		case ('ResolutionList'):
 			ResListMC = GFxClikWidget(Widget);

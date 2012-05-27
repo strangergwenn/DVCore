@@ -19,6 +19,9 @@ var (DVLink) const float			ServerListUpdateFrequency;
 
 var (DVLink) const string 			MasterServerIP;
 
+var (DVLink) localized string 		lOK;
+var (DVLink) localized string 		lNOK;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -106,8 +109,10 @@ reliable client simulated function GetServers(optional string GameName, optional
 	local array<string> Params;
 	
 	`log("DVLINK : GetServers");
-	Params.AddItem(GameName);
-	Params.AddItem(MapName);
+	if (GameName != "")
+		Params.AddItem(GameName);
+	if (MapName != "")
+		Params.AddItem(MapName);
 	SendServerCommand("GET_SERVERS", Params, false);
 }
 
@@ -118,6 +123,7 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 	local array<string> Params;
 	
 	`log("DVLINK : GetLeaderboard");
+	PC.CleanBestPlayer();
 	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
 	Params.AddItem(""$LocalOffset);
@@ -242,7 +248,7 @@ simulated function ProcessACK(string Param)
 {
 	// Data
 	`log("DVLINK : ProcessACK" @LastCommandSent);
-	SignalController(LastCommandSent, true, "Requête validée !");
+	SignalController(LastCommandSent, true, lOK);
 	AbortTimeout();
 }
 
@@ -294,7 +300,9 @@ event Opened()
 	`log("DVLINK : Successfully opened master server");
 	bIsConnected = false;
 	bIsOpened = true;
-	SetTimer(ServerListUpdateFrequency, true, 'GetServers'); 
+	GetServers();
+	SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+	SignalController("INIT", true, "");
 }
 
 
@@ -308,11 +316,18 @@ event Closed()
 }
 
 
-/*--- Text mode ---*/
+/*--- Text mode : we need to clean this shit up ---*/
 event ReceivedText(string Text)
 {
-	if (Len(Text) > 0)
-		ReceivedLine(Text);
+	local array<string> InputArray;
+	local int i;
+	
+	ParseStringIntoArray(Text, InputArray, "\n", false);
+	for (i = 0; i < InputArray.Length; i++)
+	{
+		if (Len(InputArray[i]) > 0)
+			ReceivedLine(InputArray[i]);
+	}
 }
 
 
@@ -322,7 +337,7 @@ event ReceivedLine(string Line)
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
-	`log("DVLINK : Received master command >" $ Command[0] $"<");
+	`log("DVLINK : MS command >" $ Line);
 	
 	// Standard ACK
 	if (IsEqual(Command[0], "OK"))
@@ -340,7 +355,7 @@ event ReceivedLine(string Line)
 		
 	// Error
 	else if (IsEqual(Command[0], "NOK"))
-		SignalController(LastCommandSent, false, "Requête refusée");
+		SignalController(LastCommandSent, false, lNOK);
 		
 	// Leaderboards
 	else if (IsEqual(Command[0], "TOP_PLAYER"))
@@ -389,7 +404,7 @@ defaultproperties
 	
 	CurrentID=0
 	TimeoutLength=5.0
-	ServerListUpdateFrequency=20.0
+	ServerListUpdateFrequency=5.0
 	LinkMode=MODE_Text
 	ReceiveMode=RMODE_Event
 	

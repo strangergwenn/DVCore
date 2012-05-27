@@ -100,6 +100,13 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 		MasterServerLink.GetStats();
 	}
+	
+	// First data
+	else if (Command == "INIT")
+	{
+		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+		DVHUD_Menu(myHUD).AutoConnect();
+	}
 }
 
 
@@ -157,15 +164,26 @@ reliable client event TcpGetStats(array<string> Data)
 
 
 /*--- Player rank info ---*/
+reliable client event CleanBestPlayer()
+{
+	local array<string> Empty;
+	Empty.AddItem("");
+	Empty.RemoveItem("");
+	LeaderBoardStructure = Empty;
+	LeaderBoardStructure2 = Empty;
+}
+
+
+/*--- Player rank info ---*/
 reliable client event AddBestPlayer(string PlayerName, int Rank, int PlayerPoints, bool bIsLocal)
 {
 	if (bIsLocal)
 	{
-		LeaderBoardStructure.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
+		LeaderBoardStructure2.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
 	}
 	else
 	{
-		LeaderBoardStructure2.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
+		LeaderBoardStructure.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
 	}
 }
 

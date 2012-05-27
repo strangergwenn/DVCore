@@ -48,30 +48,20 @@ simulated function PostBeginPlay()
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
 	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
-	AutoConnect();
-	
-	// Debug
-	AddServerInfo(
-		"DeepVoid.eu (hardcode)",
-		"LEVEL_01.udk",
-		"deepvoid.eu",
-		"G_TeamDeathmatch",
-		12,
-		16
-	);
 }
 
 
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
+	`log("AutoConnect");
 	if (Len(LocalStats.UserName) > 3
 	 && Len(LocalStats.Password) > 3
 	 && DVPlayerController(PlayerOwner).MasterServerLink != None)
 	{
 		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
 			LocalStats.UserName, LocalStats.Password);
-		HudMovie.SetConnectState(true, 1);
+		HudMovie.SetConnectState(1);
 	}
 }
 
@@ -91,7 +81,7 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 /*--- Called when the connection has been established ---*/
 function SignalConnected()
 {
-	HudMovie.SetConnectState(true, 2);
+	HudMovie.SetConnectState(2);
 	ConsoleCommand("SetName"@LocalStats.UserName);
 }
 
