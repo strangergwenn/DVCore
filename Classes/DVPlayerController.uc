@@ -101,7 +101,7 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	}
 	
 	// Get back the stats
-	if (Command == "CONNECT")
+	if (Command == "CONNECT" && bIsOK)
 	{
 		if (myHUD != None)
 			DVHUD_Menu(myHUD).SignalConnected();
@@ -110,7 +110,7 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	}
 	
 	// First data
-	else if (Command == "INIT")
+	else if (Command == "INIT" && bIsOK)
 	{
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 	}

@@ -338,8 +338,12 @@ event ReceivedLine(string Line)
 	Command = GetServerCommand(Line);
 	`log("DVLINK : MS command >" $ Line);
 	
+	// Error
+	if (IsEqual(Command[0], "NOK"))
+		SignalController(LastCommandSent, false, lNOK);
+	
 	// Standard ACK
-	if (IsEqual(Command[0], "OK"))
+	else if (IsEqual(Command[0], "OK"))
 	{
 		// Connection speficic case
 		if (IsEqual(LastCommandSent, "CONNECT") && Command[1] != "0")
@@ -352,10 +356,6 @@ event ReceivedLine(string Line)
 		// Default case
 		ProcessACK(Command[1]);
 	}
-		
-	// Error
-	else if (IsEqual(Command[0], "NOK"))
-		SignalController(LastCommandSent, false, lNOK);
 		
 	// Leaderboards
 	else if (IsEqual(Command[0], "TOP_PLAYER"))

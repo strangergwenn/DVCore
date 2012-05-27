@@ -48,7 +48,7 @@ simulated function PostBeginPlay()
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
 	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
-	SetTimer(1.0, false, 'AutoConnect');
+	SetTimer(0.01, false, 'AutoConnect');
 }
 
 
