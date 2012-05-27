@@ -666,6 +666,7 @@ function UpdateMenuList()
 function OnMenuItemClick(GFxClikWidget.EventData ev)
 {
     local GFxObject button;
+	PlayUISound(BipSound);
     button = ev._this.GetObject("itemRenderer");
     
 	if(button.GetString("label") == MenuListData[3])
@@ -676,7 +677,6 @@ function OnMenuItemClick(GFxClikWidget.EventData ev)
 	{
 		GoToFrame(button.GetInt("index"));
 	}
-	PlayUISound(BipSound);
 }
 
 

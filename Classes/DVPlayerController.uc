@@ -113,6 +113,7 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	else if (Command == "INIT" && bIsOK)
 	{
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+		DVHUD_Menu(myHUD).DelayedAutoConnect();
 	}
 }
 
@@ -125,7 +126,7 @@ reliable client simulated function Connect(string user, string passwd)
 
 
 /*--- Disarm timeout to avoid popup-hiding ---*/
-reliable client simulated function Register(string user, string passwd, string email)
+reliable client simulated function Register(string user, string email, string passwd)
 {
 	MasterServerLink.RegisterUser(user, email, passwd);
 }
