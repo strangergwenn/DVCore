@@ -175,7 +175,6 @@ reliable client simulated function GetStats()
 
 	Params.AddItem(""$CurrentID);
 	SendServerCommand("GET_GSTATS", Params, true);
-	SendServerCommand("GET_LSTATS", Params, true);
 	SendServerCommand("GET_WSTATS", Params, true);
 }
 
