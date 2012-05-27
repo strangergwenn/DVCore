@@ -37,6 +37,8 @@ var GFxClikWidget 						PopupButton2;
 
 var GFxObject							PopupWindow;
 
+var bool								bIsPopupVisible;
+
 
 /*----------------------------------------------------------
 	Core methods
@@ -257,6 +259,7 @@ function SetPopup(string Text[7], optional int PField, optional int PField2)
 	}
 	SetPopupStatus("");
 	PopupWindow.SetVisible(true);
+	bIsPopupVisible = true;
 	PlayUISound(BipSound);
 }
 
@@ -291,6 +294,7 @@ function SetPopupContent(int FieldID, string Content)
 function HidePopup(optional bool bHide)
 {
 	PopupWindow.SetVisible(!bHide);
+	bIsPopupVisible = false;
 }
 
 

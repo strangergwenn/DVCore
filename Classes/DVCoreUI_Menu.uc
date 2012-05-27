@@ -294,6 +294,7 @@ function OpenConnectionDialog(bool bShowRegister)
 		SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
 		SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
 	}
+	PC.CancelTimeout();
 }
 
 
@@ -315,15 +316,14 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	else if (!bIsInRegisterPopup)
 	{
 		PC.SaveIDs(Result[0], Result[1]);
-		PC.MasterServerLink.ConnectToMaster(Result[0], Result[1]);
+		PC.Connect(Result[0], Result[1]);
 		SetPopupStatus(lConnecting);
 		SetConnectState(true, 1);
 	}
 	else
 	{
-		PC.MasterServerLink.RegisterUser(Result[0], Result[3], Result[1]);
+		PC.Register(Result[0], Result[3], Result[1]);
 		SetPopupStatus(lRegistering);
-		SetConnectState(true, 1);
 	}
 }
 
@@ -338,18 +338,24 @@ function OnPButton2(GFxClikWidget.EventData evtd)
 
 
 /*--- Show result on screen ---*/
-function GetPopupResult(bool bSuccess, string Msg)
+function GetConnectionResult(bool bSuccess)
 {
-	`log("GetPopupResult");
+	`log("GetConnectionResult" @bSuccess);
 	if (bSuccess)
 	{
-		HidePopup(true);
+		SetConnectState(false, 2);
 	}
-	else	
+	else
 	{
-		SetPopupStatus((Msg != "") ? Msg : lProblem);
 		SetConnectState(false, 0);
 	}
+}
+
+/*--- Show result on screen ---*/
+function GetPopupResult(string Msg)
+{
+	`log("GetPopupResult" @Msg);
+	SetPopupStatus((Msg != "") ? Msg : lProblem);
 }
 
 
@@ -675,9 +681,11 @@ function OnMenuItemClick(GFxClikWidget.EventData ev)
 
 
 /*--- Get a command response code ---*/
-function DisplayResponse (bool bSuccess, string Msg)
+function DisplayResponse (bool bSuccess, string Msg, string Command)
 {
-	GetPopupResult(bSuccess, Msg);
+	if (Command == "CONNECT" || Command == "NET")
+		GetConnectionResult(bSuccess);
+	GetPopupResult(Msg);
 }
 
 

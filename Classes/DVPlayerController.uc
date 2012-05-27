@@ -71,7 +71,7 @@ replication
 
 
 /*----------------------------------------------------------
-	Events
+	Events and net behaviour
 ----------------------------------------------------------*/
 
 /*--- Pawn possession : is spawned and OK ---*/
@@ -91,14 +91,36 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 {
 	// Standard response if useful
 	if (myHUD.IsA('DVHUD_Menu'))
-		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg);
+		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
 	
 	// Get back the stats
 	if (Command == "CONNECT")
 	{
 		DVHUD_Menu(myHUD).SignalConnected();
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+		MasterServerLink.GetStats();
 	}
+}
+
+
+/*--- Disarm timeout to avoid popup-hiding ---*/
+reliable client simulated function Connect(string user, string passwd)
+{
+	MasterServerLink.ConnectToMaster(user, passwd);
+}
+
+
+/*--- Disarm timeout to avoid popup-hiding ---*/
+reliable client simulated function Register(string user, string passwd, string email)
+{
+	MasterServerLink.RegisterUser(user, email, passwd);
+}
+
+
+/*--- Disarm timeout to avoid popup-hiding ---*/
+reliable client simulated function CancelTimeout()
+{
+	MasterServerLink.AbortTimeout();
 }
 
 

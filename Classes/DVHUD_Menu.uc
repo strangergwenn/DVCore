@@ -65,7 +65,9 @@ simulated function PostBeginPlay()
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	if (Len(LocalStats.UserName) > 3 && Len(LocalStats.Password) > 3)
+	if (Len(LocalStats.UserName) > 3
+	 && Len(LocalStats.Password) > 3
+	 && DVPlayerController(PlayerOwner).MasterServerLink != None)
 	{
 		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
 			LocalStats.UserName, LocalStats.Password);
@@ -75,10 +77,14 @@ simulated function AutoConnect()
 
 
 /*--- Show a command response code ---*/
-function DisplayResponse (bool bSuccess, string Msg)
+function DisplayResponse (bool bSuccess, string Msg, string Command)
 {
-	HudMovie.DisplayResponse(bSuccess, Msg);
-	SetTimer(PopupTimer, false, 'HidePopup');
+	HudMovie.DisplayResponse(bSuccess, Msg, Command);
+	if (HudMovie.bIsPopupVisible)
+	{
+		ClearTimer('HidePopup');
+		SetTimer(PopupTimer, false, 'HidePopup');
+	}
 }
 
 
@@ -86,7 +92,6 @@ function DisplayResponse (bool bSuccess, string Msg)
 function SignalConnected()
 {
 	HudMovie.SetConnectState(true, 2);
-	HidePopup();
 	ConsoleCommand("SetName"@LocalStats.UserName);
 }
 
