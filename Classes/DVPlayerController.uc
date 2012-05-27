@@ -89,14 +89,22 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 /*--- Master server callback ---*/
 reliable client event TcpCallback(string Command, bool bIsOK, string Msg, optional int data[8])
 {
+	// Init
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
+	
 	// Standard response if useful
-	if (myHUD.IsA('DVHUD_Menu'))
-		DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
+	if (myHUD != None)
+	{
+		if (myHUD.IsA('DVHUD_Menu'))
+			DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
+	}
 	
 	// Get back the stats
 	if (Command == "CONNECT")
 	{
-		DVHUD_Menu(myHUD).SignalConnected();
+		if (myHUD != None)
+			DVHUD_Menu(myHUD).SignalConnected();
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 		MasterServerLink.GetStats();
 	}
@@ -105,7 +113,6 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	else if (Command == "INIT")
 	{
 		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
-		DVHUD_Menu(myHUD).AutoConnect();
 	}
 }
 
@@ -656,19 +663,12 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	
+	`log("SaveGameStatistics");
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetBoolValue("bHasLeft", bLeaving);
+	LStats.SetBoolValue("bWasUploaded", false);
 	LStats.SetIntValue("Rank", GetLocalRank());
 	LStats.SaveConfig();
-	
-	MasterServerLink.SaveGame(
-		LStats.Kills,
-		LStats.Deaths,
-		LStats.TeamKills,
-		LStats.Rank,
-		LStats.ShotsFired,
-		LStats.WeaponScores
-	);
 }
 
 

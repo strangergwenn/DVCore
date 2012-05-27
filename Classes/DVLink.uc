@@ -58,6 +58,7 @@ reliable client simulated function ConnectToMaster(string Username, string Passw
 	`log("DVLINK : ConnectToMaster");
 	Params.AddItem(Username);
 	Params.AddItem(Password);
+	Params.AddItem("0");
 	SendServerCommand("CONNECT", Params, false);
 }
 
@@ -288,7 +289,6 @@ event Resolved(IpAddr Addr)
 event ResolveFailed()
 {
 	`log("DVLINK : Failed to resolve master server");
-	bIsConnected = false;
 	bIsOpened = false;
 	SignalController("NET", false, "Hors ligne");
 }
@@ -298,7 +298,6 @@ event ResolveFailed()
 event Opened()
 {
 	`log("DVLINK : Successfully opened master server");
-	bIsConnected = false;
 	bIsOpened = true;
 	GetServers();
 	SetTimer(ServerListUpdateFrequency, true, 'GetServers');
@@ -343,10 +342,11 @@ event ReceivedLine(string Line)
 	if (IsEqual(Command[0], "OK"))
 	{
 		// Connection speficic case
-		if (IsEqual(LastCommandSent, "CONNECT"))
+		if (IsEqual(LastCommandSent, "CONNECT") && Command[1] != "0")
 		{
 			CurrentID = int(Command[1]);
 			bIsConnected = true;
+			`log("DVLINK : Connection validated for ID" @CurrentID);
 		}
 		
 		// Default case
@@ -404,7 +404,7 @@ defaultproperties
 	
 	CurrentID=0
 	TimeoutLength=5.0
-	ServerListUpdateFrequency=5.0
+	ServerListUpdateFrequency=30.0
 	LinkMode=MODE_Text
 	ReceiveMode=RMODE_Event
 	

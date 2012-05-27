@@ -48,6 +48,7 @@ simulated function PostBeginPlay()
 	GlobalStats = new class'DVUserStats';
 	GlobalStats.EmptyStats();
 	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
+	SetTimer(1.0, false, 'AutoConnect');
 }
 
 
@@ -82,7 +83,22 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 function SignalConnected()
 {
 	HudMovie.SetConnectState(2);
-	ConsoleCommand("SetName"@LocalStats.UserName);
+	ConsoleCommand("SetName" @LocalStats.UserName);
+	`log("Setting name " @LocalStats.UserName);
+	
+	if (LocalStats.bWasUploaded == false)
+	{
+		DVPlayerController(PlayerOwner).MasterServerLink.SaveGame(
+			LocalStats.Kills,
+			LocalStats.Deaths,
+			LocalStats.TeamKills,
+			LocalStats.Rank,
+			LocalStats.ShotsFired,
+			LocalStats.WeaponScores
+		);
+		LocalStats.SetBoolValue("bWasUploaded", true);
+		LocalStats.SaveConfig();
+	}
 }
 
 

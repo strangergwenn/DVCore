@@ -268,7 +268,6 @@ function OpenConnectionDialog(bool bShowRegister)
 {
 	local string Text[7];
 	
-	`log("OpenConnectionDialog");
 	if (!bShowRegister)
 	{
 		Text[0] = lPConnect;
@@ -356,7 +355,6 @@ function GetConnectionResult(bool bSuccess)
 /*--- Show result on screen ---*/
 function GetPopupResult(string Msg)
 {
-	`log("GetPopupResult" @Msg);
 	SetPopupStatus((Msg != "") ? Msg : lProblem);
 }
 

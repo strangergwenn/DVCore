@@ -25,6 +25,7 @@ var (Database) config int						Points;
 
 var (Database) config bool						bHasWon;
 var (Database) config bool						bHasLeft;
+var (Database) config bool						bWasUploaded;
 
 var (Database) config bool						bFullScreen;
 var (Database) config bool						bUseSoundOnHit;
@@ -59,6 +60,7 @@ function SetBoolValue(string PropertyName, bool NV)
 	{
 		case ("bHasWon"): 			bHasWon = NV; 			break;
 		case ("bHasLeft"): 			bHasLeft = NV; 			break;
+		case ("bWasUploaded"): 		bWasUploaded = NV; 		break;
 		case ("bFullScreen"): 		bFullScreen = NV; 		break;
 		case ("bUseSoundOnHit"): 	bUseSoundOnHit = NV; 	break;
 		case ("bBackgroundMusic"): 	bBackgroundMusic = NV; 	break;
