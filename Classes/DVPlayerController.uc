@@ -144,29 +144,27 @@ reliable client event TcpGetStats(array<string> Data)
 {
 	// Init
 	local byte i;
-	local DVUserStats GStats;
-	GStats = DVHUD(myHUD).GlobalStats;
+	local DVHUD_Menu hd;
+	hd = DVHUD_Menu(myHUD);
 	
-	// Parsing
-	switch(Data[0])
+	// Global game stats
+	if (InStr(Data[0], "GET_GSTATS") != -1)
 	{
-		// Global game stats
-		case "GET_GSTATS":
-			GStats.SetIntValue("Kills", 	int(Data[1]));
-			GStats.SetIntValue("Deaths", 	int(Data[2]));
-			GStats.SetIntValue("TeamKills", int(Data[3]));
-			GStats.SetIntValue("Points", 	int(Data[4]));
-			GStats.SetIntValue("Shots", 	int(Data[5]));
-			GStats.SetIntValue("Headshots", int(Data[6]));
-			break;
-		
-		// Weapon stats
-		case "GET_WSTATS":
-			for (i = 0; i < WeaponListLength; i++)
-			{
-				GStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
-			}
-			break;
+		hd.GlobalStats.SetIntValue("Kills", 	int(Data[1]));
+		hd.GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
+		hd.GlobalStats.SetIntValue("TeamKills", int(Data[3]));
+		hd.GlobalStats.SetIntValue("Points", 	int(Data[5]));
+		hd.GlobalStats.SetIntValue("Shots", 	int(Data[6]));
+		//hd.GlobalStats.SetIntValue("Headshots", int(Data[6]));
+	}
+	
+	// Weapon stats
+	else if (InStr(Data[0], "GET_WSTATS") != -1)
+	{
+		for (i = 0; i < WeaponListLength; i++)
+		{
+			hd.GlobalStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
+		}
 	}
 }
 
@@ -621,7 +619,7 @@ reliable client simulated function RegisterShot()
 
 
 /*--- Store kill in DB ---*/
-reliable client simulated function RegisterKill(optional bool bTeamKill)
+exec reliable client simulated function RegisterKill(optional bool bTeamKill)
 {
 	local DVUserStats LStats;
 	local int index;
@@ -638,7 +636,7 @@ reliable client simulated function RegisterKill(optional bool bTeamKill)
 	else
 	{
 		LStats.SetIntValue("Kills" , LStats.Kills + 1);
-		LStats.SetArrayIntValue("WeaponScores", index, LStats.WeaponScores[index] + 1);
+		LStats.SetArrayIntValue("WeaponScores", LStats.WeaponScores[index] + 1, index);
 	}
 }
 
@@ -651,7 +649,10 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 	for (i = 0; i < WeaponListLength; i++)
 	{
 		if (WeaponList[i] == DVPawn(Pawn).CurrentWeaponClass)
+		{
+			`log("GetCurrentWeaponIndex" @i);
 			return i;
+		}
 	}
 	return WeaponListLength;
 }

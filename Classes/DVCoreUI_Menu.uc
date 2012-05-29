@@ -368,9 +368,8 @@ simulated function GetStatsContent()
 {
 	// Init
 	local string RankInfo;
-	local DVUserStats LStats, GStats;
-	LStats = DVHUD_Menu(PC.myHUD).LocalStats;
-	GStats = DVHUD_Menu(PC.myHUD).GlobalStats;
+	local DVHUD_Menu hd;
+	hd = DVHUD_Menu(PC.myHUD);
 	
 	// General
 	SetLabel("MenuTitle", lGameStats, true);
@@ -381,37 +380,37 @@ simulated function GetStatsContent()
 	
 	// Stat block 1
 	SetLabel("StatTitle1", lEfficiency, true);
-	SetLabel("Stat10", string(GStats.Kills) @lVictims, false);
-	SetLabel("Stat11", string(100 * (GStats.Headshots) / GStats.Kills) $"%" @lHeadshots, false);
-	SetLabel("Stat12", string(GStats.Kills / GStats.Deaths) @"K/D", false);
-	SetPieChart("PieStat1", "Stat13", lDeadlyShots, GStats.Kills / GStats.ShotsFired);
+	SetLabel("Stat10", string(hd.GlobalStats.Kills) @lVictims, false);
+	SetLabel("Stat11", string(100 * (hd.GlobalStats.Headshots) / hd.GlobalStats.Kills) $"%" @lHeadshots, false);
+	SetLabel("Stat12", string(hd.GlobalStats.Kills / hd.GlobalStats.Deaths) @"K/D", false);
+	SetPieChart("PieStat1", "Stat13", lDeadlyShots, hd.GlobalStats.Kills / hd.GlobalStats.ShotsFired);
 	
 	// Stat block 2
 	SetLabel("StatTitle2", lEffByWeapon, true);
-	SetLabel("Stat20", lWeapon0 @":" @string(GStats.WeaponScores[0]) @lVictims, false);
-	SetLabel("Stat21", lWeapon1 @":" @string(GStats.WeaponScores[1]) @lVictims, false);
-	SetLabel("Stat22", lWeapon2 @":" @string(GStats.WeaponScores[2]) @lVictims, false);
-	SetLabel("Stat23", lWeapon3 @":" @string(GStats.WeaponScores[3]) @lVictims, false);
-	SetLabel("Stat24", lWeapon4 @":" @string(GStats.WeaponScores[4]) @lVictims, false);
+	SetLabel("Stat20", lWeapon0 @":" @string(hd.GlobalStats.WeaponScores[0]) @lVictims, false);
+	SetLabel("Stat21", lWeapon1 @":" @string(hd.GlobalStats.WeaponScores[1]) @lVictims, false);
+	SetLabel("Stat22", lWeapon2 @":" @string(hd.GlobalStats.WeaponScores[2]) @lVictims, false);
+	SetLabel("Stat23", lWeapon3 @":" @string(hd.GlobalStats.WeaponScores[3]) @lVictims, false);
+	SetLabel("Stat24", lWeapon4 @":" @string(hd.GlobalStats.WeaponScores[4]) @lVictims, false);
 	
 	// Stat block 3
-	if (LStats.bHasLeft)
+	if (hd.LocalStats.bHasLeft)
 		SetLabel("Stat30", lFledGame, false);
 	else
-		SetLabel("Stat30", lTeamHas $ (LStats.bHasWon ? lWon : lLost), false);
+		SetLabel("Stat30", lTeamHas $ (hd.LocalStats.bHasWon ? lWon : lLost), false);
 	
-	SetLabel("Stat31", lLastRank @string(LStats.Rank), false);
-	SetLabel("Stat32", string(LStats.Kills) @lVictims, false);
-	SetLabel("Stat33", string(LStats.Deaths) @lDeaths, false);
-	SetLabel("Stat34", string(LStats.ShotsFired) @lShotsfired, false);
+	SetLabel("Stat31", lLastRank @string(hd.LocalStats.Rank), false);
+	SetLabel("Stat32", string(hd.LocalStats.Kills) @lVictims, false);
+	SetLabel("Stat33", string(hd.LocalStats.Deaths) @lDeaths, false);
+	SetLabel("Stat34", string(hd.LocalStats.ShotsFired) @lShotsfired, false);
 	
 	// Stat block 4
-	if (GStats.Rank > 0)
-		RankInfo = lYouAreRanked @ string(GStats.Rank);
+	if (hd.GlobalStats.Rank > 0)
+		RankInfo = lYouAreRanked @ string(hd.GlobalStats.Rank);
 	else
 		RankInfo = lYouAreNotRanked;
 	SetLabel("Stat40", RankInfo, false);
-	SetLabel("Stat41", lYouHave @ string(GStats.Points) @lPoints, false);
+	SetLabel("Stat41", lYouHave @ string(hd.GlobalStats.Points) @lPoints, false);
 }
 
 

@@ -175,17 +175,17 @@ simulated function Tick(float DeltaTime)
 	local DVPawn target;
 	
 	// Init
+	super.Tick(DeltaTime);
 	FrameCount += 1;
-	Super.Tick(DeltaTime);
 	target = DVPawn(Owner);
-	Mesh.SetHidden(false);
-	if (target == None || FrameCount % TickDivisor != 0)
+	if (Mesh == None || target == None || FrameCount % TickDivisor != 0)
 	{
 		return;
 	}
+	Mesh.SetHidden(false);
 	
 	// Trace
-	else if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
+	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
 		`warn("GetSocketWorldLocationAndrotation Tick failed ");
 	EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
 	Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
@@ -462,9 +462,10 @@ simulated function PlayImpactEffects(vector HitLocation)
 		{
 			DVPlayerController(DVPawn(HitActor).Controller).PlayHitSound();
 		}
-		else if (HitInfo.PhysMaterial.ImpactSound != None)
+		else if (HitInfo.PhysMaterial != None)
 		{
-			PlaySound(HitInfo.PhysMaterial.ImpactSound, false, true, false, HitLocation);
+			if (HitInfo.PhysMaterial.ImpactSound != None)
+				PlaySound(HitInfo.PhysMaterial.ImpactSound, false, true, false, HitLocation);
 		}
 		
 		// Particle system template
