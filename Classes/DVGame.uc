@@ -17,6 +17,8 @@ var (DVGame) const class<DVTurret>		DefaultTurretClass;
 
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
+var (DVGame) const SoundCue				DefaultMusicTrack;
+
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
 
@@ -354,6 +356,13 @@ function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
 	`log("ChangeTeam "$ Other $" "$ num $" "$ bNewTeam);
 	SetTeam(Other, Teams[num], bNewTeam);
 	return true;
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackName()
+{
+	return DefaultMusicTrack;
 }
 
 

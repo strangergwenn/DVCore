@@ -278,19 +278,19 @@ event PlayerTick(float DeltaTime)
 	Methods
 ----------------------------------------------------------*/
 
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackName()
+{
+	return DVGame(WorldInfo.Game).GetTrackName();
+}
+
+
 /*--- Start music based on settings ---*/
 reliable client simulated function StartMusicIfAvailable()
-{
-	local int i;
-	local Sequence GameSeq;
-	local array<SequenceObject> AllSeqEvents;
-	
-	GameSeq = WorldInfo.GetGameSequence();
-	if(GameSeq != None && DVHUD(myHUD).LocalStats.bBackgroundMusic)
+{	
+	if (DVHUD(myHUD).LocalStats.bBackgroundMusic)
 	{
-		GameSeq.FindSeqObjectsByClass(class'DVKismetMusicStart', true, AllSeqEvents);
-		for(i = 0; i < AllSeqEvents.Length; i++)
-			DVKismetMusicStart(AllSeqEvents[i]).CheckActivate(WorldInfo, None);
+		PlaySound(GetTrackName(), true, false, true);
 	}
 }
 
