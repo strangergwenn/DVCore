@@ -194,18 +194,24 @@ simulated function bool GetNearestEnnemy ()
 /*--- Friendly fire avoidance, not shooting dead things either ---*/
 simulated function bool IsValidTarget(Pawn P)
 {
-	if (P != None && FastTrace(P.Location, FireLocation))
+	local bool bIsAcceptable;
+	
+	if (P != None)
 	{
-		return (
-			   P.isA('DVPawn')
-			&& P.Health > 0 
-			&& TeamIndex != DVPawn(P).GetTeamIndex()
-			&& DVPawn(P).GetTeamIndex() != 255
-			&& !DVPlayerController(P.Controller).IsCameraLocked()
-		);
+		if (DVPawn(P) == None)
+			return false;
+		bIsAcceptable = (!DVPawn(P).ServerIsCameraLocked() || WorldInfo.NetMode != NM_StandAlone);
+		
+		if (FastTrace(P.Location, FireLocation))
+		{
+			return (P.isA('DVPawn')
+				&&  P.Health > 0 
+				&&  TeamIndex != DVPawn(P).GetTeamIndex()
+				&&  bIsAcceptable
+			);
+		}
 	}
-	else
-		return false;
+	return false;
 }
 
 

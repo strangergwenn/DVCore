@@ -455,6 +455,16 @@ simulated function GetWeaponRecoil(float angle)
 }
 
 
+/*--- Camera lock getter ---*/
+reliable server simulated function bool ServerIsCameraLocked()
+{
+	if (Controller != None)
+		return DVPlayerController(Controller).IsCameraLocked();
+	else
+		return false;
+}
+
+
 /*--- Set ragdoll on/off ---*/
 simulated function SetPawnRBChannels(bool bRagdollMode)
 {

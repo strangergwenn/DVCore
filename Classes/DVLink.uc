@@ -361,8 +361,8 @@ event ReceivedLine(string Line)
 	// Leaderboards
 	else if (IsEqual(Command[0], "TOP_PLAYER"))
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
-	else if (IsEqual(Command[0], "LOC_PLAYER"))
-		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
+	//else if (IsEqual(Command[0], "LOC_PLAYER"))
+	//	PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
 	
 	// Server list
 	else if (IsEqual(Command[0], "SERVER"))

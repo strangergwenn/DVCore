@@ -54,6 +54,7 @@ var byte							WeaponListLength;
 
 var bool							bLocked;
 var bool							bShouldStop;
+var bool							bMusicStarted;
 
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
@@ -83,6 +84,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
+	StartMusicIfAvailable();
 }
 
 
@@ -275,25 +277,56 @@ event PlayerTick(float DeltaTime)
 
 
 /*----------------------------------------------------------
-	Methods
+	Music management
 ----------------------------------------------------------*/
 
-/*--- Get the music track to play here ---*/
-reliable server simulated function SoundCue GetTrackName()
+reliable server simulated function StartMusicIfAvailable()
 {
-	return DVGame(WorldInfo.Game).GetTrackName();
-}
-
-
-/*--- Start music based on settings ---*/
-reliable client simulated function StartMusicIfAvailable()
-{	
-	if (DVHUD(myHUD).LocalStats.bBackgroundMusic)
+	`log("StartMusicIfAvailable");
+	
+	if (!bMusicStarted)
 	{
-		PlaySound(GetTrackName(), true, false, true);
+		bMusicStarted = true;
+		ClientPlaySound(GetTrackIntro());
+		SetTimer(GetIntroLength(), false, 'StartMusicLoop');
 	}
 }
 
+
+/*--- Music loop ---*/
+reliable server simulated function StartMusicLoop()
+{
+	`log("StartMusicLoop");
+	
+	ClearTimer('StartMusicLoop');
+	ClientPlaySound(GetTrackLoop());
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackIntro()
+{
+	return DVGame(WorldInfo.Game).GetTrackIntro();
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackLoop()
+{
+	return DVGame(WorldInfo.Game).GetTrackLoop();
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function float GetIntroLength()
+{
+	return DVGame(WorldInfo.Game).GetIntroLength();
+}
+
+
+/*----------------------------------------------------------
+	Methods
+----------------------------------------------------------*/
 
 /*--- Notify a new player ---*/ 
 unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)

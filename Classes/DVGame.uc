@@ -17,7 +17,8 @@ var (DVGame) const class<DVTurret>		DefaultTurretClass;
 
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
-var (DVGame) const SoundCue				DefaultMusicTrack;
+var (DVGame) SoundCue					MusicIntro;
+var (DVGame) SoundCue					MusicLoop;
 
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
@@ -55,6 +56,7 @@ function PreBeginPlay()
 	foreach WorldInfo.AllNavigationPoints(class'DVTurretSocket', PS)
 	{
 		DVTC = spawn(PS.TurretControllerClass);
+		SetTeam(DVTC,Teams[PS.TeamIndex], false);
 		DVTC.TeamIndex = PS.TeamIndex;
 		RestartPlayer(DVTC);
 		DVTurret(DVTC.Pawn).TeamIndex = PS.TeamIndex;
@@ -91,7 +93,6 @@ event PostLogin (PlayerController NewPlayer)
 			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
 	}
 	DVPlayerController(NewPlayer).MaxScore = MaxScore;
-	DVPlayerController(NewPlayer).StartMusicIfAvailable();
 }
 
 
@@ -359,10 +360,28 @@ function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
 }
 
 
+/*----------------------------------------------------------
+	Music management
+----------------------------------------------------------*/
+
 /*--- Get the music track to play here ---*/
-reliable server simulated function SoundCue GetTrackName()
+reliable server simulated function SoundCue GetTrackIntro()
 {
-	return DefaultMusicTrack;
+	return MusicIntro;
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackLoop()
+{
+	return MusicLoop;
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function float GetIntroLength()
+{
+	return MusicIntro.GetCueDuration();
 }
 
 
