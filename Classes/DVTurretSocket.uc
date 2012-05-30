@@ -15,6 +15,7 @@ class DVTurretSocket extends UDKTeamPlayerStart
 ----------------------------------------------------------*/
 
 var (DVTS) const class<DVTurretController>	TurretControllerClass;
+var (DVTS) bool								bIsUsed;
 
 
 /*----------------------------------------------------------

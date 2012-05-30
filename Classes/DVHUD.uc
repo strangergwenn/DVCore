@@ -86,6 +86,7 @@ simulated function PostBeginPlay()
 	// Stats
 	LocalStats = new class'DVUserStats';
 	GlobalStats = new class'DVUserStats';
+	DVPlayerController(PlayerOwner).SetName(LocalStats.UserName);
 	LocalStats.EmptyStats();
 	GlobalStats.EmptyStats();
 	

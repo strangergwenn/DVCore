@@ -18,7 +18,7 @@ var (DVTurret) const ParticleSystem			MuzzleFlashEmitter;
 var (DVTurret) const class<Projectile> 		ProjClass;
 var (DVTurret) const SoundCue 				FireSound;
 
-var (DVTurret) const byte 					TeamIndex;
+var (DVTurret) byte 						TeamIndex;
 
 var (DVTurret) const int 					RoundsPerSec;
 var (DVTurret) const int 					MinTurretRotRate;
@@ -200,6 +200,8 @@ simulated function bool IsValidTarget(Pawn P)
 			   P.isA('DVPawn')
 			&& P.Health > 0 
 			&& TeamIndex != DVPawn(P).GetTeamIndex()
+			&& DVPawn(P).GetTeamIndex() != 255
+			&& !DVPlayerController(P.Controller).IsCameraLocked()
 		);
 	}
 	else
@@ -367,7 +369,15 @@ defaultproperties
 		bNotifyRigidBodyCollision=true
 	End Object
 	Components.Add(TurretMesh)
-	CollisionComponent=TurretMesh
+	
+	// Cylinder
+	Begin Object Name=CollisionCylinder
+		CollisionRadius=40.0
+		CollisionHeight=100.0
+		BlockZeroExtent=false
+	End Object
+	CylinderComponent=CollisionCylinder
+	CollisionComponent=CollisionCylinder
 	
 	// Mesh settings
 	Mesh=TurretMesh

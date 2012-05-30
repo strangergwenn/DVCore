@@ -220,7 +220,7 @@ reliable client simulated function SendServerCommand(string Command, array<strin
 			Command $= ParamsString;
 		}
 		
-		`log("DVLINK : Sending command " $ Command);
+		//`log("DVLINK : Sending command " $ Command);
 		AbortTimeout();
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		SendText(Command $"\n");
@@ -337,7 +337,7 @@ event ReceivedLine(string Line)
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
-	`log("DVLINK : MS command >" $ Line);
+	//`log("DVLINK : MS command >" $ Line);
 	
 	// Error
 	if (IsEqual(Command[0], "NOK"))

@@ -231,7 +231,7 @@ exec function StartFire(optional byte FireModeNum = 0)
 /*--- Team switch ---*/
 exec function SwitchTeam()
 {
-	super.Switchteam();
+	super.SwitchTeam();
 	DVHUD(myHUD).GameplayMessage(lTeamSwitch);	
 }
 

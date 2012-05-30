@@ -53,8 +53,9 @@ function PreBeginPlay()
 	foreach WorldInfo.AllNavigationPoints(class'DVTurretSocket', PS)
 	{
 		DVTC = spawn(PS.TurretControllerClass);
-		SetTeam(DVTC,Teams[PS.TeamIndex], false);
+		DVTC.TeamIndex = PS.TeamIndex;
 		RestartPlayer(DVTC);
+		DVTurret(DVTC.Pawn).TeamIndex = PS.TeamIndex;
 	}
 }
 
@@ -100,8 +101,10 @@ event PostLogin (PlayerController NewPlayer)
 function AddDefaultInventory(Pawn PlayerPawn)
 {
 	local class<DVWeapon> Choiced;
-	
+	if (PlayerPawn.IsA('DVTurret'))
+		return;
 	`log("AddDefaultInventory for " $ PlayerPawn);
+	
 	if (PlayerPawn.Controller != None)
 	{
 		Choiced = DVPlayerController(PlayerPawn.Controller).UserChoiceWeapon;
@@ -110,6 +113,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 			PlayerPawn.CreateInventory(Choiced);
 		}
 	}
+	
 	else
 	{
 		`log("Spawned default weapon, this is wrong.");
@@ -219,12 +223,16 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	local float 			BestRating, NewRating;
 	local int 				i, RandStart;
 
+	if (Player.IsA('DVTurretController'))
+		InTeam = DVTurretController(Player).TeamIndex;
+
 	// All player starts
 	foreach WorldInfo.AllNavigationPoints(class'PlayerStart', P)
 	{
-		if (Player == None) break;
-		if (P.bEnabled && (Player.IsA('DVTurretController') == P.IsA('DVTurretSocket')))
-			PlayerStarts[PlayerStarts.Length] = P;
+		if (Player == None || !CheckIfOK(P))
+			break;
+		else if (P.bEnabled && (Player.IsA('DVTurretController') == P.IsA('DVTurretSocket')))
+			PlayerStarts.AddItem(P);
 	}
 	RandStart = Rand(PlayerStarts.Length);
 
@@ -232,8 +240,6 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	for (i = RandStart; i < PlayerStarts.Length; i++)
 	{
 		P = PlayerStarts[i];
-		if (!CheckIfOK(P))
-			continue;
 		NewRating = RatePlayerStart(P, InTeam, Player);
 		
 		if ( NewRating >= 30 )
@@ -249,8 +255,6 @@ function PlayerStart ChoosePlayerStart(Controller Player, optional byte InTeam)
 	for ( i = 0; i < RandStart; i++)
 	{
 		P = PlayerStarts[i];
-		if (!CheckIfOK(P))
-			continue;
 		NewRating = RatePlayerStart(P, InTeam, Player);
 		
 		if ( NewRating >= 30 )

@@ -91,7 +91,8 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 function SignalConnected()
 {
 	HudMovie.SetConnectState(2);
-	ConsoleCommand("SetName" @LocalStats.UserName);
+	DVPlayerController(PlayerOwner).SetName(LocalStats.UserName);
+	LocalStats.SaveConfig();
 	`log("Setting name " @LocalStats.UserName);
 	
 	if (LocalStats.bWasUploaded == false)
