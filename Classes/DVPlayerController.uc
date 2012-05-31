@@ -84,7 +84,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
-	StartMusicIfAvailable();
+	SetTimer(1.0, false, 'StartMusicIfAvailable');
 }
 
 
@@ -284,7 +284,7 @@ reliable server simulated function StartMusicIfAvailable()
 {
 	`log("StartMusicIfAvailable");
 	
-	if (!bMusicStarted)
+	if (!bMusicStarted && DVHUD(myHUD).LocalStats.bBackgroundMusic)
 	{
 		bMusicStarted = true;
 		ClientPlaySound(GetTrackIntro());
