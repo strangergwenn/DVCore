@@ -28,15 +28,15 @@ var (DVGame) const int 					MaxScore;
 	Private attributes
 ----------------------------------------------------------*/
 
-var class<DVWeapon>					DefaultWeapon;
+var class<DVWeapon>						DefaultWeapon;
 
-var DVLink 							ServerLink;
+var DVLink 								ServerLink;
 
-var	DVTeamInfo						Teams[2];
+var	DVTeamInfo							Teams[2];
 
-var float							HeartbeatTick;
-var float							EndGameTick;
-var float							RestartTimer;
+var float								HeartbeatTick;
+var float								EndGameTick;
+var float								RestartTimer;
 
 
 /*----------------------------------------------------------
