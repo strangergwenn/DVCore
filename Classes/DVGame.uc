@@ -30,8 +30,11 @@ var (DVGame) const int 					MaxScore;
 
 var class<DVWeapon>					DefaultWeapon;
 
+var DVLink 							ServerLink;
+
 var	DVTeamInfo						Teams[2];
 
+var float							HeartbeatTick;
 var float							EndGameTick;
 var float							RestartTimer;
 
@@ -64,11 +67,20 @@ function PreBeginPlay()
 }
 
 
-/*--- Score update ---*/
+/*--- Score update server data ---*/
 event PostBeginPlay()
 {
+	// Init
 	super.PostBeginPlay();
 	SetTimer(EndGameTick, true, 'ScoreUpdated');
+	
+	// Dedicated server
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
+		ServerLink = Spawn(class'DVLink');
+		ServerLink.InitLink(None);
+		SetTimer(HeartbeatTick, true, 'SendServerData');
+	}
 }
 
 
@@ -360,6 +372,18 @@ function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
 }
 
 
+/*--- Heartbeat ---*/
+function SendServerData()
+{
+	ServerLink.Heartbeat(
+		WorldInfo.GetMapName(),
+		GetRightMost(string(self.class.name)),
+		GetNumPlayers(),
+		MaxPlayers
+	);
+}
+
+
 /*----------------------------------------------------------
 	Music management
 ----------------------------------------------------------*/
@@ -394,6 +418,8 @@ defaultproperties
 	// Settings
 	bTeamGame=true
 	EndGameTick=0.5
+	HeartbeatTick=5.0
+	MaxPlayersAllowed=16
 	
 	// Classes
 	HUDType=class'DVHUD'

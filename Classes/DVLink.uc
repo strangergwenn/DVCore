@@ -90,17 +90,20 @@ reliable client simulated function RegisterServer(string Username, string Email,
 
 
 /*--- Server heartbeat ---*/
-reliable client simulated function Heartbeat(string MapName, string GameName, int PlayerCount, int PlayerMax)
+reliable server simulated function Heartbeat(string MapName, string GameName, int PlayerCount, int PlayerMax)
 {
 	local array<string> Params;
 	
-	`log("DVLINK : Heartbeat");
-	Params.AddItem(""$CurrentID);
-	Params.AddItem(MapName);
-	Params.AddItem(GameName);
-	Params.AddItem(""$PlayerCount);
-	Params.AddItem(""$PlayerMax);
-	SendServerCommand("HEARTBEAT", Params, true);
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
+		`log("DVLINK : Heartbeat");
+		Params.AddItem(""$CurrentID);
+		Params.AddItem(MapName);
+		Params.AddItem(GameName);
+		Params.AddItem(""$PlayerCount);
+		Params.AddItem(""$PlayerMax);
+		SendServerCommand("HEARTBEAT", Params, true);
+	}
 }
 
 
@@ -300,9 +303,20 @@ event Opened()
 {
 	`log("DVLINK : Successfully opened master server");
 	bIsOpened = true;
-	GetServers();
-	SetTimer(ServerListUpdateFrequency, true, 'GetServers');
-	SignalController("INIT", true, "");
+	
+	// On client : get the server list
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		GetServers();
+		SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+		SignalController("INIT", true, "");
+	}
+	
+	// On server : register
+	else
+	{
+		RegisterServer("DEVSERVER", "admin@deepvoid.eu", "");
+	}
 }
 
 
@@ -337,7 +351,7 @@ event ReceivedLine(string Line)
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
-	//`log("DVLINK : MS command >" $ Line);
+	`log("DVLINK : MS command >" $ Line);
 	
 	// Error
 	if (IsEqual(Command[0], "NOK"))
@@ -347,7 +361,7 @@ event ReceivedLine(string Line)
 	else if (IsEqual(Command[0], "OK"))
 	{
 		// Connection speficic case
-		if (IsEqual(LastCommandSent, "CONNECT") && Command[1] != "0")
+		if ((IsEqual(LastCommandSent, "CONNECT") || IsEqual(LastCommandSent, "REG_SERVER")) && Command[1] != "0")
 		{
 			CurrentID = int(Command[1]);
 			bIsConnected = true;
