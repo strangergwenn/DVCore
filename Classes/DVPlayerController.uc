@@ -157,6 +157,7 @@ reliable client event TcpGetStats(array<string> Data)
 		hd.GlobalStats.SetIntValue("TeamKills", int(Data[3]));
 		hd.GlobalStats.SetIntValue("Points", 	int(Data[5]));
 		hd.GlobalStats.SetIntValue("Shots", 	int(Data[6]));
+		//TODO
 		//hd.GlobalStats.SetIntValue("Headshots", int(Data[6]));
 	}
 	

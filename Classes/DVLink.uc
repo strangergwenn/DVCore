@@ -315,7 +315,8 @@ event Opened()
 	// On server : register
 	else
 	{
-		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", "");
+		//TODO
+		//RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", "");
 	}
 }
 
@@ -375,6 +376,7 @@ event ReceivedLine(string Line)
 	// Leaderboards
 	else if (IsEqual(Command[0], "TOP_PLAYER"))
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
+	//TODO
 	//else if (IsEqual(Command[0], "LOC_PLAYER"))
 	//	PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
 	
