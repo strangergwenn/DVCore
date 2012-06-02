@@ -382,7 +382,7 @@ simulated function GetStatsContent()
 	SetLabel("StatTitle1", lEfficiency, true);
 	SetLabel("Stat10", string(hd.GlobalStats.Kills) @lVictims, false);
 	SetLabel("Stat11", string(100 * (hd.GlobalStats.Headshots) / hd.GlobalStats.Kills) $"%" @lHeadshots, false);
-	SetLabel("Stat12", string(hd.GlobalStats.Kills / hd.GlobalStats.Deaths) @"K/D", false);
+	SetLabel("Stat12", string((100 * hd.GlobalStats.Kills) / hd.GlobalStats.Deaths) $"% K/D", false);
 	SetPieChart("PieStat1", "Stat13", lDeadlyShots, hd.GlobalStats.Kills / hd.GlobalStats.ShotsFired);
 	
 	// Stat block 2

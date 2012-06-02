@@ -77,9 +77,10 @@ event PostBeginPlay()
 	// Dedicated server
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
-		ServerLink = Spawn(class'DVLink');
-		ServerLink.InitLink(None);
-		SetTimer(HeartbeatTick, true, 'SendServerData');
+		//TODO
+		//ServerLink = Spawn(class'DVLink');
+		//ServerLink.InitLink(None);
+		//SetTimer(HeartbeatTick, true, 'SendServerData');
 	}
 }
 
