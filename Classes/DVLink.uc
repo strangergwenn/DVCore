@@ -315,7 +315,7 @@ event Opened()
 	// On server : register
 	else
 	{
-		RegisterServer("DEVSERVER", "admin@deepvoid.eu", "");
+		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", "");
 	}
 }
 
