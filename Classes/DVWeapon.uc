@@ -403,11 +403,7 @@ simulated function PlayImpactEffects(vector HitLocation)
 		}
 		
 		// Sound effects : default, default, advanced
-		if (DVPawn(HitActor) != None)
-		{
-			DVPlayerController(DVPawn(HitActor).Controller).PlayHitSound();
-		}
-		else if (HitInfo.PhysMaterial != None)
+		if (HitInfo.PhysMaterial != None)
 		{
 			if (HitInfo.PhysMaterial.ImpactSound != None)
 				PlaySound(HitInfo.PhysMaterial.ImpactSound, false, true, false, HitLocation);

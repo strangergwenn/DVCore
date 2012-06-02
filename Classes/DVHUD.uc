@@ -96,6 +96,20 @@ simulated function PostBeginPlay()
 }
 
 
+/*--- Launch autoconnection ---*/
+simulated function AutoConnect()
+{
+	`log("Ingame autoConnect");
+	if (Len(LocalStats.UserName) > 3
+	 && Len(LocalStats.Password) > 3
+	 && DVPlayerController(PlayerOwner).MasterServerLink != None)
+	{
+		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
+			LocalStats.UserName, LocalStats.Password);
+	}
+}
+
+
 /*--- Should we using the sniper effect ---*/
 simulated function SetSniperState(bool bZooming)
 {

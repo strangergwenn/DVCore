@@ -90,24 +90,10 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 /*--- Called when the connection has been established ---*/
 function SignalConnected()
 {
-	HudMovie.SetConnectState(2);
 	DVPlayerController(PlayerOwner).SetName(LocalStats.UserName);
-	LocalStats.SaveConfig();
 	`log("Setting name " @LocalStats.UserName);
-	
-	if (LocalStats.bWasUploaded == false)
-	{
-		DVPlayerController(PlayerOwner).MasterServerLink.SaveGame(
-			LocalStats.Kills,
-			LocalStats.Deaths,
-			LocalStats.TeamKills,
-			LocalStats.Rank,
-			LocalStats.ShotsFired,
-			LocalStats.WeaponScores
-		);
-		LocalStats.SetBoolValue("bWasUploaded", true);
-		LocalStats.SaveConfig();
-	}
+	HudMovie.SetConnectState(2);
+	LocalStats.SaveConfig();
 }
 
 

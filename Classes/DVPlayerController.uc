@@ -91,46 +91,78 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 /*--- Master server callback ---*/
 reliable client event TcpCallback(string Command, bool bIsOK, string Msg, optional int data[8])
 {
-	// Init
+	// Init, on-screen ACK for menu
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
-	
-	// Standard response if useful
-	if (myHUD != None)
+	else if (myHUD != None)
 	{
 		if (myHUD.IsA('DVHUD_Menu'))
 			DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
 	}
 	
-	// Get back the stats
-	if (Command == "CONNECT" && bIsOK)
+	// First data : autoconnection if available
+	if (Command == "INIT" && bIsOK)
 	{
-		if (myHUD != None)
-			DVHUD_Menu(myHUD).SignalConnected();
-		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
-		MasterServerLink.GetStats();
+		// Are we on main menu
+		if (myHUD.IsA('DVHUD_Menu'))
+		{
+			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+			DVHUD_Menu(myHUD).DelayedAutoConnect();
+		}
+		
+		// Ingame
+		else
+			DVHUD(myHUD).AutoConnect();
 	}
 	
-	// First data
-	else if (Command == "INIT" && bIsOK)
+	// Upload & get back the stats on main menu
+	else if (Command == "CONNECT" && bIsOK && myHUD != None)
 	{
-		MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
-		DVHUD_Menu(myHUD).DelayedAutoConnect();
+		if (myHUD.IsA('DVHUD_Menu'))
+		{
+			DVHUD_Menu(myHUD).SignalConnected();
+			UploadGame();
+			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+			MasterServerLink.GetStats();
+		}
 	}
 }
 
 
-/*--- Disarm timeout to avoid popup-hiding ---*/
+/*--- New player ---*/
+reliable client simulated function Register(string user, string email, string passwd)
+{
+	MasterServerLink.RegisterUser(user, email, passwd);
+}
+
+
+/*--- Connection ---*/
 reliable client simulated function Connect(string user, string passwd)
 {
 	MasterServerLink.ConnectToMaster(user, passwd);
 }
 
 
-/*--- Disarm timeout to avoid popup-hiding ---*/
-reliable client simulated function Register(string user, string email, string passwd)
+/*--- Upload game statistics ---*/
+reliable client simulated function UploadGame()
 {
-	MasterServerLink.RegisterUser(user, email, passwd);
+	local DVUserStats LStats;
+	LStats = DVHUD_Menu(myHUD).LocalStats;
+	
+	// Stats upload
+	if (LStats.bWasUploaded == false)
+	{
+		MasterServerLink.SaveGame(
+			LStats.Kills,
+			LStats.Deaths,
+			LStats.TeamKills,
+			LStats.Rank,
+			LStats.ShotsFired,
+			LStats.WeaponScores
+		);
+		LStats.SetBoolValue("bWasUploaded", true);
+		LStats.SaveConfig();
+	}
 }
 
 
@@ -157,8 +189,7 @@ reliable client event TcpGetStats(array<string> Data)
 		hd.GlobalStats.SetIntValue("TeamKills", int(Data[3]));
 		hd.GlobalStats.SetIntValue("Points", 	int(Data[5]));
 		hd.GlobalStats.SetIntValue("Shots", 	int(Data[6]));
-		//TODO
-		//hd.GlobalStats.SetIntValue("Headshots", int(Data[6]));
+		hd.GlobalStats.SetIntValue("Headshots", int(Data[7]));
 	}
 	
 	// Weapon stats
@@ -277,6 +308,11 @@ event PlayerTick(float DeltaTime)
 }
 
 
+/*--- Nope ---*/
+function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDelegate=CanUnpause)
+{}
+
+
 /*----------------------------------------------------------
 	Music management
 ----------------------------------------------------------*/
@@ -337,6 +373,24 @@ reliable server simulated function float GetIntroLength()
 	Methods
 ----------------------------------------------------------*/
 
+/*--- Signal shot received ---*/
+reliable client simulated function ClientSignalHit(Controller InstigatedBy, bool bWasHeadshot)
+{
+	ServerSignalHit(InstigatedBy, bWasHeadshot);
+}
+reliable server simulated function ServerSignalHit(Controller InstigatedBy, bool bWasHeadshot)
+{
+	DVPlayerController(InstigatedBy).NotifyHit(bWasHeadshot);
+}
+
+
+/*--- Successful hit notification ---*/
+reliable server simulated function NotifyHit(bool bWasHeadshot)
+{
+	PlayHitSound(bWasHeadshot);
+}
+
+
 /*--- Notify a new player ---*/ 
 unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)
 {
@@ -381,10 +435,13 @@ unreliable client simulated function ShowGenericMessage(string text)
 
 
 /*--- Play the hit sound ---*/ 
-unreliable client simulated function PlayHitSound()
+unreliable client simulated function PlayHitSound(bool bWasHeadshot)
 {
 	if(DVHUD(myHUD).LocalStats.bUseSoundOnHit)
 		PlaySound(HitSound);
+	
+	if (bWasHeadshot)
+		DVHUD_Menu(myHUD).LocalStats.SetIntValue("HeadShots" , DVHUD_Menu(myHUD).LocalStats.HeadShots + 1);
 }
 
 
@@ -713,6 +770,7 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	LStats.SetBoolValue("bWasUploaded", false);
 	LStats.SetIntValue("Rank", GetLocalRank());
 	LStats.SaveConfig();
+	UploadGame();
 }
 
 

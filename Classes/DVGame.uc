@@ -90,7 +90,8 @@ event PostLogin (PlayerController NewPlayer)
 {
 	local Actor A;
 	local DVPlayerController P;
-	Super.PostLogin(NewPlayer);
+	local DVPlayerController NP;
+	super.PostLogin(NewPlayer);
 	
 	DVPlayerController(NewPlayer).SetWeaponList(DefaultWeaponList, WeaponListLength);
 	
@@ -105,7 +106,12 @@ event PostLogin (PlayerController NewPlayer)
 		if (P != NewPlayer)
 			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
 	}
-	DVPlayerController(NewPlayer).MaxScore = MaxScore;
+	
+	// Data
+	NP = DVPlayerController(NewPlayer);
+	NP.MasterServerLink = Spawn(class'DVLink');
+	NP.MasterServerLink.InitLink(NP);
+	NP.MaxScore = MaxScore;
 }
 
 
@@ -418,6 +424,7 @@ defaultproperties
 {
 	// Settings
 	bTeamGame=true
+    bPauseable=false
 	EndGameTick=0.5
 	HeartbeatTick=5.0
 	MaxPlayersAllowed=16

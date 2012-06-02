@@ -94,6 +94,10 @@ function GoToFrame(int index)
 	Game methods
 ----------------------------------------------------------*/
 
+/*--- Called when the connection has been established ---*/
+function SignalConnected()
+{}
+
 
 /*--- Return to desktop ---*/
 function QuitToDesktop(GFxClikWidget.EventData evtd)
