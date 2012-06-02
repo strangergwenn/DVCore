@@ -221,7 +221,7 @@ exec function Use()
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {
-	if (IsCameraLocked())
+	if (IsCameraLocked() || bShouldStop)
 		return;
 	else
 	{
