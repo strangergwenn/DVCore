@@ -92,7 +92,7 @@ simulated function PostBeginPlay()
 	
 	// HUD register
 	HudMovie.PC = DVPlayerController(PlayerOwner);
-	SetTimer(MenuDelay, false, 'ChooseWeapons');
+	HudMovie.OpenRespawnMenu();
 }
 
 
@@ -117,14 +117,6 @@ simulated function GameplayMessage(string text)
 simulated function ShutdownMessage()
 {
 	HudMovie.ShowBannerInfo(false);
-}
-
-
-/*--- First screen ---*/
-simulated function ChooseWeapons()
-{
-	HudMovie.OpenRespawnMenu();
-	bRespawnOpened = true;
 }
 
 
@@ -187,7 +179,7 @@ function DisplayConsoleMessages()
 
 defaultproperties
 {
-	bRespawnOpened=false
+	bRespawnOpened=true
 	HUDClass=class'DVCoreUI_HUD'
 	
 	MenuDelay=0.5
