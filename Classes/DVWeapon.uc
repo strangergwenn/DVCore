@@ -155,6 +155,13 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 		if (MeshCpnt != None)
 			MeshCpnt.DetachComponent(Mesh);
 	}
+	
+	if (Addon1 != None)
+		Addon1.Destroy();
+	if (Addon2 != None)
+		Addon2.Destroy();
+	if (Addon3 != None)
+		Addon3.Destroy();
 }
 
 

@@ -285,7 +285,7 @@ reliable server simulated function StartMusicIfAvailable()
 {
 	`log("StartMusicIfAvailable");
 	
-	if (!bMusicStarted && DVHUD(myHUD).LocalStats.bBackgroundMusic)
+	if (!bMusicStarted)
 	{
 		bMusicStarted = true;
 		ClientPlaySound(GetTrackIntro());
@@ -301,6 +301,14 @@ reliable server simulated function StartMusicLoop()
 	
 	ClearTimer('StartMusicLoop');
 	ClientPlaySound(GetTrackLoop());
+}
+
+
+/*--- Music sound if used ---*/
+unreliable client event ClientPlaySound(SoundCue ASound)
+{
+	if (DVHUD(myHUD).LocalStats.bBackgroundMusic)
+		ClientHearSound(ASound, self, Location, false, false);
 }
 
 
