@@ -208,12 +208,12 @@ exec function ShowCommandMenu()
 }
 
 
-/*--- Beam toggle ---*/
+/*--- Addon toggle ---*/
 exec function Use()
 {
 	if (Pawn != None && DVWeapon(Pawn.Weapon) != None)
 	{
-		DVPawn(Pawn).SetBeamStatus(! DVPawn(Pawn).GetBeamStatus() );
+		DVPawn(Pawn).SetAddonStatus(! DVPawn(Pawn).GetAddonStatus() );
 	}
 }
 

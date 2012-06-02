@@ -436,15 +436,15 @@ simulated function float GetJumpingFactor()
 }
 
 
-/*--- Beam status update ---*/
-reliable client simulated function bool GetBeamStatus()
+/*--- Addon status update ---*/
+reliable client simulated function bool GetAddonStatus()
 {
-	return DVPlayerRepInfo(PlayerReplicationInfo).bUseBeam;
+	return DVPlayerRepInfo(PlayerReplicationInfo).bUseAddon;
 }
 
-reliable server simulated function SetBeamStatus(bool NewStatus)
+reliable server simulated function SetAddonStatus(bool NewStatus)
 {
-	DVPlayerRepInfo(PlayerReplicationInfo).SetBeamState(NewStatus);
+	DVPlayerRepInfo(PlayerReplicationInfo).SetAddonState(NewStatus);
 }
 
 

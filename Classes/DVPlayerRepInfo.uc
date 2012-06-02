@@ -14,12 +14,12 @@ class DVPlayerRepInfo extends PlayerReplicationInfo;
 
 var int								DeathCount;
 var int								KillCount;
-var bool							bUseBeam;
+var bool							bUseAddon;
 
 replication
 {
 	if (bNetDirty)
-		DeathCount, KillCount, bUseBeam;
+		DeathCount, KillCount, bUseAddon;
 }
 
 
@@ -68,10 +68,10 @@ simulated function int GetPointCount()
 }
 
 
-/*--- Replicated beam status ---*/
-reliable server simulated function SetBeamState(bool NewStatus)
+/*--- Replicated Addon status ---*/
+reliable server simulated function SetAddonState(bool NewStatus)
 {
-	bUseBeam = NewStatus;
+	bUseAddon = NewStatus;
 	bForceNetUpdate = true;
 }
 
@@ -95,7 +95,7 @@ simulated function int GetDeathCount()
 
 defaultproperties
 {
-	bUseBeam=true
+	bUseAddon=true
 	KillCount=0
 	DeathCount=0
 }

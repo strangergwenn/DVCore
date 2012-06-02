@@ -88,6 +88,21 @@ simulated function FireAmmo()
 {}
 
 
+/*--- Is addon activated ---*/
+reliable client simulated function bool UseAddon()
+{
+	local DVPawn P;
+	P = DVPawn(Weap.Owner);
+	
+	if (P != None)
+	{
+		return P.GetAddonStatus();
+	}
+	else
+		return true;
+}
+
+
 /*--- Called when zoom starts, only if zoom modifier ---*/
 simulated function StartZoom()
 {
@@ -129,7 +144,6 @@ defaultproperties
 	Components.Add(AddonMesh)
 	
 	// Properties
-	MountSocket=Mount2
 	SmoothingFactor=0.0
 	ZoomSensitivity=0.0
 	FireRateBonus=0.0

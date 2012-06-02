@@ -18,8 +18,6 @@ var (DVWeapon) const array<SoundCue>		WeaponFireSnd;
 var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 
 var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
-var (DVWeapon) const ParticleSystem			BeamPSCTemplate_Red;
-var (DVWeapon) const ParticleSystem			BeamPSCTemplate_Blue;
 
 var (DVWeapon) vector						ZoomOffset;
 
@@ -31,7 +29,6 @@ var (DVWeapon) float 						ZoomedFOV;
 var (DVWeapon) int							MaxAmmo;
 var (DVWeapon) int							TickDivisor;
 
-var (DVWeapon) const name					LaserBeamSocket;
 var (DVWeapon) const name					WeaponFireAnim;
 var (DVWeapon) const array<name> 			EffectSockets;
 var (DVWeapon) name							ZoomSocket;
@@ -41,8 +38,10 @@ var (DVWeapon) string						WeaponIconPath;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
+var (DVWeapon) DVWeaponAddon				Addon3;
 var (DVWeapon) class<DVWeaponAddon>			AddonClass1;
 var (DVWeapon) class<DVWeaponAddon>			AddonClass2;
+var (DVWeapon) class<DVWeaponAddon>			AddonClass3;
 
 
 /*----------------------------------------------------------
@@ -59,11 +58,10 @@ var (DVWeapon) localized string				lWeaponDamage;
 ----------------------------------------------------------*/
 
 var ParticleSystemComponent		MuzzleFlashPSC;
-var ParticleSystemComponent		BeamPSC;
 
 var bool						bWeaponEmpty;
-var bool						bBeamActive;
 var bool						bZoomed;
+
 var int							FrameCount;
 
 
@@ -74,7 +72,7 @@ var int							FrameCount;
 replication
 {
 	if ( bNetDirty )
-		bZoomed, bBeamActive, Addon1, Addon2, bWeaponEmpty;
+		bZoomed, Addon1, Addon2, Addon3, bWeaponEmpty;
 }
 
 
@@ -127,17 +125,6 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	MuzzleFlashPSC.SetTemplate(MuzzleFlashPSCTemplate);
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
-	// FX : beam
-	BeamPSC = new(Outer) class'ParticleSystemComponent';
-	BeamPSC.bAutoActivate = false;
-	if (DVPlayerRepInfo(target.PlayerReplicationInfo).Team.TeamIndex == 1)
-		BeamPSC.SetTemplate(BeamPSCTemplate_Blue);
-	else
-		BeamPSC.SetTemplate(BeamPSCTemplate_Red);
-	BeamPSC.bUpdateComponentInTick = true;
-	BeamPSC.SetTickGroup(TG_EffectsUpdateWork);
-	SkeletalMeshComponent(Mesh).AttachComponentToSocket(BeamPSC, LaserBeamSocket);
-	
 	// Weapon add-ons
 	if (AddonClass1 != None)
 	{
@@ -148,6 +135,11 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	{
 		Addon2 = Spawn(AddonClass2, self);
 		Addon2.AttachToWeapon(self);
+	}
+	if (AddonClass3 != None)
+	{
+		Addon3 = Spawn(AddonClass3, self);
+		Addon3.AttachToWeapon(self);
 	}
 }
 
@@ -163,51 +155,6 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 		if (MeshCpnt != None)
 			MeshCpnt.DetachComponent(Mesh);
 	}
-	BeamPSC.DeactivateSystem();
-}
-
-
-/*--- Laser pointer end --*/
-simulated function Tick(float DeltaTime)
-{
-	local vector Impact, EndTrace, SocketLocation, Unused;
-	local rotator SocketRotation;
-	local DVPawn target;
-	
-	// Init
-	super.Tick(DeltaTime);
-	FrameCount += 1;
-	target = DVPawn(Owner);
-	if (Mesh == None || target == None || FrameCount % TickDivisor != 0)
-	{
-		return;
-	}
-	Mesh.SetHidden(false);
-	
-	// Trace
-	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(LaserBeamSocket, SocketLocation, SocketRotation))
-		`warn("GetSocketWorldLocationAndrotation Tick failed ");
-	EndTrace = SocketLocation + vector(SocketRotation) * 10000.0;
-	Trace(Impact, Unused, EndTrace, SocketLocation, true,,, TRACEFLAG_Bullet);
-	
-	// Laser pointer update
-	if (BeamPSC != None)
-	{
-		if (UseBeam() && !bBeamActive)
-		{
-			BeamPSC.ActivateSystem();
-			bBeamActive = true;
-		}
-		else if (!UseBeam() && bBeamActive)
-		{
-			BeamPSC.DeactivateSystem();
-			bBeamActive = false;
-		}
-		if (bBeamActive)
-		{
-			BeamPSC.SetVectorParameter('BeamEnd', VSize(Impact - SocketLocation) * vect(1,0,0));
-		}
-	}
 }
 
 
@@ -220,21 +167,6 @@ simulated function int AddAmmo(int amount)
 	PreviousAmmo = AmmoCount;
 	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
 	return AmmoCount - PreviousAmmo;
-}
-
-
-/*--- Is beam online ---*/
-reliable client simulated function bool UseBeam()
-{
-	local DVPawn P;
-	P = DVPawn(Owner);
-	
-	if (P != None)
-	{
-		return P.GetBeamStatus();
-	}
-	else
-		return true;
 }
 
 
@@ -284,6 +216,8 @@ simulated function ZoomIn()
 		Addon1.StartZoom();
 	if (Addon2 != None)
 		Addon2.StartZoom();
+	if (Addon3 != None)
+		Addon3.StartZoom();
 	bZoomed = true;
 }
 
@@ -295,6 +229,8 @@ simulated function ZoomOut()
 		Addon1.StopZoom();
 	if (Addon2 != None)
 		Addon2.StopZoom();
+	if (Addon3 != None)
+		Addon3.StopZoom();
 	bZoomed = false;
 }
 
@@ -307,6 +243,8 @@ simulated function bool HasLensEffect()
 		bShouldUseDirectAim = Addon1.HasLens();
 	if (!bShouldUseDirectAim && Addon2 != None)
 		bShouldUseDirectAim = Addon2.HasLens();
+	if (!bShouldUseDirectAim && Addon3 != None)
+		bShouldUseDirectAim = Addon3.HasLens();
 	return bShouldUseDirectAim;
 }
 
@@ -611,10 +549,7 @@ defaultproperties
 	ZoomOffset=(X=0,Y=0,Z=1.0)
 	
 	// Effects
-	BeamPSCTemplate_Blue=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect_Blue'
-	BeamPSCTemplate_Red=ParticleSystem'DV_CoreEffects.FX.PS_LaserBeamEffect'
 	MuzzleFlashPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
-	LaserBeamSocket=Mount1
 	WeaponFireSnd[0]=None
 	WeaponFireSnd[1]=None
 	EffectSockets(0)=MF
@@ -623,7 +558,6 @@ defaultproperties
 	// Initialization
 	bZoomed=false
 	bHidden=false
-	bBeamActive=false
 	bWeaponEmpty=false
 	bOnlyRelevantToOwner=false
 	bOnlyDirtyReplication=false
