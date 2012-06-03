@@ -81,11 +81,20 @@ replication
 /*--- Initial spawn ---*/ 
 simulated function PostBeginPlay()
 {
+	// Init
 	super.PostBeginPlay();
+	`log("DVPC : PostBeginPlay");
+	SetTimer(1.0, false, 'StartMusicIfAvailable');
+	
+	// Stats
 	LocalStats = new class'DVUserStats';
 	GlobalStats = new class'DVUserStats';
 	SetName(LocalStats.UserName);
 	GlobalStats.EmptyStats();
+	
+	// Connexion
+	MasterServerLink = spawn(class'DVLink');
+	MasterServerLink.InitLink(self);
 }
 
 
@@ -98,7 +107,6 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
-	SetTimer(1.0, false, 'StartMusicIfAvailable');
 }
 
 

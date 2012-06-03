@@ -585,6 +585,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 
 	// Logging
 	ServerLogAction("HIT");
+	if (InstigatedBy != None)
 		DVPlayerController(Controller).ClientSignalHit(InstigatedBy, bWasHS);
 	
 	// Blood impact

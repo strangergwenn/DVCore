@@ -96,7 +96,6 @@ event PostLogin (PlayerController NewPlayer)
 {
 	local Actor A;
 	local DVPlayerController P;
-	local DVPlayerController NP;
 	super.PostLogin(NewPlayer);
 	
 	DVPlayerController(NewPlayer).SetWeaponList(DefaultWeaponList, WeaponListLength);
@@ -112,12 +111,7 @@ event PostLogin (PlayerController NewPlayer)
 		if (P != NewPlayer)
 			P.ServerNotifyNewPlayer(DVPlayerController(NewPlayer).GetPlayerName());
 	}
-	
-	// Data
-	NP = DVPlayerController(NewPlayer);
-	NP.MasterServerLink = Spawn(class'DVLink');
-	NP.MasterServerLink.InitLink(NP);
-	NP.MaxScore = MaxScore;
+	DVPlayerController(NewPlayer).MaxScore = MaxScore;
 }
 
 
