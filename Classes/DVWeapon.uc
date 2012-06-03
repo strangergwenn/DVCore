@@ -190,7 +190,7 @@ simulated function vector GetZoomViewLocation()
 	if (Mesh != None)
 	{
 		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(ZoomSocket, loc, rot))
-			`warn("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
+			`log("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
 		
 		GetAxes(rot, X, Y, Z);
 		return loc + ZoomOffset.X * X +  ZoomOffset.Y * Y +  ZoomOffset.Z * Z;
@@ -271,7 +271,7 @@ simulated function vector InstantFireEndTrace(vector StartTrace)
 	local vector loc;
 	
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[0], loc, rot))
-		`warn("GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
+		`log("GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
 	
 	return StartTrace + vector(rot) * GetTraceRange();
 }

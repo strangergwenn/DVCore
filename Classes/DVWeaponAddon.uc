@@ -92,14 +92,13 @@ simulated function FireAmmo()
 reliable client simulated function bool UseAddon()
 {
 	local DVPawn P;
-	P = DVPawn(Weap.Owner);
-	
-	if (P != None)
+	if (Weap != None)
 	{
-		return P.GetAddonStatus();
+		P = DVPawn(Weap.Owner);
+		if (P != None)
+			return P.GetAddonStatus();
 	}
-	else
-		return true;
+	return true;
 }
 
 

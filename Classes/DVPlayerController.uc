@@ -146,11 +146,15 @@ reliable client simulated function Connect(string user, string passwd)
 /*--- Upload game statistics ---*/
 reliable client simulated function UploadGame()
 {
+	// Checking data
 	local DVUserStats LStats;
+	if (myHUD == None)
+		return;
 	LStats = DVHUD_Menu(myHUD).LocalStats;
+	`log("DVPC : Uploading game...");
 	
 	// Stats upload
-	if (LStats.bWasUploaded == false)
+	if (LStats != None && LStats.bWasUploaded == false)
 	{
 		MasterServerLink.SaveGame(
 			LStats.Kills,
@@ -162,7 +166,12 @@ reliable client simulated function UploadGame()
 		);
 		LStats.SetBoolValue("bWasUploaded", true);
 		LStats.SaveConfig();
+		`log("DVPC : Uploading sent");
 	}
+	
+	// Will be tried again on menu
+	else
+		`log("DVPC : Uploading aborted");
 }
 
 
@@ -319,7 +328,7 @@ function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDele
 
 reliable server simulated function StartMusicIfAvailable()
 {
-	`log("StartMusicIfAvailable");
+	`log("DVPC : StartMusicIfAvailable");
 	
 	if (!bMusicStarted)
 	{
@@ -333,7 +342,7 @@ reliable server simulated function StartMusicIfAvailable()
 /*--- Music loop ---*/
 reliable server simulated function StartMusicLoop()
 {
-	`log("StartMusicLoop");
+	`log("DVPC : StartMusicLoop");
 	
 	ClearTimer('StartMusicLoop');
 	ClientPlaySound(GetTrackLoop());
@@ -521,7 +530,7 @@ simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI
 /*--- End of game ---*/
 reliable client simulated function SignalEndGame(bool bHasWon)
 {
-	`log("End of game " $ self);
+	`log("DVPC : End of game " $ self);
 	DVHUD(myHUD).ShowPlayerList();
 	LockCamera(true);
 	
@@ -749,7 +758,7 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 	{
 		if (WeaponList[i] == DVPawn(Pawn).CurrentWeaponClass)
 		{
-			`log("GetCurrentWeaponIndex" @i);
+			`log("DVPC : GetCurrentWeaponIndex" @i);
 			return i;
 		}
 	}
@@ -764,7 +773,7 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	
-	`log("SaveGameStatistics");
+	`log("DVPC : SaveGameStatistics");
 	LStats = DVHUD(myHUD).LocalStats;
 	LStats.SetBoolValue("bHasLeft", bLeaving);
 	LStats.SetBoolValue("bWasUploaded", false);
@@ -784,7 +793,7 @@ reliable client simulated function int GetLocalRank()
 	
 	for (i = 0; i < PList.Length; i ++)
 	{
-		`log("Comparing " $ PList[i] $ " to " $ DVPlayerRepInfo(PlayerReplicationInfo));
+		`log("DVPC : Comparing " $ PList[i] $ " to " $ DVPlayerRepInfo(PlayerReplicationInfo));
 		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
 			return i + 1;
 	}

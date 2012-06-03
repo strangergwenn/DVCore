@@ -119,7 +119,7 @@ var int									StoredLevel;
 function GetServerContent()
 {
 	// Init
-	`log("GetServerContent");
+	`log("CoreUI : GetServerContent");
 	OpenConnectionDialog(false);
 	HidePopup(true);
 	
@@ -294,8 +294,8 @@ function OpenConnectionDialog(bool bShowRegister)
 	{
 		SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
 		SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
+		PC.CancelTimeout();
 	}
-	PC.CancelTimeout();
 }
 
 
@@ -341,7 +341,7 @@ function OnPButton2(GFxClikWidget.EventData evtd)
 /*--- Show result on screen ---*/
 function GetConnectionResult(bool bSuccess)
 {
-	`log("GetConnectionResult" @bSuccess);
+	`log("CoreUI : GetConnectionResult" @bSuccess);
 	if (bSuccess)
 	{
 		SetConnectState(2);
@@ -540,7 +540,7 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	HInfo = DVHUD_Menu(PC.myHUD);
 	button = GetSymbol("ResolutionList");
 	res = Split(ResListData[int(button.GetString("selectedIndex"))], "[", false);
-	`log("Clicked resolution " $ res);
+	`log("CoreUI : Clicked resolution " $ res);
 	
 	// Application
 	PlayUISound(ClickSound);

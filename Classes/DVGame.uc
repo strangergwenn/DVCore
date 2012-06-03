@@ -56,6 +56,7 @@ function PreBeginPlay()
 	CreateTeam(1);
 	
 	// Spawn turrets
+	//TODO
 	/*
 	foreach WorldInfo.AllNavigationPoints(class'DVTurretSocket', PS)
 	{
@@ -74,6 +75,7 @@ event PostBeginPlay()
 	// Init
 	super.PostBeginPlay();
 	SetTimer(EndGameTick, true, 'ScoreUpdated');
+	SetTimer(20.0, false, 'DEBUGME');
 	
 	// Dedicated server
 	if (WorldInfo.NetMode == NM_DedicatedServer)
@@ -84,7 +86,10 @@ event PostBeginPlay()
 		//SetTimer(HeartbeatTick, true, 'SendServerData');
 	}
 }
-
+function DEBUGME()
+{
+	Teams[0].Score = 50;
+}
 
 /*--- Team attribution ---*/
 event PostLogin (PlayerController NewPlayer)

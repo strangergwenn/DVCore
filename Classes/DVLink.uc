@@ -352,7 +352,7 @@ event ReceivedLine(string Line)
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
-	`log("DVLINK : MS command >" $ Line);
+	//`log("DVLINK : MS command >" $ Line);
 	
 	// Error
 	if (IsEqual(Command[0], "NOK"))
@@ -376,12 +376,11 @@ event ReceivedLine(string Line)
 	// Leaderboards
 	else if (IsEqual(Command[0], "TOP_PLAYER"))
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
-	//TODO
-	//else if (IsEqual(Command[0], "LOC_PLAYER"))
-	//	PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
+	else if (IsEqual(Command[0], "LOC_PLAYER"))
+		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
 	
 	// Server list
-	else if (IsEqual(Command[0], "SERVER"))
+	else if (IsEqual(Command[0], "SERVER") && PC.myHUD != None)
 	{
 		DVHUD_Menu(PC.myHUD).AddServerInfo(
 			Command[1],
