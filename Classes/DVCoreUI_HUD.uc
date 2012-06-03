@@ -293,9 +293,9 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		// Weapon widgets
 		case ('Weapon0'):
 		case ('Weapon1'):
-		case ('Weapon2'):/*
+		case ('Weapon2'):
 		case ('Weapon3'):
-		case ('Weapon4'):
+		case ('Weapon4'):/*
 		case ('Weapon5'):
 		case ('Weapon6'):
 		case ('Weapon7'):*/

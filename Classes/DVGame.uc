@@ -75,21 +75,16 @@ event PostBeginPlay()
 	// Init
 	super.PostBeginPlay();
 	SetTimer(EndGameTick, true, 'ScoreUpdated');
-	SetTimer(20.0, false, 'DEBUGME');
 	
 	// Dedicated server
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
-		//TODO
-		//ServerLink = Spawn(class'DVLink');
-		//ServerLink.InitLink(None);
-		//SetTimer(HeartbeatTick, true, 'SendServerData');
+		ServerLink = Spawn(class'DVLink');
+		ServerLink.InitLink(None);
+		SetTimer(HeartbeatTick, true, 'SendServerData');
 	}
 }
-function DEBUGME()
-{
-	Teams[0].Score = 50;
-}
+
 
 /*--- Team attribution ---*/
 event PostLogin (PlayerController NewPlayer)
@@ -425,7 +420,7 @@ defaultproperties
 	bTeamGame=true
     bPauseable=false
 	EndGameTick=0.5
-	HeartbeatTick=5.0
+	HeartbeatTick=20.0
 	MaxPlayersAllowed=16
 	
 	// Classes

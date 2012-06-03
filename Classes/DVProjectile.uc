@@ -81,16 +81,26 @@ simulated event SetInitialState()
 }
 
 
+/*--- Setup speed and acceleration at shot ---*/
 function Init(vector Direction)
 {
 	SetRotation(rotator(Direction));
 	Velocity = Speed * Direction;
 	Acceleration = AccelRate * Normal(Velocity);
+	SetPhysics(PHYS_Falling);
 }
 
 
+/*--- Impact ---*/
 simulated function ProcessTouch(Actor Other, Vector HitLocation, Vector HitNormal)
 {
+	if (DamageRadius > 0)
+	{
+		if (!bShuttingDown)
+		{
+			ProjectileHurtRadius(HitLocation, HitNormal);
+		}
+	}
 	Other.TakeDamage(Damage,InstigatorController,HitLocation,MomentumTransfer * Normal(Velocity), MyDamageType,, self);
 	Shutdown();
 }
