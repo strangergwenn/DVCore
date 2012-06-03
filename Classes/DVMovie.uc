@@ -264,11 +264,21 @@ function SetPopup(string Text[7], optional int PField, optional int PField2)
 	SetPopupStatus("");
 	PopupWindow.SetVisible(true);
 	bIsPopupVisible = true;
+	bCaptureInput = false;
 	PlayUISound(BipSound);
 }
 
 
-/*--- Get popup content ---*/
+/*--- Set popup initial content ---*/
+function SetPopupContent(int FieldID, string Content)
+{
+	local GFxObject TempObject;
+	TempObject = GetSymbol(PopupName $ ".PopupField" $ FieldID);
+	TempObject.SetText(Content);
+}
+
+
+/*--- Get popup's typed contents ---*/
 function array<string> GetPopupContent()
 {
 	local array<string> Result;
@@ -285,24 +295,16 @@ function array<string> GetPopupContent()
 }
 
 
-/*--- Set popup content ---*/
-function SetPopupContent(int FieldID, string Content)
-{
-	local GFxObject TempObject;
-	TempObject = GetSymbol(PopupName $ ".PopupField" $ FieldID);
-	TempObject.SetText(Content);
-}
-
-
 /*--- Hide the popup ---*/
 function HidePopup(optional bool bHide)
 {
 	PopupWindow.SetVisible(!bHide);
 	bIsPopupVisible = false;
+	bCaptureInput = true;
 }
 
 
-/*--- Set the status ---*/
+/*--- Set the status indicator ---*/
 function SetPopupStatus(string NewStatus)
 {
 	local GFxObject StatusField;
@@ -325,6 +327,14 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 function OnPButton2(GFxClikWidget.EventData evtd)
 {
 	PlayUISound(BipSound);
+}
+
+
+/*--- Simulate button pressed ---*/
+function ForceValidate()
+{
+	local GFxClikWidget.EventData evtd;
+	OnPButton1(evtd);
 }
 
 

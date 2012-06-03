@@ -53,10 +53,20 @@ simulated exec function UnDuck()
 /*--- Key pressed delegate ---*/
 function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float AmountDepressed, optional bool bGamepad)
 {
-	if(IEvent == IE_Pressed)
+	// Main menu keys
+	if (IEvent == IE_Pressed && DVHUD_Menu(myHUD) != None)
 	{
-		if (Len(KeyName) <= 10 && DVHUD_Menu(myHUD) != None)
+		// Custom key setting
+		if (Len(KeyName) <= 10)
 			DVHUD_Menu(myHUD).HudMovie.SetKeyPressed(string(KeyName));
+		
+		// Popup navigation
+		if (KeyName == 'Enter')
+			DVHUD_Menu(myHUD).HudMovie.ForceValidate();
+		else if (KeyName == 'Echap')
+			DVHUD_Menu(myHUD).HudMovie.HidePopup();
+		
+		`log("pressed" @KeyName);
 	}
 	return false;
 }

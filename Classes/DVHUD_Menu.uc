@@ -21,7 +21,7 @@ var (CoreUI) const float				PopupTimer;
 	Private attributes
 ----------------------------------------------------------*/
 
-var DVCoreUI_Menu   				HudMovie;
+var DVCoreUI_Menu   					HudMovie;
 
 
 /*----------------------------------------------------------
@@ -31,10 +31,12 @@ var DVCoreUI_Menu   				HudMovie;
 /*--- Spawn ---*/ 
 simulated function PostBeginPlay()
 {
+	// Init
 	local DVPlayerController PC;
 	super.PostBeginPlay();
 	PC = DVPlayerController(PlayerOwner);
 	
+	// Movie
 	HudMovie = new HUDClass;
 	HudMovie.SetTimingMode(TM_Real);
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
@@ -75,19 +77,19 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 }
 
 
-/*--- Popup suppression ---*/
-function HidePopup()
-{
-	HudMovie.HidePopup(true);
-	HudMovie.bIsInRegisterPopup = false;
-}
-
-
 /*--- Server data ---*/  
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
 {
 	HudMovie.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers);
 	HudMovie.UpdateServerList();
+}
+
+
+/*--- Popup suppression ---*/
+function HidePopup()
+{
+	HudMovie.HidePopup(true);
+	HudMovie.bIsInRegisterPopup = false;
 }
 
 

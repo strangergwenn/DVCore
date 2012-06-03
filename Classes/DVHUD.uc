@@ -148,11 +148,6 @@ function ToggleRespawnMenu()
 }
 
 
-/*--- Text box for objectives ---*/
-function DrawMessageText(HudLocalizedMessage LocalMessage, float ScreenX, float ScreenY)
-{}
-
-
 /*--- Console message between players ---*/
 function DisplayConsoleMessages()
 {
@@ -167,6 +162,11 @@ function DisplayConsoleMessages()
 	}
 	HUDMovie.UpdateChat(text);
 }
+
+
+/*--- Text box for objectives ---*/
+function DrawMessageText(HudLocalizedMessage LocalMessage, float ScreenX, float ScreenY)
+{}
 
 
 /*----------------------------------------------------------
