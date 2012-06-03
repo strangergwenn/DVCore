@@ -40,6 +40,9 @@ var (DVPC) localized string			lWon;
 	Private attributes
 ----------------------------------------------------------*/
 
+var DVUserStats						LocalStats;
+var DVUserStats						GlobalStats;
+
 var class<DVWeapon> 		 		WeaponList[8];
 var class<DVWeapon> 				UserChoiceWeapon;
 
@@ -75,6 +78,17 @@ replication
 	Events and net behaviour
 ----------------------------------------------------------*/
 
+/*--- Initial spawn ---*/ 
+simulated function PostBeginPlay()
+{
+	super.PostBeginPlay();
+	LocalStats = new class'DVUserStats';
+	GlobalStats = new class'DVUserStats';
+	SetName(LocalStats.UserName);
+	GlobalStats.EmptyStats();
+}
+
+
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
 {
@@ -85,6 +99,30 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
 	SetTimer(1.0, false, 'StartMusicIfAvailable');
+}
+
+
+/*--- Launch autoconnection ---*/
+simulated function AutoConnect()
+{
+	`log("DVPC : autoConnect");
+	
+	if (Len(LocalStats.UserName) > 3
+	 && Len(LocalStats.Password) > 3
+	 && MasterServerLink != None)
+	{
+		MasterServerLink.ConnectToMaster(
+			LocalStats.UserName, LocalStats.Password);
+	}
+}
+
+
+/*--- Called when the connection has been established ---*/
+function SignalConnected()
+{
+	`log("Setting name " @LocalStats.UserName);
+	SetName(LocalStats.UserName);
+	LocalStats.SaveConfig();
 }
 
 
@@ -147,25 +185,21 @@ reliable client simulated function Connect(string user, string passwd)
 reliable client simulated function UploadGame()
 {
 	// Checking data
-	local DVUserStats LStats;
-	if (myHUD == None)
-		return;
-	LStats = DVHUD_Menu(myHUD).LocalStats;
 	`log("DVPC : Uploading game...");
 	
 	// Stats upload
-	if (LStats != None && LStats.bWasUploaded == false)
+	if (LocalStats != None && LocalStats.bWasUploaded == false)
 	{
 		MasterServerLink.SaveGame(
-			LStats.Kills,
-			LStats.Deaths,
-			LStats.TeamKills,
-			LStats.Rank,
-			LStats.ShotsFired,
-			LStats.WeaponScores
+			LocalStats.Kills,
+			LocalStats.Deaths,
+			LocalStats.TeamKills,
+			LocalStats.Rank,
+			LocalStats.ShotsFired,
+			LocalStats.WeaponScores
 		);
-		LStats.SetBoolValue("bWasUploaded", true);
-		LStats.SaveConfig();
+		LocalStats.SetBoolValue("bWasUploaded", true);
+		LocalStats.SaveConfig();
 		`log("DVPC : Uploading sent");
 	}
 	
@@ -187,18 +221,16 @@ reliable client event TcpGetStats(array<string> Data)
 {
 	// Init
 	local byte i;
-	local DVHUD_Menu hd;
-	hd = DVHUD_Menu(myHUD);
 	
 	// Global game stats
 	if (InStr(Data[0], "GET_GSTATS") != -1)
 	{
-		hd.GlobalStats.SetIntValue("Kills", 	int(Data[1]));
-		hd.GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
-		hd.GlobalStats.SetIntValue("TeamKills", int(Data[3]));
-		hd.GlobalStats.SetIntValue("Points", 	int(Data[5]));
-		hd.GlobalStats.SetIntValue("Shots", 	int(Data[6]));
-		hd.GlobalStats.SetIntValue("Headshots", int(Data[7]));
+		GlobalStats.SetIntValue("Kills", 	int(Data[1]));
+		GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
+		GlobalStats.SetIntValue("TeamKills", int(Data[3]));
+		GlobalStats.SetIntValue("Points", 	int(Data[5]));
+		GlobalStats.SetIntValue("Shots", 	int(Data[6]));
+		GlobalStats.SetIntValue("Headshots", int(Data[7]));
 	}
 	
 	// Weapon stats
@@ -206,7 +238,7 @@ reliable client event TcpGetStats(array<string> Data)
 	{
 		for (i = 0; i < WeaponListLength; i++)
 		{
-			hd.GlobalStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
+			GlobalStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
 		}
 	}
 }
@@ -352,7 +384,7 @@ reliable server simulated function StartMusicLoop()
 /*--- Music sound if used ---*/
 unreliable client event ClientPlaySound(SoundCue ASound)
 {
-	if (DVHUD(myHUD).LocalStats.bBackgroundMusic)
+	if (LocalStats.bBackgroundMusic)
 		ClientHearSound(ASound, self, Location, false, false);
 }
 
@@ -446,11 +478,11 @@ unreliable client simulated function ShowGenericMessage(string text)
 /*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound(bool bWasHeadshot)
 {
-	if(DVHUD(myHUD).LocalStats.bUseSoundOnHit)
+	if(LocalStats.bUseSoundOnHit)
 		PlaySound(HitSound);
 	
 	if (bWasHeadshot)
-		DVHUD_Menu(myHUD).LocalStats.SetIntValue("HeadShots" , DVHUD_Menu(myHUD).LocalStats.HeadShots + 1);
+		LocalStats.SetIntValue("HeadShots" , LocalStats.HeadShots + 1);
 }
 
 
@@ -694,57 +726,49 @@ reliable server function ServerSuicide()
 /*--- Remember client ---*/
 reliable client simulated function SaveIDs(string User, string Pass)
 {
-	local DVUserStats LStats;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
-	LStats = DVHUD_Menu(myHUD).LocalStats;
-	LStats.SetStringValue("UserName", User);
-	LStats.SetStringValue("PassWord", Pass);
-	LStats.SaveConfig();
+	LocalStats.SetStringValue("UserName", User);
+	LocalStats.SetStringValue("PassWord", Pass);
+	LocalStats.SaveConfig();
 }
 
 
 /*--- Store kill in DB ---*/
 reliable client simulated function RegisterDeath()
 {
-	local DVUserStats LStats;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
-	LStats = DVHUD(myHUD).LocalStats;
-	LStats.SetIntValue("Deaths" , LStats.Deaths + 1);
+	LocalStats.SetIntValue("Deaths" , LocalStats.Deaths + 1);
 }
 
 
 /*--- Store shot in DB ---*/
 reliable client simulated function RegisterShot()
 {
-	local DVUserStats LStats;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
-	LStats = DVHUD(myHUD).LocalStats;
-	LStats.SetIntValue("ShotsFired" , LStats.ShotsFired + 1);
+	LocalStats.SetIntValue("ShotsFired" , LocalStats.ShotsFired + 1);
 }
 
 
 /*--- Store kill in DB ---*/
 exec reliable client simulated function RegisterKill(optional bool bTeamKill)
 {
-	local DVUserStats LStats;
 	local int index;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	
-	LStats = DVHUD(myHUD).LocalStats;
 	index = GetCurrentWeaponIndex();
 	
 	if (bTeamKill)
 	{
-		LStats.SetIntValue("TeamKills" , LStats.TeamKills + 1);
+		LocalStats.SetIntValue("TeamKills" , LocalStats.TeamKills + 1);
 	}
 	else
 	{
-		LStats.SetIntValue("Kills" , LStats.Kills + 1);
-		LStats.SetArrayIntValue("WeaponScores", LStats.WeaponScores[index] + 1, index);
+		LocalStats.SetIntValue("Kills" , LocalStats.Kills + 1);
+		LocalStats.SetArrayIntValue("WeaponScores", LocalStats.WeaponScores[index] + 1, index);
 	}
 }
 
@@ -769,16 +793,14 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 /*--- End of game : saving ---*/
 reliable client simulated function SaveGameStatistics(bool bHasWon, optional bool bLeaving)
 {
-	local DVUserStats LStats;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	
 	`log("DVPC : SaveGameStatistics");
-	LStats = DVHUD(myHUD).LocalStats;
-	LStats.SetBoolValue("bHasLeft", bLeaving);
-	LStats.SetBoolValue("bWasUploaded", false);
-	LStats.SetIntValue("Rank", GetLocalRank());
-	LStats.SaveConfig();
+	LocalStats.SetBoolValue("bHasLeft", bLeaving);
+	LocalStats.SetBoolValue("bWasUploaded", false);
+	LocalStats.SetIntValue("Rank", GetLocalRank());
+	LocalStats.SaveConfig();
 	UploadGame();
 }
 
@@ -793,9 +815,11 @@ reliable client simulated function int GetLocalRank()
 	
 	for (i = 0; i < PList.Length; i ++)
 	{
-		`log("DVPC : Comparing " $ PList[i] $ " to " $ DVPlayerRepInfo(PlayerReplicationInfo));
 		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
+		{
+			`log("DVPC : GetLocalRank"@i);
 			return i + 1;
+		}
 	}
 	return 0;
 }

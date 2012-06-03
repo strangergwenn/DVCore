@@ -21,9 +21,6 @@ var (CoreUI) const float				PopupTimer;
 	Private attributes
 ----------------------------------------------------------*/
 
-var DVUserStats						LocalStats;
-var DVUserStats						GlobalStats;
-
 var DVCoreUI_Menu   				HudMovie;
 
 
@@ -34,20 +31,19 @@ var DVCoreUI_Menu   				HudMovie;
 /*--- Spawn ---*/ 
 simulated function PostBeginPlay()
 {
+	local DVPlayerController PC;
 	super.PostBeginPlay();
+	PC = DVPlayerController(PlayerOwner);
 	
 	HudMovie = new HUDClass;
 	HudMovie.SetTimingMode(TM_Real);
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
 	HudMovie.Start();
 	HudMovie.Advance(0);
-	HudMovie.PC = DVPlayerController(PlayerOwner);
+	HudMovie.PC = PC;
 	
 	// User settings
-	LocalStats = new class'DVUserStats';
-	GlobalStats = new class'DVUserStats';
-	GlobalStats.EmptyStats();
-	HudMovie.ApplyResolutionSetting(LocalStats.Resolution, (LocalStats.bFullScreen ? "f" : "w"));
+	HudMovie.ApplyResolutionSetting(PC.LocalStats.Resolution, (PC.LocalStats.bFullScreen ? "f" : "w"));
 	`log("HUD is ready");
 }
 
@@ -63,15 +59,16 @@ simulated function DelayedAutoConnect()
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	`log("AutoConnect");
-	if (Len(LocalStats.UserName) > 3
-	 && Len(LocalStats.Password) > 3
-	 && DVPlayerController(PlayerOwner).MasterServerLink != None)
-	{
-		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
-			LocalStats.UserName, LocalStats.Password);
-		HudMovie.SetConnectState(1);
-	}
+	DVPlayerController(PlayerOwner).AutoConnect();
+	HudMovie.SetConnectState(1);
+}
+
+
+/*--- Called when the connection has been established ---*/
+function SignalConnected()
+{
+	DVPlayerController(PlayerOwner).SignalConnected();
+	HudMovie.SetConnectState(2);
 }
 
 
@@ -84,16 +81,6 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 		ClearTimer('HidePopup');
 		SetTimer(PopupTimer, false, 'HidePopup');
 	}
-}
-
-
-/*--- Called when the connection has been established ---*/
-function SignalConnected()
-{
-	DVPlayerController(PlayerOwner).SetName(LocalStats.UserName);
-	`log("Setting name " @LocalStats.UserName);
-	HudMovie.SetConnectState(2);
-	LocalStats.SaveConfig();
 }
 
 

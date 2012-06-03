@@ -292,8 +292,8 @@ function OpenConnectionDialog(bool bShowRegister)
 	}
 	if (PC != None)
 	{
-		SetPopupContent(1, DVHUD_Menu(PC.myHUD).LocalStats.UserName);
-		SetPopupContent(2, DVHUD_Menu(PC.myHUD).LocalStats.Password);
+		SetPopupContent(1, PC.LocalStats.UserName);
+		SetPopupContent(2, PC.LocalStats.Password);
 		PC.CancelTimeout();
 	}
 }
@@ -368,8 +368,6 @@ simulated function GetStatsContent()
 {
 	// Init
 	local string RankInfo;
-	local DVHUD_Menu hd;
-	hd = DVHUD_Menu(PC.myHUD);
 	
 	// General
 	SetLabel("MenuTitle", lGameStats, true);
@@ -380,37 +378,37 @@ simulated function GetStatsContent()
 	
 	// Stat block 1
 	SetLabel("StatTitle1", lEfficiency, true);
-	SetLabel("Stat10", string(hd.GlobalStats.Kills) @lVictims, false);
-	SetLabel("Stat11", string(100 * (hd.GlobalStats.Headshots) / hd.GlobalStats.Kills) $"%" @lHeadshots, false);
-	SetLabel("Stat12", string((100 * hd.GlobalStats.Kills) / hd.GlobalStats.Deaths) $"% K/D", false);
-	SetPieChart("PieStat1", "Stat13", lDeadlyShots, hd.GlobalStats.Kills / hd.GlobalStats.ShotsFired);
+	SetLabel("Stat10", string(PC.GlobalStats.Kills) @lVictims, false);
+	SetLabel("Stat11", string(100 * (PC.GlobalStats.Headshots) / PC.GlobalStats.Kills) $"%" @lHeadshots, false);
+	SetLabel("Stat12", string((100 * PC.GlobalStats.Kills) / PC.GlobalStats.Deaths) $"% K/D", false);
+	SetPieChart("PieStat1", "Stat13", lDeadlyShots, PC.GlobalStats.Kills / PC.GlobalStats.ShotsFired);
 	
 	// Stat block 2
 	SetLabel("StatTitle2", lEffByWeapon, true);
-	SetLabel("Stat20", lWeapon0 @":" @string(hd.GlobalStats.WeaponScores[0]) @lVictims, false);
-	SetLabel("Stat21", lWeapon1 @":" @string(hd.GlobalStats.WeaponScores[1]) @lVictims, false);
-	SetLabel("Stat22", lWeapon2 @":" @string(hd.GlobalStats.WeaponScores[2]) @lVictims, false);
-	SetLabel("Stat23", lWeapon3 @":" @string(hd.GlobalStats.WeaponScores[3]) @lVictims, false);
-	SetLabel("Stat24", lWeapon4 @":" @string(hd.GlobalStats.WeaponScores[4]) @lVictims, false);
+	SetLabel("Stat20", lWeapon0 @":" @string(PC.GlobalStats.WeaponScores[0]) @lVictims, false);
+	SetLabel("Stat21", lWeapon1 @":" @string(PC.GlobalStats.WeaponScores[1]) @lVictims, false);
+	SetLabel("Stat22", lWeapon2 @":" @string(PC.GlobalStats.WeaponScores[2]) @lVictims, false);
+	SetLabel("Stat23", lWeapon3 @":" @string(PC.GlobalStats.WeaponScores[3]) @lVictims, false);
+	SetLabel("Stat24", lWeapon4 @":" @string(PC.GlobalStats.WeaponScores[4]) @lVictims, false);
 	
 	// Stat block 3
-	if (hd.LocalStats.bHasLeft)
+	if (PC.LocalStats.bHasLeft)
 		SetLabel("Stat30", lFledGame, false);
 	else
-		SetLabel("Stat30", lTeamHas $ (hd.LocalStats.bHasWon ? lWon : lLost), false);
+		SetLabel("Stat30", lTeamHas $ (PC.LocalStats.bHasWon ? lWon : lLost), false);
 	
-	SetLabel("Stat31", lLastRank @string(hd.LocalStats.Rank), false);
-	SetLabel("Stat32", string(hd.LocalStats.Kills) @lVictims, false);
-	SetLabel("Stat33", string(hd.LocalStats.Deaths) @lDeaths, false);
-	SetLabel("Stat34", string(hd.LocalStats.ShotsFired) @lShotsfired, false);
+	SetLabel("Stat31", lLastRank @string(PC.LocalStats.Rank), false);
+	SetLabel("Stat32", string(PC.LocalStats.Kills) @lVictims, false);
+	SetLabel("Stat33", string(PC.LocalStats.Deaths) @lDeaths, false);
+	SetLabel("Stat34", string(PC.LocalStats.ShotsFired) @lShotsfired, false);
 	
 	// Stat block 4
-	if (hd.GlobalStats.Rank > 0)
-		RankInfo = lYouAreRanked @ string(hd.GlobalStats.Rank);
+	if (PC.GlobalStats.Rank > 0)
+		RankInfo = lYouAreRanked @ string(PC.GlobalStats.Rank);
 	else
 		RankInfo = lYouAreNotRanked;
 	SetLabel("Stat40", RankInfo, false);
-	SetLabel("Stat41", lYouHave @ string(hd.GlobalStats.Points) @lPoints, false);
+	SetLabel("Stat41", lYouHave @ string(PC.GlobalStats.Points) @lPoints, false);
 }
 
 
@@ -443,10 +441,8 @@ simulated function UpdateLeaderboard(GFxObject List, bool bIsLocal)
 simulated function GetOptionsContent()
 {
 	local GFxObject tmpDisabled;
-	local DVHUD_Menu HInfo;
 	local string Key;
 	local byte i;
-	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// General
 	SetLabel("MenuTitle", lSettings, true);
@@ -461,9 +457,9 @@ simulated function GetOptionsContent()
 	SetWidgetLabel("OptionCB1", lIngameMusic, false);
 	SetWidgetLabel("OptionCB2", lImpactIndicator, false);
 	SetWidgetLabel("OptionCB3", lFullScreen, false);
-	SetChecked("OptionCB1", HInfo.LocalStats.bBackgroundMusic);
-	SetChecked("OptionCB2", HInfo.LocalStats.bUseSoundOnHit);
-	SetChecked("OptionCB3", HInfo.LocalStats.bFullScreen);
+	SetChecked("OptionCB1", PC.LocalStats.bBackgroundMusic);
+	SetChecked("OptionCB2", PC.LocalStats.bUseSoundOnHit);
+	SetChecked("OptionCB3", PC.LocalStats.bFullScreen);
 	
 	// Keys
 	for (i = 0; i < KeyListData.Length; i++)
@@ -480,8 +476,6 @@ function UpdateResList()
 	local byte 			i;
 	local GFxObject 	TempObj;
 	local GFxObject 	DataProvider;
-	local DVHUD_Menu 	HInfo;
-	HInfo = DVHUD_Menu(PC.myHUD);
 	
 	// Sending data to menu
 	DataProvider = ResListMC.GetObject("dataProvider");
@@ -492,7 +486,7 @@ function UpdateResList()
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	ResListMC.SetObject("dataProvider", DataProvider);
-	ResListMC.SetInt("selectedIndex", IsInArray(HInfo.LocalStats.Resolution, ResListData, true));
+	ResListMC.SetInt("selectedIndex", IsInArray(PC.LocalStats.Resolution, ResListData, true));
 }
 
 
@@ -532,12 +526,10 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 {
 	// Vars
 	local GFxObject button;
-	local DVHUD_Menu HInfo;
 	local string res, flag;
 	local byte i;
 	
 	// Resolution
-	HInfo = DVHUD_Menu(PC.myHUD);
 	button = GetSymbol("ResolutionList");
 	res = Split(ResListData[int(button.GetString("selectedIndex"))], "[", false);
 	`log("CoreUI : Clicked resolution " $ res);
@@ -550,11 +542,11 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	ApplyResolutionSetting(res, flag);
 	
 	// Options
-	HInfo.LocalStats.SetBoolValue("bBackgroundMusic", IsChecked("OptionCB1"));
-	HInfo.LocalStats.SetBoolValue("bUseSoundOnHit", IsChecked("OptionCB2"));
-	HInfo.LocalStats.SetBoolValue("bFullScreen", IsChecked("OptionCB3"));
-	HInfo.LocalStats.SetStringValue("Resolution", res);
-	HInfo.LocalStats.SaveConfig();
+	PC.LocalStats.SetBoolValue("bBackgroundMusic", IsChecked("OptionCB1"));
+	PC.LocalStats.SetBoolValue("bUseSoundOnHit", IsChecked("OptionCB2"));
+	PC.LocalStats.SetBoolValue("bFullScreen", IsChecked("OptionCB3"));
+	PC.LocalStats.SetStringValue("Resolution", res);
+	PC.LocalStats.SaveConfig();
 	
 	// Keys
 	for (i = 0; i < KeyListData.Length; i++)

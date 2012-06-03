@@ -24,9 +24,6 @@ var (DVHUD) const float					MenuDelay;
 	Private attributes
 ----------------------------------------------------------*/
 
-var DVUserStats							LocalStats;
-var DVUserStats							GlobalStats;
-
 var DVCoreUI_HUD   						HudMovie;
 var bool								bRespawnOpened;
 
@@ -76,22 +73,21 @@ event PostRender()
 simulated function PostBeginPlay()
 {	
 	// HUD spawn
+	local DVPlayerController PC;
 	super.PostBeginPlay();
+	PC = DVPlayerController(PlayerOwner);
+	
+	// Movie
 	HudMovie = new HUDClass;
 	HudMovie.SetTimingMode(TM_Real);
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
 	HudMovie.Start();
 	HudMovie.Advance(0);
 	
-	// Stats
-	LocalStats = new class'DVUserStats';
-	GlobalStats = new class'DVUserStats';
-	DVPlayerController(PlayerOwner).SetName(LocalStats.UserName);
-	LocalStats.EmptyStats();
-	GlobalStats.EmptyStats();
-	
 	// HUD register
-	HudMovie.PC = DVPlayerController(PlayerOwner);
+	PC.SetName(PC.LocalStats.UserName);
+	PC.LocalStats.EmptyStats();
+	HudMovie.PC = PC;
 	HudMovie.OpenRespawnMenu();
 }
 
@@ -99,14 +95,7 @@ simulated function PostBeginPlay()
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	`log("Ingame autoConnect");
-	if (Len(LocalStats.UserName) > 3
-	 && Len(LocalStats.Password) > 3
-	 && DVPlayerController(PlayerOwner).MasterServerLink != None)
-	{
-		DVPlayerController(PlayerOwner).MasterServerLink.ConnectToMaster(
-			LocalStats.UserName, LocalStats.Password);
-	}
+	DVPlayerController(PlayerOwner).AutoConnect();
 }
 
 
