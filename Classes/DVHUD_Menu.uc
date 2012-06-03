@@ -48,18 +48,9 @@ simulated function PostBeginPlay()
 }
 
 
-/*--- Launch autoconnection in one second ---*/
-simulated function DelayedAutoConnect()
-{
-	ClearTimer('AutoConnect');
-	SetTimer(1.0, false, 'AutoConnect');
-}
-
-
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	DVPlayerController(PlayerOwner).AutoConnect();
 	HudMovie.SetConnectState(1);
 }
 

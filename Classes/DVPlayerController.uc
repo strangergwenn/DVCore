@@ -145,12 +145,9 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
-			DVHUD_Menu(myHUD).DelayedAutoConnect();
+			DVHUD_Menu(myHUD).AutoConnect();
 		}
-		
-		// Ingame
-		else
-			DVHUD(myHUD).AutoConnect();
+		AutoConnect();
 	}
 	
 	// Upload & get back the stats on main menu

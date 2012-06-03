@@ -92,13 +92,6 @@ simulated function PostBeginPlay()
 }
 
 
-/*--- Launch autoconnection ---*/
-simulated function AutoConnect()
-{
-	DVPlayerController(PlayerOwner).AutoConnect();
-}
-
-
 /*--- Should we using the sniper effect ---*/
 simulated function SetSniperState(bool bZooming)
 {

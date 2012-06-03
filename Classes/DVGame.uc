@@ -47,8 +47,8 @@ var float								RestartTimer;
 function PreBeginPlay()
 {
 	// Vars
-	local DVTurretController DVTC;
-	local DVTurretSocket PS;
+	//local DVTurretController DVTC;
+	//local DVTurretSocket PS;
 	
 	// Game
 	super.PreBeginPlay();
