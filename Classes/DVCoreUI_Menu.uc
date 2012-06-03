@@ -511,7 +511,19 @@ function EditKey(GFxClikWidget.EventData ev)
 /*--- Save key pressed ---*/
 function SetKeyPressed(string KeyName)
 {
-	if (bIsKeyEditing)
+	local string Key;
+	
+	// Cancel
+	if (KeyName == "Escape")
+	{
+		Key = DVPlayerInput(PC.PlayerInput).GetKeyBinding(BindListData[KeyBeingEdited - 1]);
+		SetLabel("Key" $KeyBeingEdited, Key $ "   |   " $KeyListData[KeyBeingEdited - 1], false);
+		bIsKeyEditing = false;
+		bCaptureInput = true;
+	}
+	
+	// Key editing
+	else if (bIsKeyEditing)
 	{
 		SetLabel("Key" $KeyBeingEdited, KeyName $ "   |   " $KeyListData[KeyBeingEdited - 1], false);
 		bIsKeyEditing = false;
