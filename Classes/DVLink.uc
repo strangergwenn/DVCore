@@ -307,7 +307,6 @@ event Opened()
 	// On client : get the server list
 	if (WorldInfo.NetMode != NM_DedicatedServer)
 	{
-		GetServers();
 		SetTimer(ServerListUpdateFrequency, true, 'GetServers');
 		SignalController("INIT", true, "");
 	}

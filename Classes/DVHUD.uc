@@ -88,7 +88,7 @@ simulated function PostBeginPlay()
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
 	HudMovie.PC = PC;
-	HudMovie.OpenRespawnMenu();
+	HudMovie.OpenRespawnMenu(false);
 }
 
 

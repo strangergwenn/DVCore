@@ -35,13 +35,20 @@ var (DVWeapon) name							ZoomSocket;
 
 var (DVWeapon) Texture2D					WeaponIcon;
 var (DVWeapon) string						WeaponIconPath;
+var (DVWeapon) string						WeaponPath;
 
 var (DVWeapon) DVWeaponAddon				Addon1;
 var (DVWeapon) DVWeaponAddon				Addon2;
 var (DVWeapon) DVWeaponAddon				Addon3;
-var (DVWeapon) class<DVWeaponAddon>			AddonClass1;
-var (DVWeapon) class<DVWeaponAddon>			AddonClass2;
-var (DVWeapon) class<DVWeaponAddon>			AddonClass3;
+
+
+/*----------------------------------------------------------
+	Configurable attributes
+----------------------------------------------------------*/
+
+var (DVWeapon) config string				AddonClass1;
+var (DVWeapon) config string				AddonClass2;
+var (DVWeapon) config string				AddonClass3;
 
 
 /*----------------------------------------------------------
@@ -126,20 +133,27 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
 	// Weapon add-ons
-	if (AddonClass1 != None)
+	Addon1 = GetAddon(AddonClass1);
+	Addon1.AttachToWeapon(self);
+	Addon2 = GetAddon(AddonClass2);
+	Addon2.AttachToWeapon(self);
+	Addon3 = GetAddon(AddonClass3);
+	Addon3.AttachToWeapon(self);
+}
+
+
+/*--- Setup an addon ---*/
+simulated function DVWeaponAddon GetAddon(string AddonClass)
+{
+	if (AddonClass != "")
 	{
-		Addon1 = Spawn(AddonClass1, self);
-		Addon1.AttachToWeapon(self);
-	}
-	if (AddonClass2 != None)
-	{
-		Addon2 = Spawn(AddonClass2, self);
-		Addon2.AttachToWeapon(self);
-	}
-	if (AddonClass3 != None)
-	{
-		Addon3 = Spawn(AddonClass3, self);
-		Addon3.AttachToWeapon(self);
+		return Spawn(
+			class<DVWeaponAddon>(DynamicLoadObject(
+				WeaponPath $"." $AddonClass,
+				class'Class',
+				false)),
+			self
+		);
 	}
 }
 
@@ -219,12 +233,8 @@ simulated function float GetZoomFactor()
 /*--- Begin zoom state ---*/
 simulated function ZoomIn()
 {
-	if (Addon1 != None)
-		Addon1.StartZoom();
-	if (Addon2 != None)
-		Addon2.StartZoom();
-	if (Addon3 != None)
-		Addon3.StartZoom();
+	if (HasLensEffect())
+		DVHUD(DVPlayerController(DVPawn(Owner).Controller).myHUD).SetSniperState(true);
 	bZoomed = true;
 }
 
@@ -232,12 +242,8 @@ simulated function ZoomIn()
 /*--- End zoom state ---*/
 simulated function ZoomOut()
 {
-	if (Addon1 != None)
-		Addon1.StopZoom();
-	if (Addon2 != None)
-		Addon2.StopZoom();
-	if (Addon3 != None)
-		Addon3.StopZoom();
+	if (HasLensEffect())
+		DVHUD(DVPlayerController(DVPawn(Owner).Controller).myHUD).SetSniperState(false);
 	bZoomed = false;
 }
 
@@ -402,7 +408,7 @@ simulated function PlayImpactEffects(vector HitLocation)
 			CheckHitInfo(HitInfo, Pawn(HitActor).Mesh, -HitNormal, NewHitLoc);
 		}
 		
-		// Sound effects : default, default, advanced
+		// Sound effects
 		if (HitInfo.PhysMaterial != None)
 		{
 			if (HitInfo.PhysMaterial.ImpactSound != None)

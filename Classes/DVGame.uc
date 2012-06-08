@@ -13,15 +13,12 @@ class DVGame extends UDKGame;
 ----------------------------------------------------------*/
 
 var (DVGame) const class<DVWeapon> 		DefaultWeaponList[8];
-var (DVGame) const class<DVTurret>		DefaultTurretClass;
 
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
-var (DVGame) SoundCue					MusicIntro;
-var (DVGame) SoundCue					MusicLoop;
-
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
+var (DVGame) const float				SpawnProtectTime;
 
 
 /*----------------------------------------------------------
@@ -46,26 +43,9 @@ var float								RestartTimer;
 /*--- Standard team creation ---*/
 function PreBeginPlay()
 {
-	// Vars
-	//local DVTurretController DVTC;
-	//local DVTurretSocket PS;
-	
-	// Game
 	super.PreBeginPlay();
 	CreateTeam(0);
 	CreateTeam(1);
-	
-	// Spawn turrets
-	//TODO
-	/*
-	foreach WorldInfo.AllNavigationPoints(class'DVTurretSocket', PS)
-	{
-		DVTC = spawn(PS.TurretControllerClass);
-		SetTeam(DVTC,Teams[PS.TeamIndex], false);
-		DVTC.TeamIndex = PS.TeamIndex;
-		RestartPlayer(DVTC);
-		DVTurret(DVTC.Pawn).TeamIndex = PS.TeamIndex;
-	}*/
 }
 
 
@@ -118,8 +98,6 @@ event PostLogin (PlayerController NewPlayer)
 function AddDefaultInventory(Pawn PlayerPawn)
 {
 	local class<DVWeapon> Choiced;
-	if (PlayerPawn.IsA('DVTurret'))
-		return;
 	`log("AddDefaultInventory for " $ PlayerPawn);
 	
 	if (PlayerPawn.Controller != None)
@@ -143,10 +121,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 /*--- Get the default class for pawns ---*/
 function class<Pawn> GetDefaultPlayerClass(Controller C)
 {
-	if (C.IsA('DVTurretController'))
-		return DefaultTurretClass;
-	else
-		return DefaultPawnClass;
+	return DefaultPawnClass;
 }
 
 
@@ -392,21 +367,26 @@ function SendServerData()
 /*--- Get the music track to play here ---*/
 reliable server simulated function SoundCue GetTrackIntro()
 {
-	return MusicIntro;
+	return DVMapInfo(WorldInfo.GetMapInfo()).MusicIntro;
 }
 
 
 /*--- Get the music track to play here ---*/
 reliable server simulated function SoundCue GetTrackLoop()
 {
-	return MusicLoop;
+	return DVMapInfo(WorldInfo.GetMapInfo()).MusicLoop;
 }
 
 
 /*--- Get the music track to play here ---*/
 reliable server simulated function float GetIntroLength()
 {
-	return MusicIntro.GetCueDuration();
+	local float Duration;
+	
+	Duration = DVMapInfo(WorldInfo.GetMapInfo()).MusicIntro.GetCueDuration();
+	`log("GetIntroLength" @Duration);
+	
+	return Duration;
 }
 
 

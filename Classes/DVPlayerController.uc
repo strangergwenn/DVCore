@@ -119,8 +119,7 @@ simulated function AutoConnect()
 	 && Len(LocalStats.Password) > 3
 	 && MasterServerLink != None)
 	{
-		MasterServerLink.ConnectToMaster(
-			LocalStats.UserName, LocalStats.Password);
+		MasterServerLink.ConnectToMaster(LocalStats.UserName, LocalStats.Password);
 	}
 }
 
@@ -139,7 +138,9 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 {
 	// Init, on-screen ACK for menu
 	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
 		return;
+	}
 	else if (myHUD != None)
 	{
 		if (myHUD.IsA('DVHUD_Menu'))
@@ -149,9 +150,9 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	// First data : autoconnection if available
 	if (Command == "INIT" && bIsOK)
 	{
-		// Are we on main menu
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
+			MasterServerLink.GetServers();
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 			DVHUD_Menu(myHUD).AutoConnect();
 		}
@@ -164,7 +165,6 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
 			DVHUD_Menu(myHUD).SignalConnected();
-			UploadGame();
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 			MasterServerLink.GetStats();
 		}
@@ -365,10 +365,9 @@ function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDele
 
 reliable server simulated function StartMusicIfAvailable()
 {
-	`log("DVPC : StartMusicIfAvailable");
-	
 	if (!bMusicStarted)
 	{
+		`log("DVPC : StartMusicIfAvailable");
 		bMusicStarted = true;
 		ClientPlaySound(GetTrackIntro());
 		SetTimer(GetIntroLength(), false, 'StartMusicLoop');
@@ -380,7 +379,6 @@ reliable server simulated function StartMusicIfAvailable()
 reliable server simulated function StartMusicLoop()
 {
 	`log("DVPC : StartMusicLoop");
-	
 	ClearTimer('StartMusicLoop');
 	ClientPlaySound(GetTrackLoop());
 }

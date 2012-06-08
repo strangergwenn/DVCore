@@ -79,7 +79,8 @@ simulated function AttachToWeapon(DVWeapon wp)
 /*--- Zoom lens feature ---*/
 simulated function bool HasLens()
 {
-	return bUseLens;
+	`log("HasLens" @bUseLens);
+	return bUseLens && UseAddon();
 }
 
 
@@ -99,23 +100,6 @@ reliable client simulated function bool UseAddon()
 			return P.GetAddonStatus();
 	}
 	return true;
-}
-
-
-/*--- Called when zoom starts, only if zoom modifier ---*/
-simulated function StartZoom()
-{
-	if (bUseLens)
-	{
-		DVHUD(DVPlayerController(DVPawn(Weap.Owner).Controller).myHUD).SetSniperState(true);
-	}
-}
-
-
-/*--- Called when zoom stops ---*/
-simulated function StopZoom()
-{
-	DVHUD(DVPlayerController(DVPawn(Weap.Owner).Controller).myHUD).SetSniperState(false);
 }
 
 

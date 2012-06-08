@@ -68,11 +68,24 @@ function SignalConnected()
 /*--- Show a command response code ---*/
 function DisplayResponse (bool bSuccess, string Msg, string Command)
 {
-	HudMovie.DisplayResponse(bSuccess, Msg, Command);
-	if (HudMovie.bIsPopupVisible)
+	if (HudMovie.StoredLevel < 2)
+	{
+		HudMovie.DisplayResponse(bSuccess, Msg, Command);
+		if (HudMovie.bIsPopupVisible)
+		{
+			CancelHide();
+			SetTimer(PopupTimer, false, 'HidePopup');
+		}
+	}
+}
+
+
+/*--- Cancel every timer closing the popup ---*/
+function CancelHide()
+{
+	if (HudMovie.bIsPopupVisible && HudMovie.StoredLevel < 2)
 	{
 		ClearTimer('HidePopup');
-		SetTimer(PopupTimer, false, 'HidePopup');
 	}
 }
 

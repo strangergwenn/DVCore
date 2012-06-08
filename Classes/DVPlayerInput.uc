@@ -56,9 +56,8 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 	// Main menu keys
 	if (IEvent == IE_Pressed && DVHUD_Menu(myHUD) != None)
 	{
-		// Custom key setting
-		if (Len(KeyName) <= 30)
-			DVHUD_Menu(myHUD).HudMovie.SetKeyPressed(string(KeyName));
+		DVHUD_Menu(myHUD).HudMovie.SetKeyPressed(string(KeyName));
+		DVHUD_Menu(myHUD).CancelHide();
 		
 		// Popup navigation
 		if (KeyName == 'Enter')

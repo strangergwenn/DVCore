@@ -115,11 +115,14 @@ simulated function SpawnExplosionEffects(vector HitLocation, vector HitNormal)
 
 	if (WorldInfo.NetMode != NM_DedicatedServer)
 	{
+		// Light effect
 		if (ProjectileLight != None)
 		{
 			DetachComponent(ProjectileLight);
 			ProjectileLight = None;
 		}
+		
+		// Explosion effect
 		if (ProjExplosionTemplate != None && EffectIsRelevant(Location, false, MaxEffectDistance))
 		{
 			EffectAttachActor = None;
@@ -136,6 +139,7 @@ simulated function SpawnExplosionEffects(vector HitLocation, vector HitNormal)
 			}
 		}
 
+		// Sound
 		if (ExplosionSound != None)
 		{
 			PlaySound(ExplosionSound, true);
