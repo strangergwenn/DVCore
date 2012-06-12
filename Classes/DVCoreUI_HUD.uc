@@ -85,7 +85,6 @@ simulated function InitParts()
 	ScoreListRed.SetVisible(false);
 	WarningMC.SetVisible(false);
 	SniperMC.SetVisible(false);
-	bCaptureInput = false;
 	ChatMC.SetText("");
 }
 
@@ -112,20 +111,6 @@ simulated function UpdateInfo(int health, int ammo, int max)
 }
 
 
-/*--- Open chat ---*/
-simulated function StartTalking()
-{
-	if (!bChatting)
-	{
-		PlayUISound(ClickSound);
-		ChatTextMC.SetBool("focused", true);
-		ChatTextMC.SetString("text", "");
-		bCaptureInput = true;
-		bChatting = true;
-	}
-}
-
-
 /*--- Score update ---*/
 simulated function UpdateScore(int s1, int s2, int max)
 {
@@ -137,23 +122,37 @@ simulated function UpdateScore(int s1, int s2, int max)
 
 
 /*--- Open chat ---*/
+simulated function StartTalking()
+{
+	if (!bChatting)
+	{
+		PlayUISound(ClickSound);
+		ChatTextMC.SetBool("focused", true);
+		ChatTextMC.SetString("text", "");
+		bChatting = true;
+		PC.IgnoreMoveInput(true);
+	}
+}
+
+
+/*--- Open chat ---*/
 simulated function SendChatMessage()
 {
 	local string text;
 	
-	bCaptureInput = false;
 	if (bChatting)
 	{
 		PlayUISound(ClickSound);
-		bChatting = false;
 		
 		text = ChatTextMC.GetString("text");
 		if (text != "")
 			ConsoleCommand("Say"@text);
 		
 		ChatTextMC.SetString("text", "...");
-		ChatMC.SetBool("focused", true);
 	}
+	bChatting = false;
+	PC.IgnoreMoveInput(false);
+	ChatMC.SetBool("focused", true);
 }
 
 
@@ -226,6 +225,7 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 	else if (TeamIndex == PC.GetTeamIndex())
 	{
 		List.SetInt("selectedIndex", PC.GetLocalRank() - 1);
+		`log("Highlighting index" @PC.GetLocalRank() - 1);
 	}
 }
 
@@ -325,7 +325,6 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	// Restart
 	SetGameUnPaused();
 	PC.HUDRespawn(!bFirstFrame, NewWeapon);
-	bCaptureInput = false;
 	bFirstFrame = false;
 }
 
@@ -335,7 +334,6 @@ reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
 	// Settings
 	bChatting = false;
-	bCaptureInput = false;
 	bWasKilled = bKilledMenu;
 	
 	// Pawn
@@ -356,7 +354,6 @@ reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 function TogglePause()
 {
 	SetGamePaused();
-	bCaptureInput = false;
 }
 
 
@@ -373,7 +370,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 		PC.HUDRespawn(true);
 	}
 	SetGameUnPaused();
-	bCaptureInput = false;
+	PC.LockCamera(false);
 }
 
 

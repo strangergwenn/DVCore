@@ -230,6 +230,7 @@ reliable client event TcpGetStats(array<string> Data)
 	// Global game stats
 	if (InStr(Data[0], "GET_GSTATS") != -1)
 	{
+		`log("Got game data");
 		GlobalStats.SetIntValue("Kills", 	int(Data[1]));
 		GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
 		GlobalStats.SetIntValue("TeamKills", int(Data[3]));
@@ -241,9 +242,10 @@ reliable client event TcpGetStats(array<string> Data)
 	// Weapon stats
 	else if (InStr(Data[0], "GET_WSTATS") != -1)
 	{
-		for (i = 0; i < WeaponListLength; i++)
+		`log("Got weapon data");
+		for (i = 0; i < 8; i++)
 		{
-			GlobalStats.SetArrayIntValue("WeaponScores", i, int(Data[i + 1]));
+			GlobalStats.SetArrayIntValue("WeaponScores", int(Data[i + 1]), i);
 		}
 	}
 }
@@ -281,6 +283,10 @@ reliable client event AddBestPlayer(string PlayerName, int Rank, int PlayerPoint
 /*--- Scores ---*/
 exec function ShowCommandMenu()
 {
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
 	DVHUD(myHUD).ShowPlayerList();
 	SetTimer(ScoreLength, false, 'HideScores');
 }
@@ -289,6 +295,10 @@ exec function ShowCommandMenu()
 /*--- Addon toggle ---*/
 exec function Use()
 {
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
 	if (Pawn != None && DVWeapon(Pawn.Weapon) != None)
 	{
 		DVPawn(Pawn).SetAddonStatus(! DVPawn(Pawn).GetAddonStatus() );
@@ -299,6 +309,10 @@ exec function Use()
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
 	if (IsCameraLocked() || bShouldStop)
 		return;
 	else
@@ -311,6 +325,10 @@ exec function StartFire(optional byte FireModeNum = 0)
 /*--- Team switch ---*/
 exec function SwitchTeam()
 {
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
 	super.SwitchTeam();
 	DVHUD(myHUD).GameplayMessage(lTeamSwitch);	
 }
@@ -501,6 +519,16 @@ simulated function LockCamera(bool NewState)
 simulated function bool IsCameraLocked()
 {
 	return bLocked;
+}
+
+
+/*--- Chat lock getter ---*/
+simulated function bool IsChatLocked()
+{
+	if (DVHUD(myHUD) != None)
+		return DVHUD(myHUD).HudMovie.bChatting;
+	else
+		return false;
 }
 
 
@@ -837,6 +865,7 @@ reliable client simulated function array<DVPlayerRepInfo> GetPlayerList()
 	ForEach AllActors(class'DVPlayerRepInfo', PRI)
 	{
 		PRList.AddItem(PRI);
+		`log("GetPlayerList" @PRI);
 	}
 	PRList.Sort(SortPlayers);
 	return PRList;

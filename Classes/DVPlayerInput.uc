@@ -24,6 +24,10 @@ var bool  							bHoldDuck;
 /*--- Duck duck duck ---*/
 simulated exec function Duck()
 {
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
 	if (bHoldDuck)
 	{
 		bHoldDuck = false;
@@ -40,6 +44,7 @@ simulated exec function Duck()
 	LastDuckTime = WorldInfo.TimeSeconds;
 }
 
+
 /*--- Stop ducking ---*/
 simulated exec function UnDuck()
 {
@@ -47,6 +52,17 @@ simulated exec function UnDuck()
 	{
 		bDuck = 0;
 	}
+}
+
+
+/*--- Jump ---*/
+exec function Jump()
+{
+	// Chatting
+	if (IsChatLocked())
+		return;
+	
+	super.Jump();
 }
 
 

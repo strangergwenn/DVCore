@@ -401,6 +401,7 @@ defaultproperties
     bPauseable=false
 	EndGameTick=0.5
 	HeartbeatTick=20.0
+	WeaponListLength=8
 	MaxPlayersAllowed=16
 	
 	// Classes

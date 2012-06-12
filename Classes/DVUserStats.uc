@@ -89,6 +89,7 @@ function SetIntValue(string PropertyName, int NV)
 /*--- Set the new data value : integer ---*/
 function SetArrayIntValue(string PropertyName, int NV, int index)
 {
+	`log("SetArrayIntValue" @PropertyName @index @ NV);
 	switch(PropertyName)
 	{
 		case ("WeaponScores"): 	WeaponScores[index] = NV; 		break;
