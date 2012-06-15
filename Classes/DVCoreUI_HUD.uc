@@ -13,6 +13,8 @@ class DVCoreUI_HUD extends DVMovie;
 
 var (HUD) const int			WarningThreshold;
 
+var (HUD) localized string 	lChangeWeapon;
+var (HUD) localized string 	lValidateConfig;
 var (HUD) localized string 	lChooseWeapon;
 var (HUD) localized string 	lSwitchTeam;
 var (HUD) localized string 	lQuitGame;
@@ -27,7 +29,6 @@ var (HUD) localized string 	lPV;
 var GFxClikWidget 			ResumeButtonMC;
 var GFxClikWidget 			RestartButtonMC;
 var GFxClikWidget 			SwitchTeamButtonMC;
-var GFxClikWidget 			ExitButtonMC;
 
 var GFxClikWidget 			ScoreListRed;
 var GFxClikWidget 			ScoreListBlue;
@@ -209,7 +210,10 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 		else if (PRList[i].Team.TeamIndex == TeamIndex)
 		{
 			TempObj = CreateObject("Object");
-			TempObj.SetString("label", PRList[i].PlayerName $ " : "$ PRList[i].KillCount $ " K, "$ PRList[i].DeathCount $ " D");
+			TempObj.SetString("label",
+				  PRList[i].PlayerName $ " : "
+				$ PRList[i].KillCount $ " K, "
+				$ PRList[i].DeathCount $ " D");
 			DataProvider.SetElementObject(j, TempObj);
 			j++;
 		}
@@ -255,6 +259,40 @@ reliable client function UpdateWeaponList()
 }
 
 
+/*--- Update the addons list ---*/
+reliable client function UpdateAddonList()
+{
+	local byte i;
+	local DVWeapon wp;
+	local GFxObject TempObject;
+	wp = DVWeapon(PC.Pawn.Weapon);
+	
+	// Weapon list
+	for (i = 0; i < wp.AddonList.Length; i++)
+	{
+		if (wp.AddonList[i] != None)
+		{
+			SetupAddonWidget("Config"$i, string(wp.AddonList[i]));
+			`log("Setup" @wp.AddonList[i]);
+		}
+		else
+		{
+			TempObject = GetSymbol("Config"$i);
+			if (TempObject != None)
+				TempObject.SetVisible(false);
+		}
+	}
+	
+	// Invisible items
+	for (i = wp.AddonList.Length; i < 16; i++)
+	{
+		TempObject = GetSymbol("Config"$i);
+		if (TempObject != None)
+			TempObject.SetVisible(false);
+	}
+}
+
+
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
@@ -268,11 +306,22 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 	{
 		// Exit
 		case ('ExitMenu'):
-			ExitButtonMC = GetLiveWidget(Widget, 'CLIK_click', OnExit);
+			GetLiveWidget(Widget, 'CLIK_click', OnExit);
 			SetWidgetLabel("ExitMenu", lQuitGame, false);
-			
-			// By the way...
 			UpdateWeaponList();
+			break;
+		
+		// Weapon change in config
+		case ('ChangeWeapon'):
+			GetLiveWidget(Widget, 'CLIK_click', OnExit);
+			SetWidgetLabel("ChangeWeapon", lChangeWeapon, false);
+			break;
+		
+		// Validate the addon config
+		case ('ValidateConfig'):
+			GetLiveWidget(Widget, 'CLIK_click', OnValidateConfig);
+			SetWidgetLabel("ValidateConfig", lValidateConfig, false);
+			UpdateAddonList();
 			break;
 		
 		// Team switch
@@ -295,12 +344,26 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		case ('Weapon1'):
 		case ('Weapon2'):
 		case ('Weapon3'):
-		case ('Weapon4'):/*
-		case ('Weapon5'):
-		case ('Weapon6'):
-		case ('Weapon7'):*/
+		case ('Weapon4'):
 			TempObject = GFxClikWidget(Widget);
 			TempObject.AddEventListener('CLIK_click', OnWeaponWidgetClick);
+			break;
+		
+		// Addon widgets
+		case ('Config0'):
+		case ('Config1'):
+		case ('Config2'):
+		case ('Config3'):
+		case ('Config4'):
+		case ('Config5'):
+		case ('Config6'):
+		case ('Config7'):
+		case ('Config8'):
+		case ('Config9'):
+		case ('Config10'):
+		case ('Config11'):
+			TempObject = GFxClikWidget(Widget);
+			TempObject.AddEventListener('CLIK_click', OnAddonWidgetClick);
 			break;
 		
 		default: return super.WidgetInitialized(Widgetname, WidgetPath, Widget);
@@ -329,6 +392,31 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 }
 
 
+/*--- Addon selection ---*/
+function OnAddonWidgetClick(GFxClikWidget.EventData ev)
+{
+	// Vars
+	local DVWeapon wp;
+	local GFxObject button;
+	
+	// Addon ID
+	wp = DVWeapon(PC.Pawn.Weapon);
+	button = ev._this.GetObject("target");
+	wp.RequestAddon(int(Right(button.GetString("name"), 1)));
+}
+
+
+/*--- Save weapon configuration and respawn ---*/
+function OnValidateConfig(GFxClikWidget.EventData ev)
+{
+	`log("Saving add-on configuration...");
+	DVWeapon(PC.Pawn.Weapon).SaveConfig();
+	PC.LockCamera(false);
+	PC.HUDRespawn(true);
+	SetGameUnPaused();
+}
+
+
 /*--- Respawn menu ---*/
 reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
@@ -347,6 +435,15 @@ reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 	Scene.GotoAndPlayI(2);
 	Banner = GetSymbol("Banner");
 	OpenPlayerList(PC.GetPlayerList());
+}
+
+
+/*--- Weapon data ---*/
+reliable client simulated function OpenWeaponConfig()
+{
+	bChatting = false;
+	SetGamePaused();
+	Scene.GotoAndPlayI(3);
 }
 
 
@@ -413,4 +510,20 @@ defaultproperties
 	WidgetBindings(13)={(WidgetName="Weapon5",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(14)={(WidgetName="Weapon6",WidgetClass=class'GFxClikWidget')}
 	WidgetBindings(15)={(WidgetName="Weapon7",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(16)={(WidgetName="Config0",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(17)={(WidgetName="Config1",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(18)={(WidgetName="Config2",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(19)={(WidgetName="Config3",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(20)={(WidgetName="Config4",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(21)={(WidgetName="Config5",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(22)={(WidgetName="Config6",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(23)={(WidgetName="Config7",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(24)={(WidgetName="Config8",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(25)={(WidgetName="Config9",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(26)={(WidgetName="Config10",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(27)={(WidgetName="Config11",WidgetClass=class'GFxClikWidget')}
+	
+	WidgetBindings(28)={(WidgetName="ValidateConfig",WidgetClass=class'GFxClikWidget')}
+	WidgetBindings(29)={(WidgetName="ChangeWeapon",	WidgetClass=class'GFxClikWidget')}
 }

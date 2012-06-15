@@ -39,6 +39,8 @@ var (DVPawn) const ParticleSystem	LargeHitPSCTemplate;
 var (DVPawn) const array<MaterialInstanceConstant> TeamMaterials;
 var (DVPawn) const array<MaterialInstanceConstant> BloodDecals;
 
+var (DVPawn) const string			ModuleName;
+
 
 /*----------------------------------------------------------
 	Localized attributes

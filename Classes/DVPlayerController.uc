@@ -306,6 +306,13 @@ exec function Use()
 }
 
 
+/*--- Open weapon management ---*/
+exec function ConfigureWeapons()
+{
+	DVHUD(myHUD).OpenWeaponConfig();
+}
+
+
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {

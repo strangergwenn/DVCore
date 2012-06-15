@@ -22,11 +22,23 @@ var (Addon) float			FireRateBonus;
 var (Addon) float			DamageBonus;
 var (Addon) float			AmmoBonus;
 
-var (Addon) name			MountSocket;
+var (Addon) byte			SocketID;
 
 var (Addon) bool			bUseLens;
 
 var (Addon) DVWeapon		Weap;
+
+var (Addon) Texture2D		Icon;
+var (Addon) string			IconPath;
+
+
+/*----------------------------------------------------------
+	Localized attributes
+----------------------------------------------------------*/
+
+var (Addon) localized string lAddonName;
+var (Addon) localized string lAddonL1;
+var (Addon) localized string lAddonL2;
 
 
 /*----------------------------------------------------------
@@ -40,17 +52,23 @@ var StaticMeshComponent 	Mesh;
 	Methods
 ----------------------------------------------------------*/
 
+/*--- Get the socket name ---*/
+simulated function name MountSocket()
+{
+	return name("Mount" $SocketID);
+}
+
 
 /*--- Weapon attachment ---*/
 simulated function AttachToWeapon(DVWeapon wp)
 {
-	if (MountSocket == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
+	if (MountSocket() == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
 		return;
 	
 	// Mesh
 	AttachComponent(Mesh);
 	Mesh.SetShadowParent(wp.Mesh);
-	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket);
+	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
 	Weap = wp;
 	
 	// Properties override
@@ -62,7 +80,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.ZoomedFOV = ZoomedFOV;
 	if (ZoomOffset != vect(0,0,0))
 	{
-		wp.ZoomSocket = MountSocket;
+		wp.ZoomSocket = MountSocket();
 		wp.ZoomOffset = ZoomOffset;
 	}
 	
@@ -76,10 +94,25 @@ simulated function AttachToWeapon(DVWeapon wp)
 }
 
 
+/*--- Destroying ---*/
+simulated function DetachFromWeapon()
+{
+	if (Mesh != None)
+	{
+		Mesh.SetShadowParent(None);
+		Mesh.SetLightEnvironment(None);
+		Mesh.SetHidden(true);
+		
+		if (Weap.Mesh != None)
+			SkeletalMeshComponent(Weap.Mesh).DetachComponent(Mesh);
+	}
+	Destroy();
+}
+
+
 /*--- Zoom lens feature ---*/
 simulated function bool HasLens()
 {
-	`log("HasLens" @bUseLens);
 	return bUseLens && UseAddon();
 }
 
@@ -100,6 +133,13 @@ reliable client simulated function bool UseAddon()
 			return P.GetAddonStatus();
 	}
 	return true;
+}
+
+
+/*--- Texture icon ---*/
+function static string GetIcon()
+{
+	return "img://" $ default.IconPath $ ".Icon." $ default.Icon;
 }
 
 

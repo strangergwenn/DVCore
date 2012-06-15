@@ -116,6 +116,13 @@ simulated function ShutdownMessage()
 }
 
 
+/*--- Weapon data ---*/
+reliable client simulated function OpenWeaponConfig()
+{
+	HudMovie.OpenWeaponConfig();
+}
+
+
 /*--- Score management ---*/
 reliable client simulated function ShowPlayerList()
 {

@@ -179,23 +179,36 @@ function ApplyResolutionSetting(string code, string flag)
 ----------------------------------------------------------*/
 
 /*--- Set up a weapon widget ---*/
-function SetupWeaponWidget(string WidgetName, string WeaponClass)
+function SetupWeaponWidget(string WidgetName, string LoadClass)
 {
 	// Vars
+	local string ClassToLoad;
 	local class<DVWeapon> wpClass;
-	local string WeaponClassToLoad;
-	local string IconPath;
-
-	// Load a weapon class
-	WeaponClassToLoad = "DeepVoid." $ WeaponClass;
-	wpClass = class<DVWeapon>(DynamicLoadObject(WeaponClassToLoad, class'Class', false));
-	IconPath = wpClass.static.GetWeaponPath() $ string(wpClass.static.GetWeaponIcon());
+	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
+	wpClass = class<DVWeapon>(DynamicLoadObject(ClassToLoad, class'Class', false));
 	
 	// Data
 	SetLabel(WidgetName $".WName", 	wpClass.default.lWeaponName, true);
 	SetLabel(WidgetName $".WDesc", 	wpClass.default.lWeaponDesc, false);
 	SetLabel(WidgetName $".WStats", wpClass.default.lWeaponDamage, false);
-	SetupIcon(WidgetName$".WIcon",	IconPath);
+	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
+}
+
+
+/*--- Set up an add-on widget ---*/
+function SetupAddonWidget(string WidgetName, string LoadClass)
+{
+	// Vars
+	local string ClassToLoad;
+	local class<DVWeaponAddon> wpClass;
+	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
+	wpClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
+	
+	// Data
+	SetLabel(WidgetName $".WName", 	wpClass.default.lAddonName, true);
+	SetLabel(WidgetName $".WDesc", 	wpClass.default.lAddonL1, false);
+	SetLabel(WidgetName $".WStats", wpClass.default.lAddonL2, false);
+	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
 }
 
 

@@ -35,11 +35,6 @@ var (DVWeapon) name							ZoomSocket;
 
 var (DVWeapon) Texture2D					WeaponIcon;
 var (DVWeapon) string						WeaponIconPath;
-var (DVWeapon) string						WeaponPath;
-
-var (DVWeapon) DVWeaponAddon				Addon1;
-var (DVWeapon) DVWeaponAddon				Addon2;
-var (DVWeapon) DVWeaponAddon				Addon3;
 
 
 /*----------------------------------------------------------
@@ -49,6 +44,8 @@ var (DVWeapon) DVWeaponAddon				Addon3;
 var (DVWeapon) config string				AddonClass1;
 var (DVWeapon) config string				AddonClass2;
 var (DVWeapon) config string				AddonClass3;
+
+var (DVWeapon) config array<string> 		AvailableAddons;
 
 
 /*----------------------------------------------------------
@@ -70,6 +67,11 @@ var bool						bWeaponEmpty;
 var bool						bZoomed;
 
 var int							FrameCount;
+
+var DVWeaponAddon				Addon1;
+var DVWeaponAddon				Addon2;
+var DVWeaponAddon				Addon3;
+var array< class<DVWeaponAddon> > AddonList;
 
 
 /*----------------------------------------------------------
@@ -102,6 +104,7 @@ simulated function TimeWeaponEquipping()
 		ZP.WeaponClassChanged();
 	}
 	
+	FillAddonList();
 	SetTimer(0.5, false, 'WeaponEquipped');
 }
 
@@ -142,6 +145,68 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 }
 
 
+/*--- Fill the available addons list ---*/
+simulated function FillAddonList()
+{
+	local byte i;
+	for (i = 0; i < 16; i++)
+	{
+		if (AvailableAddons[i] != "")
+		{
+			AddonList.AddItem(class<DVWeaponAddon>(DynamicLoadObject(
+				DVPawn(Owner).ModuleName $"." $AvailableAddons[i],
+				class'Class',
+				false))
+			);
+			`log("Found available add-on :" @AvailableAddons[i]);
+		}
+		else
+			AddonList.AddItem(None);
+	}
+}
+
+
+/*--- Manage an add-on request (add or delete) ---*/
+function RequestAddon(byte AddonID)
+{
+	switch (AddonList[AddonID].default.SocketID)
+	{
+		case 1:
+			SetAddon(Addon1, AddonClass1, string(AddonList[AddonID]));
+			break;		
+		case 2:
+			SetAddon(Addon2, AddonClass2, string(AddonList[AddonID]));
+			break;
+		case 3:
+			SetAddon(Addon3, AddonClass2, string(AddonList[AddonID]));
+			break;
+	}
+}
+
+
+/*--- Add-on creation ---*/
+function SetAddon(DVWeaponAddon OldAddon, string AddonClass, string NewAddon)
+{
+	`log("SetAddon testing" @OldAddon);
+	if (OldAddon != None)
+	{
+		`log("SetAddon destroyed" @OldAddon);
+		OldAddon.DetachFromWeapon();
+		OldAddon.Destroy();
+	}
+	`log("SetAddon testing" @OldAddon);
+	
+	`log("SetAddon comparing >" $NewAddon $"< to >" $AddonClass $"<");
+	if (AddonClass == "" || NewAddon != AddonClass)
+	{
+		`log("SetAddon added" @NewAddon);
+		AddonClass = NewAddon;
+		OldAddon = GetAddon(NewAddon);
+		OldAddon.AttachToWeapon(self);
+	}
+}
+
+
 /*--- Setup an addon ---*/
 simulated function DVWeaponAddon GetAddon(string AddonClass)
 {
@@ -149,13 +214,14 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 	{
 		return Spawn(
 			class<DVWeaponAddon>(DynamicLoadObject(
-				WeaponPath $"." $AddonClass,
+				DVPawn(Owner).ModuleName $"." $AddonClass,
 				class'Class',
 				false)),
 			self
 		);
 	}
 }
+
 
 
 /*--- Detach weapon from pawn ---*/
@@ -485,16 +551,9 @@ simulated function int GetAmmoMax()
 
 
 /*--- Texture icon ---*/
-function static Texture2D GetWeaponIcon()
+function static string GetIcon()
 {
-	return default.WeaponIcon;
-}
-
-
-/*--- Texture icon path---*/
-function static string GetWeaponPath()
-{
-	return "img://" $ default.WeaponIconPath $ ".Icon.";
+	return "img://" $ default.WeaponIconPath $ ".Icon." $ default.WeaponIcon;
 }
 
 
