@@ -91,21 +91,47 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.InstantHitDamage[0] *= DamageBonus;
 	if (FireRateBonus != 0.0)
 		wp.FireInterval[0] /= FireRateBonus;
+	
+	`log("Mounted add-on" @self);
 }
 
 
 /*--- Destroying ---*/
-simulated function DetachFromWeapon()
+simulated function DetachFromWeapon(DVWeapon wp)
 {
+	// Mesh
 	if (Mesh != None)
 	{
 		Mesh.SetShadowParent(None);
 		Mesh.SetLightEnvironment(None);
 		Mesh.SetHidden(true);
 		
-		if (Weap.Mesh != None)
-			SkeletalMeshComponent(Weap.Mesh).DetachComponent(Mesh);
+		if (wp.Mesh != None)
+			SkeletalMeshComponent(wp.Mesh).DetachComponent(Mesh);
 	}
+	
+	// Properties override
+	if (SmoothingFactor != 0.0)
+		wp.SmoothingFactor = wp.default.SmoothingFactor;
+	if (ZoomSensitivity != 0.0)
+		wp.ZoomSensitivity = wp.default.ZoomSensitivity;
+	if (ZoomedFOV != 0.0)
+		wp.ZoomedFOV = wp.default.ZoomedFOV;
+	if (ZoomOffset != vect(0,0,0))
+	{
+		wp.ZoomOffset = wp.default.ZoomOffset;
+	}
+	
+	// Bonus
+	if (AmmoBonus != 0.0)
+		wp.MaxAmmo /= AmmoBonus;
+	if (DamageBonus != 0.0)
+		wp.InstantHitDamage[0] /= DamageBonus;
+	if (FireRateBonus != 0.0)
+		wp.FireInterval[0] *= FireRateBonus;
+	
+	// Ending
+	`log("Removed add-on" @self);
 	Destroy();
 }
 

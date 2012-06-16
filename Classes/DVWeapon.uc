@@ -136,14 +136,47 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
 	// Weapon add-ons
-	Addon1 = GetAddon(AddonClass1);
-	Addon1.AttachToWeapon(self);
-	Addon2 = GetAddon(AddonClass2);
-	Addon2.AttachToWeapon(self);
-	Addon3 = GetAddon(AddonClass3);
-	Addon3.AttachToWeapon(self);
+	SpawnAddon(AddonClass1);
+	SpawnAddon(AddonClass2);
+	SpawnAddon(AddonClass3);
 }
 
+
+/*--- Detach weapon from pawn ---*/
+simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
+{
+	if (Mesh != None)
+	{
+		Mesh.SetShadowParent(None);
+		Mesh.SetLightEnvironment(None);
+		
+		if (MeshCpnt != None)
+			MeshCpnt.DetachComponent(Mesh);
+	}
+	
+	// Weapon add-ons
+	RemoveAddon(Addon1);
+	RemoveAddon(Addon2);
+	RemoveAddon(Addon3);
+}
+
+
+/*--- Ammo ---*/
+simulated function int AddAmmo(int amount)
+{
+	local int PreviousAmmo;
+	
+	bWeaponEmpty = false;
+	PreviousAmmo = AmmoCount;
+	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
+	
+	return AmmoCount - PreviousAmmo;
+}
+
+
+/*----------------------------------------------------------
+	Add-ons management
+----------------------------------------------------------*/
 
 /*--- Fill the available addons list ---*/
 simulated function FillAddonList()
@@ -178,36 +211,79 @@ function RequestAddon(byte AddonID)
 			SetAddon(Addon2, AddonClass2, string(AddonList[AddonID]));
 			break;
 		case 3:
-			SetAddon(Addon3, AddonClass2, string(AddonList[AddonID]));
+			SetAddon(Addon3, AddonClass3, string(AddonList[AddonID]));
 			break;
 	}
 }
 
 
-/*--- Add-on creation ---*/
-function SetAddon(DVWeaponAddon OldAddon, string AddonClass, string NewAddon)
+/*--- Add-on toggle ---*/
+function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 {
-	`log("SetAddon testing" @OldAddon);
-	if (OldAddon != None)
+	if (OldClass != "" && OldClass == NewClass)
+		RemoveAddon(OldAddon);
+	else
+		SpawnAddon(NewClass);
+}
+
+
+/*--- Add-on creation ---*/
+simulated function SpawnAddon(string AddonClass)
+{
+	local DVWeaponAddon NewAddon;
+	if (AddonClass != "")
 	{
-		`log("SetAddon destroyed" @OldAddon);
-		OldAddon.DetachFromWeapon();
-		OldAddon.Destroy();
-	}
-	`log("SetAddon testing" @OldAddon);
-	
-	`log("SetAddon comparing >" $NewAddon $"< to >" $AddonClass $"<");
-	if (AddonClass == "" || NewAddon != AddonClass)
-	{
-		`log("SetAddon added" @NewAddon);
-		AddonClass = NewAddon;
-		OldAddon = GetAddon(NewAddon);
-		OldAddon.AttachToWeapon(self);
+		NewAddon = GetAddon(AddonClass);
+		switch (NewAddon.SocketID)
+		{
+			case 1:
+				Addon1 = NewAddon;
+				AddonClass1 = AddonClass;
+				Addon1.AttachToWeapon(self);
+				break;
+			case 2:
+				Addon2 = NewAddon;
+				AddonClass2 = AddonClass;
+				Addon2.AttachToWeapon(self);
+				break;
+			case 3:
+				Addon3 = NewAddon;
+				AddonClass3 = AddonClass;
+				Addon3.AttachToWeapon(self);
+				break;
+		}
 	}
 }
 
 
-/*--- Setup an addon ---*/
+/*--- Add-on deletion ---*/
+function RemoveAddon(DVWeaponAddon OldAddon)
+{
+	if (OldAddon != None)
+	{
+		switch (OldAddon.SocketID)
+		{
+			case 1:
+				Addon1.DetachFromWeapon(self);
+				AddonClass1 = "";
+				Addon1 = None;
+				break;
+			case 2:
+				Addon2.DetachFromWeapon(self);
+				AddonClass2 = "";
+				Addon2 = None;
+				break;
+			case 3:
+				Addon3.DetachFromWeapon(self);
+				AddonClass3 = "";
+				Addon3 = None;
+				break;
+		}
+	}
+}
+
+
+/*--- Add-on loading ---*/
 simulated function DVWeaponAddon GetAddon(string AddonClass)
 {
 	if (AddonClass != "")
@@ -220,40 +296,6 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 			self
 		);
 	}
-}
-
-
-
-/*--- Detach weapon from pawn ---*/
-simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
-{
-	if (Mesh != None)
-	{
-		Mesh.SetShadowParent(None);
-		Mesh.SetLightEnvironment(None);
-		
-		if (MeshCpnt != None)
-			MeshCpnt.DetachComponent(Mesh);
-	}
-	
-	if (Addon1 != None)
-		Addon1.Destroy();
-	if (Addon2 != None)
-		Addon2.Destroy();
-	if (Addon3 != None)
-		Addon3.Destroy();
-}
-
-
-/*--- Ammo ---*/
-simulated function int AddAmmo(int amount)
-{
-	local int PreviousAmmo;
-	
-	bWeaponEmpty = false;
-	PreviousAmmo = AmmoCount;
-	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
-	return AmmoCount - PreviousAmmo;
 }
 
 
