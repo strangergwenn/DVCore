@@ -62,6 +62,8 @@ var bool							bMusicStarted;
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
+var string							ModuleName;
+
 
 /*----------------------------------------------------------
 	Replication
@@ -107,6 +109,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
+	ModuleName = DVPawn(aPawn).ModuleName;
 }
 
 

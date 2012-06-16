@@ -52,6 +52,7 @@ var string 					NewWeaponName;
 var bool					bChatting;
 var bool 					bFirstFrame;
 var bool					bWasKilled;
+var bool					bListOpened;
 
 
 /*----------------------------------------------------------
@@ -109,6 +110,10 @@ simulated function UpdateInfo(int health, int ammo, int max)
 	// Health warning
 	if (health <= WarningThreshold)
 		WarningMC.SetVisible(true);
+	
+	// Bugfix
+	if (!bListOpened)
+		ClosePlayerList();
 }
 
 
@@ -178,6 +183,7 @@ reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 	ScoreListBlue.SetVisible(true);
 	FillPlayerList(ScoreListRed, PRList, 0);
 	FillPlayerList(ScoreListBlue, PRList, 1);
+	bListOpened = true;
 }
 
 
@@ -186,6 +192,7 @@ reliable client function ClosePlayerList()
 {
 	ScoreListRed.SetVisible(false);
 	ScoreListBlue.SetVisible(false);
+	bListOpened = false;
 }
 
 
