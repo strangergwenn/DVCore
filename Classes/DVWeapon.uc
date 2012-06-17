@@ -203,7 +203,6 @@ simulated function FillAddonList()
 				class'Class',
 				false))
 			);
-			`log("Found available add-on :" @AvailableAddons[i]);
 		}
 		else
 			AddonList.AddItem(None);

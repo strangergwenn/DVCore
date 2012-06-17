@@ -20,6 +20,7 @@ var (Bench) const name			WeaponSocket;
 
 var (Bench) const float 		DetectionDistance;
 var (Bench) const float 		DetectionPeriod;
+var (Bench) const float 		WeaponScale;
 
 
 /*----------------------------------------------------------
@@ -29,6 +30,8 @@ var (Bench) const float 		DetectionPeriod;
 var SkeletalMeshComponent		Mesh;
 
 var DVPlayerController			PC;
+
+var DVPawn						OldPawn;
 
 var float 						CurrentPeriod;
 
@@ -54,10 +57,10 @@ simulated function Tick(float DeltaTime)
 		CurrentPeriod = DetectionPeriod;
 		foreach AllActors(class'DVPawn', P)
 		{
-			if (VSize(P.Location - Location) < DetectionDistance && !bConfigLaunched)
+			if (VSize(P.Location - Location) < DetectionDistance && !bConfigLaunched && P != OldPawn)
 			{
-				LaunchConfig(P);
-				bConfigLaunched = true;
+				OldPawn = P;
+				bConfigLaunched = LaunchConfig(P);
 			}
 		}
 	}
@@ -68,11 +71,17 @@ simulated function Tick(float DeltaTime)
 simulated function ConfiguringEnded(PlayerController ThePC)
 {
 	bConfigLaunched = false;
+	
+	Weapon.DetachFrom(Mesh);
+	Weapon.Destroy();
+	Weapon = None;
+	
+	OldPawn.Destroy();
 }
 
 
 /*--- Open the configuration interface ---*/
-simulated function LaunchConfig(DVPawn P)
+simulated function bool LaunchConfig(DVPawn P)
 {
 	// Vars
 	local vector WPos;
@@ -87,7 +96,9 @@ simulated function LaunchConfig(DVPawn P)
 	// Weapon spawn
 	Weapon = Spawn(P.CurrentWeaponClass, self,, WPos);
 	Weapon.AttachWeaponTo(Mesh, WeaponSocket);
-	Weapon.Mesh.SetScale3D(Vect(1,1,1) * 2.0);
+	Weapon.Mesh.SetScale3D(Vect(1,1,1) * WeaponScale);
+	
+	return (PC != None);
 }
 
 
@@ -134,8 +145,9 @@ defaultProperties
 	Mesh=Bench
 	
  	// Gameplay
-	DetectionDistance=300.0
+ 	WeaponScale=1.8;
 	DetectionPeriod=0.25
+	DetectionDistance=300.0
 	EyeSocket=ViewSocket
 	WeaponSocket=WeaponPoint
 	

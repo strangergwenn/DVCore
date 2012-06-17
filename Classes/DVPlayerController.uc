@@ -390,7 +390,7 @@ function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDele
 
 reliable server simulated function StartMusicIfAvailable()
 {
-	if (!bMusicStarted)
+	if (!bMusicStarted && WorldInfo != None)
 	{
 		`log("DVPC : StartMusicIfAvailable");
 		bMusicStarted = true;
@@ -684,6 +684,11 @@ simulated function string GetPlayerName()
 /*--- Call this to respawn the player ---*/
 reliable server simulated function HUDRespawn(bool bShouldKill, optional class<DVWeapon> NewWeapon)
 {
+	if (bConfiguring)
+	{
+		Bench.ConfiguringEnded(self);
+		Bench = None;	
+	}
 	if (NewWeapon == None)
 	{
 		NewWeapon = UserChoiceWeapon;
@@ -691,12 +696,6 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 	ServerSetUserChoice(NewWeapon, bShouldKill);
 	SetUserChoice(NewWeapon);
 	ServerReStartPlayer();
-	
-	if (bConfiguring)
-	{
-		Bench.ConfiguringEnded(self);
-		Bench = None;	
-	}
 }
 
 

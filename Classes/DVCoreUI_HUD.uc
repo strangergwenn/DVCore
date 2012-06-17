@@ -320,7 +320,7 @@ event bool WidgetInitialized (name WidgetName, name WidgetPath, GFxObject Widget
 		
 		// Weapon change in config
 		case ('ChangeWeapon'):
-			GetLiveWidget(Widget, 'CLIK_click', OnExit);
+			GetLiveWidget(Widget, 'CLIK_click', OnSwitchWeapon);
 			SetWidgetLabel("ChangeWeapon", lChangeWeapon, false);
 			break;
 		
@@ -421,6 +421,13 @@ function OnValidateConfig(GFxClikWidget.EventData ev)
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
 	SetGameUnPaused();
+}
+
+
+/*--- Weapon selection ---*/
+function OnSwitchWeapon(GFxClikWidget.EventData ev)
+{
+	OpenRespawnMenu(true);
 }
 
 
