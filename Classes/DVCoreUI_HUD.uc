@@ -205,7 +205,39 @@ reliable client function ClosePlayerList()
 	Data
 ----------------------------------------------------------*/
 
-/*--- PLayer list filling ---*/
+/*--- Set up an add-on widget ---*/
+function SetupAddonWidget(string WidgetName, string LoadClass)
+{
+	// Vars
+	local string ClassToLoad;
+	local class<DVWeaponAddon> wpClass;
+	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
+	wpClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
+	
+	// Data
+	SetLabel(WidgetName $".WName", 	wpClass.default.lAddonName, true);
+	SetLabel(WidgetName $".WDesc", 	wpClass.default.lAddonL1, false);
+	SetLabel(WidgetName $".WStats", GetSlotName(wpClass.default.SocketID), false);
+	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
+}
+
+
+/*--- Get an add-on slot name ---*/
+function string GetSlotName(byte Index)
+{
+	switch (Index)
+	{
+		case 1:
+			return lCannon;
+		case 2:
+			return lRail;
+		case 3:
+			return lAmmo;
+	}
+}
+
+
+/*--- Player list filling ---*/
 reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> PRList, byte TeamIndex)
 {
 	local byte i, j;

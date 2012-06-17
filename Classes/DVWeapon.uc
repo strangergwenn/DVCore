@@ -231,7 +231,7 @@ function RequestAddon(byte AddonID)
 /*--- Add-on toggle ---*/
 function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 {
-	if (OldClass != "" && OldClass == NewClass)
+	if (OldClass != "")
 		RemoveAddon(OldAddon);
 	else
 		SpawnAddon(NewClass);

@@ -38,7 +38,6 @@ var (Addon) string			IconPath;
 
 var (Addon) localized string lAddonName;
 var (Addon) localized string lAddonL1;
-var (Addon) localized string lAddonL2;
 
 
 /*----------------------------------------------------------

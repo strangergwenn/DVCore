@@ -195,23 +195,6 @@ function SetupWeaponWidget(string WidgetName, string LoadClass)
 }
 
 
-/*--- Set up an add-on widget ---*/
-function SetupAddonWidget(string WidgetName, string LoadClass)
-{
-	// Vars
-	local string ClassToLoad;
-	local class<DVWeaponAddon> wpClass;
-	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
-	wpClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
-	
-	// Data
-	SetLabel(WidgetName $".WName", 	wpClass.default.lAddonName, true);
-	SetLabel(WidgetName $".WDesc", 	wpClass.default.lAddonL1, false);
-	SetLabel(WidgetName $".WStats", wpClass.default.lAddonL2, false);
-	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
-}
-
-
 /*----------------------------------------------------------
 	Popup management
 ----------------------------------------------------------*/
