@@ -113,7 +113,6 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 {	
 	Mesh.GetSocketWorldLocationAndRotation(EyeSocket, out_CamLoc, out_CamRot);
 	
-	out_FOV = 90;
 	out_CamRot.Roll = 0;
 	out_CamRot.Pitch = -16384;
 	

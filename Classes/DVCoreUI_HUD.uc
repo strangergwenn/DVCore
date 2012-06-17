@@ -13,11 +13,16 @@ class DVCoreUI_HUD extends DVMovie;
 
 var (HUD) const int			WarningThreshold;
 
+var (HUD) localized string 	lAmmo;
+var (HUD) localized string 	lCannon;
+var (HUD) localized string 	lRail;
+
 var (HUD) localized string 	lChangeWeapon;
 var (HUD) localized string 	lValidateConfig;
 var (HUD) localized string 	lChooseWeapon;
 var (HUD) localized string 	lSwitchTeam;
 var (HUD) localized string 	lQuitGame;
+
 var (HUD) localized string 	lPointsOn;
 var (HUD) localized string 	lPV;
 
@@ -269,10 +274,16 @@ reliable client function UpdateWeaponList()
 /*--- Update the addons list ---*/
 reliable client function UpdateAddonList()
 {
+	// Vars
 	local byte i;
 	local DVWeapon wp;
 	local GFxObject TempObject;
+	
+	// Init
 	wp = DVWeapon(PC.Pawn.Weapon);
+	SetLabel("CannonTitle", lCannon, true);
+	SetLabel("AmmoTitle", lAmmo, true);
+	SetLabel("SightTitle", lRail, true);
 	
 	// Weapon list
 	for (i = 0; i < wp.AddonList.Length; i++)
