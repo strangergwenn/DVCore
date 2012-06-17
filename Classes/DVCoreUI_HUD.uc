@@ -470,6 +470,7 @@ function OnValidateConfig(GFxClikWidget.EventData ev)
 /*--- Weapon selection ---*/
 function OnSwitchWeapon(GFxClikWidget.EventData ev)
 {
+	SetGameUnPaused();
 	OpenRespawnMenu(true);
 }
 
@@ -514,8 +515,8 @@ function TogglePause()
 /*--- Pause end ---*/
 function OnResume(GFxClikWidget.EventData evtd)
 {
-	// Whoah, take something man.
-	if (bFirstFrame)
+	// No.
+	if (bFirstFrame || PC.bConfiguring)
 		return;
 	
 	// Respawn or just resume

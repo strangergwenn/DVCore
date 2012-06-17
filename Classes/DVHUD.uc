@@ -17,6 +17,7 @@ var (DVHUD) const LinearColor			BlueColor;
 var (DVHUD) const class<DVCoreUI_HUD>	HUDClass;
 
 var (DVHUD) const float					GameplayMessageTime;
+var (DVHUD) const float					HitWarningLength;
 var (DVHUD) const float					MenuDelay;
 
 
@@ -89,6 +90,18 @@ simulated function PostBeginPlay()
 	PC.LocalStats.EmptyStats();
 	HudMovie.PC = PC;
 	HudMovie.OpenRespawnMenu(false);
+}
+
+
+/*--- Shot effect ---*/
+simulated function ShowHit()
+{
+	HudMovie.WarningMC.SetVisible(true);
+	SetTimer(HitWarningLength, false, 'HideHit');
+}
+simulated function HideHit()
+{
+	HudMovie.WarningMC.SetVisible(false);
 }
 
 
@@ -186,6 +199,7 @@ defaultproperties
 	HUDClass=class'DVCoreUI_HUD'
 	
 	MenuDelay=0.5
+	HitWarningLength=0.2
 	GameplayMessageTime=3.0
 	
 	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)

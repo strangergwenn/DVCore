@@ -114,6 +114,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
 	ModuleName = DVPawn(aPawn).ModuleName;
 	bConfiguring = false;
+	HideScores();
 }
 
 

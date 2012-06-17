@@ -600,7 +600,8 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 			SpawnBloodDecal(BloodImpact, BloodNormal);
 	}
 	
-	// Sound
+	// UI
+	DVHUD(DVPlayerController(Controller).myHUD).ShowHit();
 	if (HitSound != None)
 		PlaySound(HitSound, false, true, false, Location);
 	
