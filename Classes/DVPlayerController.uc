@@ -542,6 +542,20 @@ simulated function bool IsChatLocked()
 }
 
 
+/*--- Player viewpoint ---*/
+simulated event GetPlayerViewPoint(out vector out_Location, out Rotator out_Rotation)
+{
+	if (ViewTarget != None)
+	{
+		ViewTarget.CalcCamera(0, out_Location, out_Rotation, FOVAngle);
+	}
+	else
+	{
+		super.GetPlayerViewPoint(out_Location, out_Rotation);
+	}
+}
+
+
 /*--- Camera management  ---*/
 function UpdateRotation(float DeltaTime)
 {

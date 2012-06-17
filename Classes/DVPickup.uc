@@ -119,7 +119,7 @@ auto state Pickup
 ----------------------------------------------------------*/
 
 defaultproperties
-{    
+{
     // Lighting
  	Begin Object Class=DynamicLightEnvironmentComponent Name=PickupLightEnvironment
  	    bDynamic=true
