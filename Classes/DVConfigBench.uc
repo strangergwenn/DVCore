@@ -67,6 +67,34 @@ simulated function Tick(float DeltaTime)
 }
 
 
+/*--- Open the configuration interface ---*/
+simulated function bool LaunchConfig(DVPawn P)
+{
+	// Vars
+	local vector WPos;
+	local rotator WRot;
+	PC = DVPlayerController(P.Controller);
+	
+	// Init
+	if (PC != None)
+	{
+		Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, WPos, WRot);
+		PC.ConfigureWeapons(self);
+		ModuleName = P.ModuleName;
+		
+		// Weapon spawn
+		Weapon = Spawn(P.CurrentWeaponClass, self,, WPos);
+		Weapon.AttachWeaponTo(Mesh, WeaponSocket);
+		Weapon.Mesh.SetScale3D(Vect(1,1,1) * WeaponScale);
+		return true;
+	}
+	
+	// Error
+	else
+		return false;
+}
+
+
 /*--- Not configuring anymore ---*/
 simulated function ConfiguringEnded(PlayerController ThePC)
 {
@@ -77,28 +105,6 @@ simulated function ConfiguringEnded(PlayerController ThePC)
 	Weapon = None;
 	
 	OldPawn.Destroy();
-}
-
-
-/*--- Open the configuration interface ---*/
-simulated function bool LaunchConfig(DVPawn P)
-{
-	// Vars
-	local vector WPos;
-	local rotator WRot;
-	
-	// Init
-	Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, WPos, WRot);
-	PC = DVPlayerController(P.Controller);
-	PC.ConfigureWeapons(self);
-	ModuleName = P.ModuleName;
-	
-	// Weapon spawn
-	Weapon = Spawn(P.CurrentWeaponClass, self,, WPos);
-	Weapon.AttachWeaponTo(Mesh, WeaponSocket);
-	Weapon.Mesh.SetScale3D(Vect(1,1,1) * WeaponScale);
-	
-	return (PC != None);
 }
 
 
