@@ -291,6 +291,7 @@ simulated function StartZoom()
 	Mesh.GlobalAnimRateScale = (ZoomedGroundSpeed / UnzoomedGroundSpeed);
 }
 
+
 simulated function EndZoom()
 {
 	bZoomed = false;

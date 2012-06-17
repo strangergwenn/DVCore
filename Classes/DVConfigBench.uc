@@ -16,6 +16,7 @@ class DVConfigBench extends Actor
 ----------------------------------------------------------*/
 
 var (Bench) const name			EyeSocket;
+var (Bench) const name			WeaponSocket;
 
 var (Bench) const float 		DetectionDistance;
 var (Bench) const float 		DetectionPeriod;
@@ -27,9 +28,15 @@ var (Bench) const float 		DetectionPeriod;
 
 var SkeletalMeshComponent		Mesh;
 
+var DVPlayerController			PC;
+
 var float 						CurrentPeriod;
 
 var bool 						bConfigLaunched;
+
+var string						ModuleName;
+
+var DVWeapon					Weapon;
 
 
 /*----------------------------------------------------------
@@ -58,7 +65,7 @@ simulated function Tick(float DeltaTime)
 
 
 /*--- Not configuring anymore ---*/
-event EndViewTarget(PlayerController PC)
+simulated function ConfiguringEnded(PlayerController ThePC)
 {
 	bConfigLaunched = false;
 }
@@ -67,9 +74,20 @@ event EndViewTarget(PlayerController PC)
 /*--- Open the configuration interface ---*/
 simulated function LaunchConfig(DVPawn P)
 {
-	local DVPlayerController PC;
+	// Vars
+	local vector WPos;
+	local rotator WRot;
+	
+	// Init
+	Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, WPos, WRot);
 	PC = DVPlayerController(P.Controller);
 	PC.ConfigureWeapons(self);
+	ModuleName = P.ModuleName;
+	
+	// Weapon spawn
+	Weapon = Spawn(P.CurrentWeaponClass, self,, WPos);
+	Weapon.AttachWeaponTo(Mesh, WeaponSocket);
+	Weapon.Mesh.SetScale3D(Vect(1,1,1) * 2.0);
 }
 
 
@@ -78,9 +96,9 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 {	
 	Mesh.GetSocketWorldLocationAndRotation(EyeSocket, out_CamLoc, out_CamRot);
 	
+	out_FOV = 90;
 	out_CamRot.Roll = 0;
 	out_CamRot.Pitch = -16384;
-	out_FOV = 110;
 	
 	return true;
 }
@@ -92,13 +110,22 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 
 defaultProperties
 {
+	// Lighting
+	Begin Object class=DynamicLightEnvironmentComponent Name=MyLightEnvironment
+		bEnabled=true
+		bDynamic=true
+	End Object
+	Components.Add(MyLightEnvironment)
+	
 	// Mesh
 	Begin Object class=SkeletalMeshComponent name=Bench
+		Scale=0.7
 		BlockActors=true
 		BlockZeroExtent=true
 		BlockRigidBody=true
 		BlockNonzeroExtent=true
 		CollideActors=true
+		LightEnvironment=MyLightEnvironment
 		SkeletalMesh=SkeletalMesh'DV_Spacegear.Mesh.SK_ConfigBench'
 		PhysicsAsset=PhysicsAsset'DV_Spacegear.Mesh.SK_ConfigBench_Physics'
 	End Object
@@ -110,9 +137,9 @@ defaultProperties
 	DetectionDistance=300.0
 	DetectionPeriod=0.25
 	EyeSocket=ViewSocket
+	WeaponSocket=WeaponPoint
 	
  	// Mesh settings
-	Physics=PHYS_RigidBody
 	bEdShouldSnap=true
 	bCollideActors=true
 	bCollideWorld=true

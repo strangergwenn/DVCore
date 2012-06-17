@@ -96,15 +96,12 @@ simulated function TimeWeaponEquipping()
 	
 	ZP = DVPawn(Owner);
 	AmmoCount = MaxAmmo;
-	Mesh.SetHidden(false);
 	
 	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) && ZP != None)
 	{
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
 	}
-	
-	FillAddonList();
 	SetTimer(0.5, false, 'WeaponEquipped');
 }
 
@@ -112,21 +109,35 @@ simulated function TimeWeaponEquipping()
 /*--- Weapon attachment ---*/
 simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name SocketName)
 {
+	// Init
 	local DVPawn target;
 	target = DVPawn(Owner);
-	
-	if (SocketName == '')
-		SocketName = target.WeaponSocket;
 	if (SkeletalMeshComponent(Mesh) == None)
 		return;
+	Mesh.SetHidden(false);
+	FillAddonList();
 	
-	// Mesh
-	AttachComponent(Mesh);
-	if (target.Mesh != None && Mesh != None)
+	// Config bench
+	if (Owner.IsA('DVConfigBench'))
 	{
-		Mesh.SetShadowParent(target.Mesh);
-		Mesh.SetLightEnvironment(target.LightEnvironment);
-		target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
+		MeshCpnt.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
+	}
+	
+	// Standard game
+	else
+	{
+		// Socket name
+		if (SocketName == '')
+			SocketName = target.WeaponSocket;
+		
+		// Mesh
+		AttachComponent(Mesh);
+		if (target.Mesh != None && Mesh != None)
+		{
+			Mesh.SetShadowParent(target.Mesh);
+			Mesh.SetLightEnvironment(target.LightEnvironment);
+			target.Mesh.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
+		}
 	}
 	
 	// Flash
@@ -182,12 +193,13 @@ simulated function int AddAmmo(int amount)
 simulated function FillAddonList()
 {
 	local byte i;
+	
 	for (i = 0; i < 16; i++)
 	{
 		if (AvailableAddons[i] != "")
 		{
 			AddonList.AddItem(class<DVWeaponAddon>(DynamicLoadObject(
-				DVPawn(Owner).ModuleName $"." $AvailableAddons[i],
+				GetModuleName() $"." $AvailableAddons[i],
 				class'Class',
 				false))
 			);
@@ -290,12 +302,26 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 	{
 		return Spawn(
 			class<DVWeaponAddon>(DynamicLoadObject(
-				DVPawn(Owner).ModuleName $"." $AddonClass,
+				GetModuleName() $"." $AddonClass,
 				class'Class',
 				false)),
 			self
 		);
 	}
+}
+
+
+/*--- Path for loading parts ---*/
+simulated function string GetModuleName()
+{
+	local string ModuleName;
+	
+	if (Owner.IsA('DVConfigBench'))
+		ModuleName = DVConfigBench(Owner).ModuleName;
+	else
+		ModuleName = DVPawn(Owner).ModuleName;
+		
+	return ModuleName;
 }
 
 

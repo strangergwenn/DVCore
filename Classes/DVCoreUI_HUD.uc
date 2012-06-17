@@ -407,7 +407,7 @@ function OnAddonWidgetClick(GFxClikWidget.EventData ev)
 	local GFxObject button;
 	
 	// Addon ID
-	wp = DVWeapon(PC.Pawn.Weapon);
+	wp = PC.Bench.Weapon;
 	button = ev._this.GetObject("target");
 	wp.RequestAddon(int(Right(button.GetString("name"), 1)));
 }
@@ -417,7 +417,7 @@ function OnAddonWidgetClick(GFxClikWidget.EventData ev)
 function OnValidateConfig(GFxClikWidget.EventData ev)
 {
 	`log("Saving add-on configuration...");
-	DVWeapon(PC.Pawn.Weapon).SaveConfig();
+	PC.Bench.Weapon.SaveConfig();
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
 	SetGameUnPaused();

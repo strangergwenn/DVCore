@@ -43,6 +43,8 @@ var (DVPC) localized string			lWon;
 var DVUserStats						LocalStats;
 var DVUserStats						GlobalStats;
 
+var DVConfigBench					Bench;
+
 var class<DVWeapon> 		 		WeaponList[8];
 var class<DVWeapon> 				UserChoiceWeapon;
 
@@ -311,15 +313,6 @@ exec function Use()
 }
 
 
-/*--- Open weapon management ---*/
-exec function ConfigureWeapons(DVConfigBench TheBench)
-{
-	bConfiguring = true;
-	SetViewTargetWithBlend(TheBench);
-	DVHUD(myHUD).OpenWeaponConfig();
-}
-
-
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {
@@ -448,6 +441,16 @@ reliable server simulated function float GetIntroLength()
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
+
+/*--- Open weapon management ---*/
+function ConfigureWeapons(DVConfigBench TheBench)
+{
+	Bench = TheBench;
+	bConfiguring = true;
+	SetViewTargetWithBlend(TheBench);
+	DVHUD(myHUD).OpenWeaponConfig();
+}
+
 
 /*--- Signal shot received ---*/
 reliable client simulated function ClientSignalHit(Controller InstigatedBy, bool bWasHeadshot)
@@ -688,6 +691,12 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 	ServerSetUserChoice(NewWeapon, bShouldKill);
 	SetUserChoice(NewWeapon);
 	ServerReStartPlayer();
+	
+	if (bConfiguring)
+	{
+		Bench.ConfiguringEnded(self);
+		Bench = None;	
+	}
 }
 
 
