@@ -57,6 +57,7 @@ var byte							WeaponListLength;
 
 var bool							bLocked;
 var bool							bShouldStop;
+var bool							bConfiguring;
 var bool							bMusicStarted;
 
 var array<string>					LeaderBoardStructure;
@@ -110,6 +111,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
 	ModuleName = DVPawn(aPawn).ModuleName;
+	bConfiguring = false;
 }
 
 
@@ -310,8 +312,10 @@ exec function Use()
 
 
 /*--- Open weapon management ---*/
-exec function ConfigureWeapons()
+exec function ConfigureWeapons(DVConfigBench TheBench)
 {
+	bConfiguring = true;
+	SetViewTargetWithBlend(TheBench);
 	DVHUD(myHUD).OpenWeaponConfig();
 }
 
@@ -545,7 +549,7 @@ simulated function bool IsChatLocked()
 /*--- Player viewpoint ---*/
 simulated event GetPlayerViewPoint(out vector out_Location, out Rotator out_Rotation)
 {
-	if (ViewTarget != None)
+	if (ViewTarget != None && bConfiguring)
 	{
 		ViewTarget.CalcCamera(0, out_Location, out_Rotation, FOVAngle);
 	}

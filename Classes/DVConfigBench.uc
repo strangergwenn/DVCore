@@ -42,29 +42,25 @@ simulated function Tick(float DeltaTime)
 	local DVPawn P;
 	CurrentPeriod -= DeltaTime;
 	
-	// Detection loop
 	if (CurrentPeriod <= 0)
 	{
 		CurrentPeriod = DetectionPeriod;
 		foreach AllActors(class'DVPawn', P)
 		{
-			// New player (has respawned)
-			if (VSize(P.Location - Location) < DetectionDistance)
+			if (VSize(P.Location - Location) < DetectionDistance && !bConfigLaunched)
 			{
-				if (!bConfigLaunched)
-				{
-					LaunchConfig(P);
-					bConfigLaunched = true;
-				}
-			}
-			
-			// Distant player (has respawned)
-			else 
-			{
-				bConfigLaunched = false;
+				LaunchConfig(P);
+				bConfigLaunched = true;
 			}
 		}
 	}
+}
+
+
+/*--- Not configuring anymore ---*/
+event EndViewTarget(PlayerController PC)
+{
+	bConfigLaunched = false;
 }
 
 
@@ -73,8 +69,7 @@ simulated function LaunchConfig(DVPawn P)
 {
 	local DVPlayerController PC;
 	PC = DVPlayerController(P.Controller);
-	PC.SetViewTargetWithBlend(self);
-	PC.ConfigureWeapons();
+	PC.ConfigureWeapons(self);
 }
 
 
