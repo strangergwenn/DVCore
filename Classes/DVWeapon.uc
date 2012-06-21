@@ -234,7 +234,7 @@ function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 {
 	if (OldClass != "")
 		RemoveAddon(OldAddon);
-	else
+	if (OldClass != NewClass)
 		SpawnAddon(NewClass);
 }
 

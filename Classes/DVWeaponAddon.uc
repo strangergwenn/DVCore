@@ -69,6 +69,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	// Mesh
 	AttachComponent(Mesh);
 	Mesh.SetShadowParent(wp.Mesh);
+	Mesh.SetLightEnvironment(wp.Mesh.LightEnvironment);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
 	Weap = wp;
 	
