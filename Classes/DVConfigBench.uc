@@ -150,7 +150,7 @@ defaultProperties
 	Mesh=Bench
 	
  	// Gameplay
- 	WeaponScale=1.8;
+ 	WeaponScale=1.6;
 	DetectionPeriod=0.25
 	DetectionDistance=300.0
 	EyeSocket=ViewSocket

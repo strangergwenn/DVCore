@@ -18,7 +18,9 @@ var (Addon) float			SmoothingFactor;
 var (Addon) float 			ZoomSensitivity;
 var (Addon) float 			ZoomedFOV;
 
+var (Addon) float			PrecisionBonus;
 var (Addon) float			FireRateBonus;
+var (Addon) float			KineticBonus;
 var (Addon) float			DamageBonus;
 var (Addon) float			AmmoBonus;
 
@@ -90,6 +92,11 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.InstantHitDamage[0] *= DamageBonus;
 	if (FireRateBonus != 0.0)
 		wp.FireInterval[0] /= FireRateBonus;
+	if (KineticBonus != 0.0)
+		wp.KineticImpulse *= KineticBonus;
+	if (PrecisionBonus != 0.0)
+		wp.Spread[0] /= PrecisionBonus;
+		
 	
 	`log("Mounted add-on" @self);
 }
