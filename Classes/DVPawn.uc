@@ -194,7 +194,7 @@ simulated function WeaponClassChanged()
 	{
 		if (Weapon != None)
 		{
-			`log("Destroyed " $ Weapon);
+			`log("DVP > Destroyed " $ Weapon);
 			DVWeapon(Weapon).DetachFrom(Mesh);
 			Weapon.Destroy();
 			Weapon = None;
@@ -204,7 +204,7 @@ simulated function WeaponClassChanged()
 		{
 			Weapon = Spawn(CurrentWeaponClass, self);
 			Weapon.Instigator = self;
-			`log("Spawned " $ Weapon);
+			`log("DVP > Spawned " $ Weapon);
 		}
 	}
 	WeaponChanged(DVWeapon(Weapon));
@@ -274,7 +274,7 @@ simulated function Vector GetPawnViewLocation()
 	else
 	{
 		if (!Mesh.GetSocketWorldLocationAndrotation(EyeSocket, SMS))
-			`log("GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
+			`log("DVP > GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
 		SMS.Z = 	HeadBobbingFactor 	* SMS.Z + 
 			(1.0 - HeadBobbingFactor) 	* (Location.Z + StandardEyeHeight);
 	}
@@ -649,7 +649,7 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	bReplicateMovement = false;
 	
 	// Weapon
-	`log("PlayDying");
+	`log("DVP > PlayDying");
 	if (OldWeaponReference != None)
 	{
 		OldWeaponReference.DetachFrom(Mesh);

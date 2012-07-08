@@ -54,6 +54,7 @@ var GFxObject 				Progress2MC;
 
 var string 					NewWeaponName;
 
+var bool					bInMenu;
 var bool					bChatting;
 var bool 					bFirstFrame;
 var bool					bWasKilled;
@@ -273,7 +274,7 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 	else if (TeamIndex == PC.GetTeamIndex())
 	{
 		List.SetInt("selectedIndex", PC.GetLocalRank() - 1);
-		`log("Highlighting index" @PC.GetLocalRank() - 1);
+		`log("CoreUI > Highlighting index" @PC.GetLocalRank() - 1);
 	}
 }
 
@@ -323,7 +324,6 @@ reliable client function UpdateAddonList()
 		if (wp.AddonList[i] != None)
 		{
 			SetupAddonWidget("Config"$i, string(wp.AddonList[i]));
-			`log("Setup" @wp.AddonList[i]);
 		}
 		else
 		{
@@ -436,9 +436,11 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	NewWeapon = PC.WeaponList[i];
 	
 	// Restart
+	`log("CoreUI > Weapon selected");
 	SetGameUnPaused();
 	PC.HUDRespawn(!bFirstFrame, NewWeapon);
 	bFirstFrame = false;
+	bInMenu = false;
 }
 
 
@@ -459,7 +461,7 @@ function OnAddonWidgetClick(GFxClikWidget.EventData ev)
 /*--- Save weapon configuration and respawn ---*/
 function OnValidateConfig(GFxClikWidget.EventData ev)
 {
-	`log("Saving add-on configuration...");
+	`log("CoreUI > Respawning with weapon configured");
 	PC.Bench.Weapon.SaveConfig();
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
@@ -470,6 +472,7 @@ function OnValidateConfig(GFxClikWidget.EventData ev)
 /*--- Weapon selection ---*/
 function OnSwitchWeapon(GFxClikWidget.EventData ev)
 {
+	`log("CoreUI > Respawning for weapon selection");
 	SetGameUnPaused();
 	OpenRespawnMenu(true);
 }
@@ -479,8 +482,10 @@ function OnSwitchWeapon(GFxClikWidget.EventData ev)
 reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
 	// Settings
+	`log("CoreUI > Opening respawn menu, kill=" $bKilledMenu);
 	bChatting = false;
 	bWasKilled = bKilledMenu;
+	bInMenu = true;
 	
 	// Pawn
 	if (bFirstFrame)
@@ -516,16 +521,19 @@ function TogglePause()
 function OnResume(GFxClikWidget.EventData evtd)
 {
 	// No.
-	if (bFirstFrame || PC.bConfiguring)
+	`log("CoreUI > Resuming, kill=" $bWasKilled $",inMenu=" $bInMenu);
+	if (bFirstFrame || PC.bConfiguring || !bInMenu)
 		return;
 	
 	// Respawn or just resume
 	if (bWasKilled)
 	{
 		PC.HUDRespawn(true);
+		bWasKilled = false;
 	}
 	SetGameUnPaused();
 	PC.LockCamera(false);
+	bInMenu = false;
 }
 
 

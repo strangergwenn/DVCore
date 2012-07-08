@@ -28,7 +28,7 @@ reliable server simulated function int GetScore()
 
 reliable server simulated function AddKill(bool bTeamKill)
 {
-	`log("AddKill " $ self);
+	`log("DVTI > AddKill " $ self);
 	if (!bTeamKill)
 		Score += 1;
 }

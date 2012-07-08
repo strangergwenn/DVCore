@@ -85,6 +85,14 @@ var (CoreUI) localized array<string>	KeyListData;
 	Private attributes
 ----------------------------------------------------------*/
 
+enum EPopupState
+{
+    PS_None,
+    PS_Password,
+    PS_Login,
+    PS_Register
+};
+
 var GFxClikWidget 						MapListMC;
 var GFxClikWidget 						MenuListMC;
 var GFxClikWidget 						ServerListMC;
@@ -101,8 +109,9 @@ var array<UDKUIDataProvider_MapInfo> 	MapList;
 var array<string>						ServerList;
 var array<string>						IPList;
 
+var EPopupState							PopupState;
+
 var bool 								bMapsInitialized;
-var bool								bIsInRegisterPopup;
 var bool								bIsKeyEditing;
 
 var string								ServerURL;
@@ -119,7 +128,7 @@ var int									StoredLevel;
 function GetServerContent()
 {
 	// Init
-	`log("CoreUI : GetServerContent");
+	`log("CoreUI  > GetServerContent");
 	OpenConnectionDialog(false);
 	HidePopup(true);
 	
@@ -132,11 +141,11 @@ function GetServerContent()
 
 
 /*--- Add a possibly new server to the local database ---*/
-function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
+function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
 	if (IPList.Find(IP) < 0)
 	{
-		ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers));
+		ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
 		IPList.AddItem(IP);
 	}
 }
@@ -164,9 +173,13 @@ function UpdateServerList()
 
 
 /*--- Return a formatted server string to be displayed in the server browser ---*/
-function string FormatServerInfo(string ServerName, string Level, string Game, int Players, int MaxPlayers)
+function string FormatServerInfo(string ServerName, string Level, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
 	ServerName = Caps(ServerName);
+	
+	if (bIsPassword)
+		ServerName @= " - Password protected";
+	
 	Game = GetRightMost(Game);
 	Level = Caps(Repl(Level, ".udk", "", false));
 	return (ServerName $ "\n" $Players $"/" $MaxPlayers @ lPlayers $"," @Game $"\n" $Level);
@@ -228,7 +241,7 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 function OpenServer(GFxClikWidget.EventData evtd)
 {
 	PlayUISound(ClickSound);
-	ConsoleCommand("open " $ ServerURL $ "?game=");
+	OpenPasswordDialog();
 }
 
 
@@ -263,6 +276,25 @@ function OnPlayerConnect(GFxClikWidget.EventData evtd)
 }
 
 
+/*--- Open the password popup ---*/
+function OpenPasswordDialog()
+{
+	local string Text[7];
+	
+	Text[0] = lPPassword;
+	Text[1] = lPPassword;
+	Text[5] = lPConnectButton;
+	Text[6] = lPBack;
+	SetPopup(Text, 1);
+	PopupState = PS_Password;
+	
+	if (PC != None)
+	{
+		PC.CancelTimeout();
+	}
+}
+
+
 /*--- Open the connection popup ---*/
 function OpenConnectionDialog(bool bShowRegister)
 {
@@ -278,6 +310,7 @@ function OpenConnectionDialog(bool bShowRegister)
 		Text[5] = lPConnectButton;
 		Text[6] = lPNewPlayer;
 		SetPopup(Text, 2);
+		PopupState = PS_Login;
 	}
 	else
 	{
@@ -289,6 +322,7 @@ function OpenConnectionDialog(bool bShowRegister)
 		Text[5] = LPRegister;
 		Text[6] = lPBack;
 		SetPopup(Text, 2, 3);
+		PopupState = PS_Register;
 	}
 	if (PC != None)
 	{
@@ -308,23 +342,31 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 	Result = GetPopupContent();
 	
 	// Checking
-	if (Len(Result[0]) < 4 || (bIsInRegisterPopup && Len(Result[3]) < 10))
+	if (Len(Result[0]) < 4 || ((PopupState == PS_Register) && Len(Result[3]) < 10))
 		SetPopupStatus(lIncorrectData);
-	else if (bIsInRegisterPopup && Result[1] != Result[2])
+	else if ((PopupState == PS_Register) && Result[1] != Result[2])
 		SetPopupStatus(lWrongPassword);
 	
-	// Actions
-	else if (!bIsInRegisterPopup)
+	// Register
+	else if (PopupState == PS_Register)
+	{
+		PC.Register(Result[0], Result[3], Result[1]);
+		SetPopupStatus(lRegistering);
+	}
+	
+	// Login
+	else if (PopupState == PS_Login)
 	{
 		PC.SaveIDs(Result[0], Result[1]);
 		PC.Connect(Result[0], Result[1]);
 		SetPopupStatus(lConnecting);
 		SetConnectState(1);
 	}
-	else
+	
+	// Password
+	else if (PopupState == PS_Password)
 	{
-		PC.Register(Result[0], Result[3], Result[1]);
-		SetPopupStatus(lRegistering);
+		ConsoleCommand("open " $ ServerURL $ "?Password=" $Result[0] $"?game=");
 	}
 }
 
@@ -333,15 +375,34 @@ function OnPButton1(GFxClikWidget.EventData evtd)
 function OnPButton2(GFxClikWidget.EventData evtd)
 {
 	super.OnPButton2(evtd);
-	bIsInRegisterPopup = !bIsInRegisterPopup;
-	OpenConnectionDialog(bIsInRegisterPopup);
+	
+	// Register
+	if (PopupState == PS_Register)
+	{
+		PopupState = PS_Login;
+		OpenConnectionDialog(false);
+	}
+	
+	// Login
+	else if (PopupState == PS_Login)
+	{
+		PopupState = PS_Register;
+		OpenConnectionDialog(true);
+	}
+	
+	// Password
+	else if (PopupState == PS_Password)
+	{
+		HidePopup(true);
+		PC.CancelTimeout();
+	}
 }
 
 
 /*--- Show result on screen ---*/
 function GetConnectionResult(bool bSuccess)
 {
-	`log("CoreUI : GetConnectionResult" @bSuccess);
+	`log("CoreUI  > GetConnectionResult" @bSuccess);
 	if (bSuccess)
 	{
 		SetConnectState(2);
@@ -544,7 +605,7 @@ function ValidateSettings(GFxClikWidget.EventData ev)
 	// Resolution
 	button = GetSymbol("ResolutionList");
 	res = Split(ResListData[int(button.GetString("selectedIndex"))], "[", false);
-	`log("CoreUI : Clicked resolution " $ res);
+	`log("CoreUI  > Clicked resolution " $ res);
 	
 	// Application
 	PlayUISound(ClickSound);

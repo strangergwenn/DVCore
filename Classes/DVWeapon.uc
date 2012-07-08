@@ -21,6 +21,8 @@ var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
 
 var (DVWeapon) vector						ZoomOffset;
 
+var (DVWeapon) bool							bHasLens;
+
 var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
 var (DVWeapon) float						RecoilAngle;
@@ -338,7 +340,7 @@ simulated function vector GetZoomViewLocation()
 	if (Mesh != None)
 	{
 		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(ZoomSocket, loc, rot))
-			`log("GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
+			`log("DVW > GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
 		
 		GetAxes(rot, X, Y, Z);
 		return loc + ZoomOffset.X * X +  ZoomOffset.Y * Y +  ZoomOffset.Z * Z;
@@ -385,14 +387,7 @@ simulated function ZoomOut()
 /*--- Use lens effect ---*/
 simulated function bool HasLensEffect()
 {
-	local bool bShouldUseDirectAim;
-	if (Addon1 != None)
-		bShouldUseDirectAim = Addon1.HasLens();
-	if (!bShouldUseDirectAim && Addon2 != None)
-		bShouldUseDirectAim = Addon2.HasLens();
-	if (!bShouldUseDirectAim && Addon3 != None)
-		bShouldUseDirectAim = Addon3.HasLens();
-	return bShouldUseDirectAim;
+	return bHasLens;
 }
 
 
@@ -400,18 +395,21 @@ simulated function bool HasLensEffect()
 	Firing methods
 ----------------------------------------------------------*/
 
-/*--- Tracing ---*/
+/*--- Trace start ---*/
 simulated function vector InstantFireStartTrace()
 {
 	return GetEffectLocation();
 }
+
+
+/*--- Trace end ---*/
 simulated function vector InstantFireEndTrace(vector StartTrace)
 {
 	local rotator rot;
 	local vector loc;
 	
 	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[0], loc, rot))
-		`log("GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
+		`log("DVW > GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
 	
 	return StartTrace + vector(rot) * GetTraceRange();
 }
@@ -568,7 +566,7 @@ simulated function vector GetEffectLocation()
 	{
 		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[CurrentFireMode], SocketLocation))
 		{
-			`log("GetSocketWorldLocationAndrotation GetEffectLocation failed");
+			`log("DVW > GetSocketWorldLocationAndrotation GetEffectLocation failed");
 			SocketLocation = Location;
 		}
 	}

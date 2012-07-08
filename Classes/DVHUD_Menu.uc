@@ -46,7 +46,6 @@ simulated function PostBeginPlay()
 	
 	// User settings
 	HudMovie.ApplyResolutionSetting(PC.LocalStats.Resolution, (PC.LocalStats.bFullScreen ? "f" : "w"));
-	`log("HUD is ready");
 }
 
 
@@ -91,9 +90,9 @@ function CancelHide()
 
 
 /*--- Server data ---*/  
-function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers)
+function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
-	HudMovie.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers);
+	HudMovie.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers, bIsPassword);
 	HudMovie.UpdateServerList();
 }
 
@@ -102,7 +101,7 @@ function AddServerInfo(string ServerName, string Level, string IP, string Game, 
 function HidePopup()
 {
 	HudMovie.HidePopup(true);
-	HudMovie.bIsInRegisterPopup = false;
+	HudMovie.PopupState = PS_None;
 }
 
 

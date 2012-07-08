@@ -44,7 +44,7 @@ var DVPlayerController				PC;
 /*--- Initialization ---*/
 reliable client simulated function InitLink(DVPlayerController LinkedController)
 {
-	`log("DVLINK : InitLink");
+	`log("DVLINK > InitLink");
 	PC = LinkedController;
 	resolve(MasterServerIP);
 }
@@ -55,7 +55,7 @@ reliable client simulated function ConnectToMaster(string Username, string Passw
 {
 	local array<string> Params;
 	
-	`log("DVLINK : ConnectToMaster");
+	`log("DVLINK > ConnectToMaster");
 	Params.AddItem(Username);
 	Params.AddItem(Password);
 	Params.AddItem("0");
@@ -68,7 +68,7 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 {
 	local array<string> Params;
 	
-	`log("DVLINK : RegisterUser");
+	`log("DVLINK > RegisterUser");
 	Params.AddItem(Username);
 	Params.AddItem(Email);
 	Params.AddItem(Password);
@@ -81,7 +81,7 @@ reliable client simulated function RegisterServer(string Username, string Email,
 {
 	local array<string> Params;
 	
-	`log("DVLINK : RegisterServer");
+	`log("DVLINK > RegisterServer");
 	Params.AddItem(Username);
 	Params.AddItem(Email);
 	Params.AddItem(Password);
@@ -96,7 +96,7 @@ reliable server simulated function Heartbeat(string MapName, string GameName, in
 	
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
-		`log("DVLINK : Heartbeat");
+		`log("DVLINK > Heartbeat");
 		Params.AddItem(""$CurrentID);
 		Params.AddItem(MapName);
 		Params.AddItem(GameName);
@@ -112,7 +112,7 @@ reliable client simulated function GetServers(optional string GameName, optional
 {
 	local array<string> Params;
 	
-	`log("DVLINK : GetServers");
+	`log("DVLINK > GetServers");
 	if (GameName != "")
 		Params.AddItem(GameName);
 	if (MapName != "")
@@ -126,7 +126,7 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 {
 	local array<string> Params;
 	
-	`log("DVLINK : GetLeaderboard");
+	`log("DVLINK > GetLeaderboard");
 	PC.CleanBestPlayer();
 	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
@@ -140,7 +140,7 @@ reliable client simulated function SaveGame(int kills, int deaths, int teamkills
 {
 	local array<string> Params;
 	
-	`log("DVLINK : SaveGame");
+	`log("DVLINK > SaveGame");
 	Params.AddItem(""$CurrentID);
 	Params.AddItem(""$kills);
 	Params.AddItem(""$deaths);
@@ -161,7 +161,7 @@ reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
 	local int i;
 	
 	Params.AddItem(""$CurrentID);
-	`log("DVLINK : SaveWeaponsStats");
+	`log("DVLINK > SaveWeaponsStats");
 	for (i = 0; i < WeaponScores.Length; i++)
 	{
 		Params.AddItem("" $ WeaponScores[i]);
@@ -174,7 +174,7 @@ reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
 reliable client simulated function GetStats()
 {
 	local array<string> Params;
-	`log("DVLINK : GetStats");
+	`log("DVLINK > GetStats");
 
 	Params.AddItem(""$CurrentID);
 	SendServerCommand("GET_GSTATS", Params, true);
@@ -201,14 +201,14 @@ reliable client simulated function SendServerCommand(string Command, array<strin
 	// If failed connexion, retry...
 	if (!bIsOpened)
 	{
-		`log("DVLINK : Reconnecting");
+		`log("DVLINK > Reconnecting");
 		resolve(MasterServerIP);
 	}
 	
 	// Not yet connected
 	else if (CurrentID == 0 && bRequireNet)
 	{
-		`log("DVLINK : Cannot send commands while disconnected");
+		`log("DVLINK > Cannot send commands while disconnected");
 		return;
 	}
 	
@@ -223,7 +223,7 @@ reliable client simulated function SendServerCommand(string Command, array<strin
 			Command $= ParamsString;
 		}
 		
-		`log("DVLINK : Sending command " $ Command);
+		`log("DVLINK > Sending command " $ Command);
 		AbortTimeout();
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		SendText(Command $"\n");
@@ -243,7 +243,7 @@ simulated function array<string> GetServerCommand(string Input)
 /*--- Command timeout ---*/
 simulated function SignalTimeout()
 {
-	`log("DVLINK : Command timeout...");
+	`log("DVLINK > Command timeout...");
 	SignalController("NET", false, "Serveur indisponible");
 }
 
@@ -252,7 +252,7 @@ simulated function SignalTimeout()
 simulated function ProcessACK(string Param)
 {
 	// Data
-	`log("DVLINK : ProcessACK" @LastCommandSent);
+	`log("DVLINK > ProcessACK" @LastCommandSent);
 	SignalController(LastCommandSent, true, lOK);
 	AbortTimeout();
 }
@@ -261,10 +261,12 @@ simulated function ProcessACK(string Param)
 /*--- Call back the controller to inform it ---*/
 simulated function SignalController(string Command, bool bIsOK, optional string Msg)
 {
-	if (PC != None)
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+		return;
+	else if (PC != None)
 		PC.TcpCallback(Command, bIsOK, Msg);
 	else
-		`log("DVLINK : Could not inform the controller because it does not exist");
+		`log("DVLINK > Could not inform the controller because it does not exist");
 }
 
 
@@ -275,16 +277,16 @@ simulated function SignalController(string Command, bool bIsOK, optional string 
 /*--- TCP connexion answer ---*/
 event Resolved(IpAddr Addr)
 {
-	`log("DVLINK : Successfully resolved master server" @IpAddrToString(Addr));
+	`log("DVLINK > Successfully resolved master server" @IpAddrToString(Addr));
 	
 	Addr.Port = MasterServerPort;
 	AbortTimeout();
 	SetTimer(TimeoutLength, false, 'SignalTimeout');
 	
-	`Log("DVLINK : Bound to port" @BindPort());
+	`log("DVLINK > Bound to port" @BindPort());
 	if (!Open(Addr))
 	{
-		`log ("DVLINK : Could not connect to master server...");
+		`log("DVLINK > Could not connect to master server...");
 	}
 }
 
@@ -292,7 +294,7 @@ event Resolved(IpAddr Addr)
 /*--- No connexion ! ---*/
 event ResolveFailed()
 {
-	`log("DVLINK : Failed to resolve master server");
+	`log("DVLINK > Failed to resolve master server");
 	bIsOpened = false;
 	SignalController("NET", false, "Hors ligne");
 }
@@ -301,8 +303,9 @@ event ResolveFailed()
 /*--- Server accepted the connexion ---*/
 event Opened()
 {
-	`log("DVLINK : Successfully opened master server");
+	local bool bUsePassword;
 	bIsOpened = true;
+	`log("DVLINK > Successfully opened master server");
 	
 	// On client : get the server list
 	if (WorldInfo.NetMode != NM_DedicatedServer)
@@ -314,7 +317,8 @@ event Opened()
 	// On server : register
 	else
 	{
-		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", "");
+		bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
+		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", bUsePassword ? "1":"0");
 	}
 }
 
@@ -322,7 +326,7 @@ event Opened()
 /*--- Closed connexion ---*/
 event Closed()
 {
-	`log("DVLINK : Closed master server");
+	`log("DVLINK > Closed master server");
 	bIsConnected = false;
 	bIsOpened = false;
 	SignalController("NET", false);
@@ -350,7 +354,7 @@ event ReceivedLine(string Line)
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
-	`log("DVLINK : MS command >" $ Line);
+	`log("DVLINK > MS command >" $ Line);
 	
 	// Error
 	if (IsEqual(Command[0], "NOK"))
@@ -364,7 +368,7 @@ event ReceivedLine(string Line)
 		{
 			CurrentID = int(Command[1]);
 			bIsConnected = true;
-			`log("DVLINK : Connection validated for ID" @CurrentID);
+			`log("DVLINK > Connection validated for ID" @CurrentID);
 		}
 		
 		// Default case
@@ -386,7 +390,8 @@ event ReceivedLine(string Line)
 			Command[3],
 			Command[4], 
 			int(Command[5]),
-			int(Command[6])
+			int(Command[6]),
+			Command[7] != "0"
 		);
 	}
 	

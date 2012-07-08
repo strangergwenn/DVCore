@@ -65,8 +65,6 @@ var bool							bMusicStarted;
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
-var string							ModuleName;
-
 
 /*----------------------------------------------------------
 	Replication
@@ -88,8 +86,9 @@ simulated function PostBeginPlay()
 {
 	// Init
 	super.PostBeginPlay();
-	`log("DVPC : PostBeginPlay");
+	`log("DVPC > PostBeginPlay");
 	SetTimer(1.0, false, 'StartMusicIfAvailable');
+	bConfiguring = false;
 	
 	// Stats
 	LocalStats = new class'DVUserStats';
@@ -112,7 +111,6 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
-	ModuleName = DVPawn(aPawn).ModuleName;
 	bConfiguring = false;
 	HideScores();
 }
@@ -121,7 +119,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	`log("DVPC : autoConnect");
+	`log("DVPC > autoConnect");
 	
 	if (Len(LocalStats.UserName) > 3
 	 && Len(LocalStats.Password) > 3
@@ -135,7 +133,7 @@ simulated function AutoConnect()
 /*--- Called when the connection has been established ---*/
 function SignalConnected()
 {
-	`log("Setting name " @LocalStats.UserName);
+	`log("DVPC > Setting name " @LocalStats.UserName);
 	SetName(LocalStats.UserName);
 	LocalStats.SaveConfig();
 }
@@ -198,7 +196,7 @@ reliable client simulated function Connect(string user, string passwd)
 reliable client simulated function UploadGame()
 {
 	// Checking data
-	`log("DVPC : Uploading game...");
+	`log("DVPC > Uploading game...");
 	
 	// Stats upload
 	if (LocalStats != None && LocalStats.bWasUploaded == false)
@@ -213,12 +211,12 @@ reliable client simulated function UploadGame()
 		);
 		LocalStats.SetBoolValue("bWasUploaded", true);
 		LocalStats.SaveConfig();
-		`log("DVPC : Uploading sent");
+		`log("DVPC > Uploading sent");
 	}
 	
 	// Will be tried again on menu
 	else
-		`log("DVPC : Uploading aborted");
+		`log("DVPC > Uploading aborted");
 }
 
 
@@ -238,7 +236,7 @@ reliable client event TcpGetStats(array<string> Data)
 	// Global game stats
 	if (InStr(Data[0], "GET_GSTATS") != -1)
 	{
-		`log("Got game data");
+		`log("DVPC > Got game data");
 		GlobalStats.SetIntValue("Kills", 	int(Data[1]));
 		GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
 		GlobalStats.SetIntValue("TeamKills", int(Data[3]));
@@ -250,7 +248,7 @@ reliable client event TcpGetStats(array<string> Data)
 	// Weapon stats
 	else if (InStr(Data[0], "GET_WSTATS") != -1)
 	{
-		`log("Got weapon data");
+		`log("DVPC > Got weapon data");
 		for (i = 0; i < 8; i++)
 		{
 			GlobalStats.SetArrayIntValue("WeaponScores", int(Data[i + 1]), i);
@@ -345,7 +343,6 @@ exec function SwitchTeam()
 /*--- Send text ---*/
 exec function Talk()
 {
-	`log("Talk");
 	DVHUD(myHUD).HudMovie.StartTalking();
 }
 
@@ -393,7 +390,7 @@ reliable server simulated function StartMusicIfAvailable()
 {
 	if (!bMusicStarted && WorldInfo != None)
 	{
-		`log("DVPC : StartMusicIfAvailable");
+		`log("DVPC > StartMusicIfAvailable");
 		bMusicStarted = true;
 		ClientPlaySound(GetTrackIntro());
 		SetTimer(GetIntroLength(), false, 'StartMusicLoop');
@@ -404,7 +401,7 @@ reliable server simulated function StartMusicIfAvailable()
 /*--- Music loop ---*/
 reliable server simulated function StartMusicLoop()
 {
-	`log("DVPC : StartMusicLoop");
+	`log("DVPC > StartMusicLoop");
 	ClearTimer('StartMusicLoop');
 	ClientPlaySound(GetTrackLoop());
 }
@@ -625,7 +622,7 @@ simulated function SpeakTTS( coerce string S, optional PlayerReplicationInfo PRI
 /*--- End of game ---*/
 reliable client simulated function SignalEndGame(bool bHasWon)
 {
-	`log("DVPC : End of game " $ self);
+	`log("DVPC > End of game " $ self);
 	DVHUD(myHUD).ShowPlayerList();
 	LockCamera(true);
 	
@@ -688,7 +685,8 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 	if (bConfiguring)
 	{
 		Bench.ConfiguringEnded(self);
-		Bench = None;	
+		Bench = None;
+		bConfiguring = false;
 	}
 	if (NewWeapon == None)
 	{
@@ -703,6 +701,7 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 /*--- Register the weapon to use on respawn ---*/
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
+	`log("DVPC > Respawn, kill=" $bShouldKill);
 	if (Pawn != None)
 	{
 		if (bShouldKill)
@@ -850,7 +849,7 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 	{
 		if (WeaponList[i] == DVPawn(Pawn).CurrentWeaponClass)
 		{
-			`log("DVPC : GetCurrentWeaponIndex" @i);
+			`log("DVPC > GetCurrentWeaponIndex" @i);
 			return i;
 		}
 	}
@@ -864,7 +863,7 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 		return;
 	
-	`log("DVPC : SaveGameStatistics");
+	`log("DVPC > SaveGameStatistics");
 	LocalStats.SetBoolValue("bHasLeft", bLeaving);
 	LocalStats.SetBoolValue("bWasUploaded", false);
 	LocalStats.SetIntValue("Rank", GetLocalRank());
@@ -885,7 +884,7 @@ reliable client simulated function int GetLocalRank()
 	{
 		if (PList[i] == DVPlayerRepInfo(PlayerReplicationInfo))
 		{
-			`log("DVPC : GetLocalRank"@i);
+			`log("DVPC > GetLocalRank"@i);
 			return i + 1;
 		}
 	}
@@ -902,7 +901,7 @@ reliable client simulated function array<DVPlayerRepInfo> GetPlayerList()
 	ForEach AllActors(class'DVPlayerRepInfo', PRI)
 	{
 		PRList.AddItem(PRI);
-		`log("GetPlayerList" @PRI);
+		`log("DVPC > GetPlayerList" @PRI);
 	}
 	PRList.Sort(SortPlayers);
 	return PRList;

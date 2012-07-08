@@ -14,6 +14,8 @@ class DVGame extends UDKGame;
 
 var (DVGame) const class<DVWeapon> 		DefaultWeaponList[8];
 
+var (DVGame) const class<DVWeaponAddon> DefaultAddonList[16];
+
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
 var (DVGame) const int					WeaponListLength;
@@ -65,6 +67,13 @@ event PostBeginPlay()
 	}
 }
 
+/*--- Login & security ---*/
+event PreLogin(string Options, string Address, const UniqueNetId UniqueId, bool bSupportsAuth, out string ErrorMessage)
+{
+	super.PreLogin(Options, Address, UniqueId, bSupportsAuth, ErrorMessage);
+	`log("DVG >" @ErrorMessage);
+}
+
 
 /*--- Team attribution ---*/
 event PostLogin (PlayerController NewPlayer)
@@ -98,7 +107,7 @@ event PostLogin (PlayerController NewPlayer)
 function AddDefaultInventory(Pawn PlayerPawn)
 {
 	local class<DVWeapon> Choiced;
-	`log("AddDefaultInventory for " $ PlayerPawn);
+	`log("DVG > AddDefaultInventory for " $ PlayerPawn);
 	
 	if (PlayerPawn.Controller != None)
 	{
@@ -111,7 +120,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 	
 	else
 	{
-		`log("Spawned default weapon, this is wrong.");
+		`log("DVG > Spawned default weapon, this is wrong.");
 		PlayerPawn.CreateInventory(DefaultWeapon);
 	}
 	PlayerPawn.AddDefaultInventory();
@@ -192,7 +201,7 @@ function ScoreKill(Controller Killer, Controller Other)
 			KillerPRI.ScorePoint(bIsTeamKill);
 		}
 		DVPlayerController(Other).ShowKilledBy(KillerPRI.PlayerName);
-		`log(Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
+		`log("DVG > " $Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
 	}
 	
 	// Death indication to other player
@@ -384,7 +393,7 @@ reliable server simulated function float GetIntroLength()
 	local float Duration;
 	
 	Duration = DVMapInfo(WorldInfo.GetMapInfo()).MusicIntro.GetCueDuration();
-	`log("GetIntroLength" @Duration);
+	`log("DVG > GetIntroLength" @Duration);
 	
 	return Duration;
 }

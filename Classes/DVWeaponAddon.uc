@@ -86,6 +86,10 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.ZoomOffset = ZoomOffset;
 	}
 	
+	// Lens override
+	if (bUseLens && !wp.bHasLens)
+		wp.bHasLens = true;
+	
 	// Bonus
 	if (AmmoBonus != 0.0)
 		wp.MaxAmmo *= AmmoBonus;
@@ -99,7 +103,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 		wp.Spread[0] /= PrecisionBonus;
 		
 	
-	`log("Mounted add-on" @self);
+	`log("DVWA > Mounted add-on" @self);
 }
 
 
@@ -128,6 +132,7 @@ simulated function DetachFromWeapon(DVWeapon wp)
 	{
 		wp.ZoomOffset = wp.default.ZoomOffset;
 	}
+	wp.bHasLens = false;
 	
 	// Bonus
 	if (AmmoBonus != 0.0)
@@ -138,15 +143,8 @@ simulated function DetachFromWeapon(DVWeapon wp)
 		wp.FireInterval[0] *= FireRateBonus;
 	
 	// Ending
-	`log("Removed add-on" @self);
+	`log("DVWA > Removed add-on" @self);
 	Destroy();
-}
-
-
-/*--- Zoom lens feature ---*/
-simulated function bool HasLens()
-{
-	return bUseLens && UseAddon();
 }
 
 

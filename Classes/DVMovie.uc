@@ -49,7 +49,6 @@ function bool Start(optional bool StartPaused = false)
 {
 	super.Start();
 	
-	`log("Gfx start");
 	Advance(0);
 	InitParts();
 	
@@ -60,7 +59,6 @@ function bool Start(optional bool StartPaused = false)
 /*--- Do this on start & restart --*/
 function InitParts()
 {
-	`log("Gfx init parts");
 	Scene = GetVariableObject("_root");
 	Banner = GetSymbol("Banner");
 	ShowBannerInfo(false);
@@ -102,7 +100,7 @@ function SignalConnected()
 /*--- Return to desktop ---*/
 function QuitToDesktop(GFxClikWidget.EventData evtd)
 {
-	`log("Gfx exiting");
+	`log("DVM > Exiting");
 	PC.SaveGameStatistics(false, true);
 	ConsoleCommand("exit");
 }
@@ -111,7 +109,7 @@ function QuitToDesktop(GFxClikWidget.EventData evtd)
 /*--- Pause menu ---*/
 function SetGamePaused()
 {
-	`log("Gfx paused game");
+	`log("DVM > Paused game");
 	if (PC != None)
 	{
 		PC.LockCamera(true);
@@ -122,7 +120,7 @@ function SetGamePaused()
 /*--- Game resume ---*/
 function SetGameUnPaused()
 {
-	`log("Gfx resumed game");
+	`log("DVM > Resumed game");
 	if (PC != None)
 	{
 		PC.LockCamera(false);
@@ -158,7 +156,7 @@ function PlayUISound(SoundCue sound)
 /*--- Apply a resolution code ---*/
 function ApplyResolutionSetting(string code, string flag)
 {
-	`log("ApplyResolutionSetting" @code @flag);
+	`log("DVM > ApplyResolutionSetting" @code @flag);
 	switch (code)
 	{
 		case ("720p"):
@@ -184,7 +182,7 @@ function SetupWeaponWidget(string WidgetName, string LoadClass)
 	// Vars
 	local string ClassToLoad;
 	local class<DVWeapon> wpClass;
-	ClassToLoad = PC.ModuleName $ "." $ LoadClass;
+	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
 	wpClass = class<DVWeapon>(DynamicLoadObject(ClassToLoad, class'Class', false));
 	
 	// Data

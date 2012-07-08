@@ -87,7 +87,6 @@ function Init(vector Direction)
 	SetRotation(rotator(Direction));
 	Velocity = Speed * Direction;
 	Acceleration = AccelRate * Normal(Velocity);
-	SetPhysics(PHYS_Falling);
 }
 
 

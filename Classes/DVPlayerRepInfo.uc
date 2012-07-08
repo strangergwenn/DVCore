@@ -53,7 +53,7 @@ reliable server simulated function ScorePoint (bool bTeamKill)
 	{
 		DVTeamInfo(Team).AddKill(bTeamKill);
 	}
-	`log("ScorePoint for " $ self);
+	`log("DVPR > ScorePoint for " $ self);
 	bForceNetUpdate = true;
 	
 	if (bTeamKill)
