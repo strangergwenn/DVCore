@@ -48,6 +48,7 @@ var (CoreUI) localized string			lWeapon4;
 var (CoreUI) localized string			lMultiplayerGames;
 var (CoreUI) localized string			lLocalGames;
 var (CoreUI) localized string			lServerList;
+var (CoreUI) localized string			lServerProtected;
 var (CoreUI) localized string			lActions;
 var (CoreUI) localized string			lPlayers;
 var (CoreUI) localized string			lConnect;
@@ -111,6 +112,7 @@ var array<string>						IPList;
 
 var EPopupState							PopupState;
 
+var bool 								bIsPasswordProtected;
 var bool 								bMapsInitialized;
 var bool								bIsKeyEditing;
 
@@ -178,19 +180,11 @@ function string FormatServerInfo(string ServerName, string Level, string Game, i
 	ServerName = Caps(ServerName);
 	
 	if (bIsPassword)
-		ServerName @= " - Password protected";
+		ServerName @= "-" @lServerProtected;
 	
 	Game = GetRightMost(Game);
 	Level = Caps(Repl(Level, ".udk", "", false));
 	return (ServerName $ "\n" $Players $"/" $MaxPlayers @ lPlayers $"," @Game $"\n" $Level);
-}
-
-
-/*--- Server selection ---*/
-function OnServerItemClick(GFxClikWidget.EventData ev)
-{
-	ServerURL = IPList[ServerList.Find(GetListItemClicked(ev))];
-	ServerConnect.SetBool("enabled", true);
 }
 
 
@@ -229,9 +223,22 @@ function UpdateMapList()
 }
 
 
+/*--- Server selection ---*/
+function OnServerItemClick(GFxClikWidget.EventData ev)
+{
+	local string ServerString;
+	ServerString = GetListItemClicked(ev);
+	
+	ServerURL = IPList[ServerList.Find(ServerString)];
+	bIsPasswordProtected = (InStr(ServerString, lServerProtected) != -1);
+	ServerConnect.SetBool("enabled", true);
+}
+
+
 /*--- Map click ---*/
 function OnMapItemClick(GFxClikWidget.EventData ev)
 {
+	bIsPasswordProtected = false;
 	ServerURL = GetListItemClicked(ev);
 	ServerConnect.SetBool("enabled", true);
 }
@@ -241,30 +248,15 @@ function OnMapItemClick(GFxClikWidget.EventData ev)
 function OpenServer(GFxClikWidget.EventData evtd)
 {
 	PlayUISound(ClickSound);
-	OpenPasswordDialog();
-}
-
-
-/*--- Display the server connection state ---*/
-function SetConnectState(optional int Level)
-{
-	local string Message;
 	
-	PlayerConnect.SetBool("enabled", (Level == 0));
-	switch (Level)
+	if (bIsPasswordProtected)
 	{
-		case (0):
-			Message = lConnect;
-			break; 
-		case (1):
-			Message = lConnecting;
-			break; 
-		case (2):
-			Message = lConnected;
-			break; 
+		OpenPasswordDialog();
 	}
-	StoredLevel = Level;
-	PlayerConnect.SetString("label", Message);
+	else
+	{
+		ConsoleCommand("open " $ ServerURL $ "?game=");
+	}
 }
 
 
@@ -396,6 +388,29 @@ function OnPButton2(GFxClikWidget.EventData evtd)
 		HidePopup(true);
 		PC.CancelTimeout();
 	}
+}
+
+
+/*--- Display the server connection state ---*/
+function SetConnectState(optional int Level)
+{
+	local string Message;
+	
+	PlayerConnect.SetBool("enabled", (Level == 0));
+	switch (Level)
+	{
+		case (0):
+			Message = lConnect;
+			break; 
+		case (1):
+			Message = lConnecting;
+			break; 
+		case (2):
+			Message = lConnected;
+			break; 
+	}
+	StoredLevel = Level;
+	PlayerConnect.SetString("label", Message);
 }
 
 
