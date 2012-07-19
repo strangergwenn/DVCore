@@ -39,6 +39,8 @@ var GFxObject							PopupWindow;
 
 var bool								bIsPopupVisible;
 
+var string								ModuleName;
+
 
 /*----------------------------------------------------------
 	Core methods
@@ -182,7 +184,11 @@ function SetupWeaponWidget(string WidgetName, string LoadClass)
 	// Vars
 	local string ClassToLoad;
 	local class<DVWeapon> wpClass;
-	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
+	if (PC.Pawn != None)
+	{
+		ModuleName = DVPawn(PC.Pawn).ModuleName;
+	}
+	ClassToLoad = ModuleName $ "." $ LoadClass;
 	wpClass = class<DVWeapon>(DynamicLoadObject(ClassToLoad, class'Class', false));
 	
 	// Data

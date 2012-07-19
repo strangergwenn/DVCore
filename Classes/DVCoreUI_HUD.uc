@@ -212,7 +212,11 @@ function SetupAddonWidget(string WidgetName, string LoadClass)
 	// Vars
 	local string ClassToLoad;
 	local class<DVWeaponAddon> wpClass;
-	ClassToLoad = DVPawn(PC.Pawn).ModuleName $ "." $ LoadClass;
+	if (PC.Pawn != None)
+	{
+		ModuleName = DVPawn(PC.Pawn).ModuleName;
+	}
+	ClassToLoad = ModuleName $ "." $ LoadClass;
 	wpClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
 	
 	// Data
