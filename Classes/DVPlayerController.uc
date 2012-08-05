@@ -35,6 +35,15 @@ var (DVPC) localized string			lKilled;
 var (DVPC) localized string			lLost;
 var (DVPC) localized string			lWon;
 
+var (DVPC) localized string			lRedFlagTaken;
+var (DVPC) localized string			lBlueFlagTaken;
+var (DVPC) localized string			lRedFlagDropped;
+var (DVPC) localized string			lBlueFlagDropped;
+var (DVPC) localized string			lRedFlagReturned;
+var (DVPC) localized string			lBlueFlagReturned;
+var (DVPC) localized string			lRedFlagCaptured;
+var (DVPC) localized string			lBlueFlagCaptured;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -468,49 +477,6 @@ reliable server simulated function NotifyHit(bool bWasHeadshot)
 }
 
 
-/*--- Notify a new player ---*/ 
-unreliable server simulated function ServerNotifyNewPlayer(string PlayerName)
-{
-	NotifyNewPlayer(PlayerName);
-}
-unreliable client simulated function NotifyNewPlayer(string PlayerName)
-{
-	ShowGenericMessage("" $PlayerName @ lJoinedGame);
-}
-
-
-/*--- Show the killer message ---*/ 
-unreliable client simulated function ShowKilledBy(string KillerName)
-{
-	RegisterDeath();
-	ShowGenericMessage(lKilledBy @ KillerName $ " !");
-}
-
-
-/*--- Show the killed message ---*/ 
-unreliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
-{
-	RegisterKill(bTeamKill);
-	ShowGenericMessage(lKilled @ KilledName $ " !");
-}
-
-
-/*--- Show the killer message ---*/ 
-unreliable client simulated function ShowEmptyAmmo()
-{
-	ShowGenericMessage(lEmptyWeapon);
-}
-
-
-/*--- Show a generic message ---*/ 
-unreliable client simulated function ShowGenericMessage(string text)
-{
-	if (WorldInfo.NetMode == NM_DedicatedServer || myHUD == None)
-		return;
-	DVHUD(myHUD).GameplayMessage(text);
-}
-
-
 /*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound(bool bWasHeadshot)
 {
@@ -783,6 +749,76 @@ reliable server function ServerSuicide()
 	{
 		Pawn.Suicide();
 	}
+}
+
+
+/*----------------------------------------------------------
+	Notifications
+----------------------------------------------------------*/
+
+/*--- Server flag state event ---*/
+reliable server function ServerNotifyFlagState(int FlagState, byte TeamNumber)
+{
+	NotifyFlagState(FlagState, TeamNumber);
+}
+
+/*--- Client flag status - 0 : taken, 1 : dropped, 2 : returned, 3 : captured ---*/
+reliable client simulated function NotifyFlagState(int FlagState, byte TeamNumber)
+{	
+	switch (FlagState)
+	{
+		case 0:
+			ShowGenericMessage((TeamNumber == 0) ? lRedFlagTaken : lBlueFlagTaken);
+		case 1:
+			ShowGenericMessage((TeamNumber == 0) ? lRedFlagDropped : lBlueFlagDropped);
+		case 2:
+			ShowGenericMessage((TeamNumber == 0) ? lRedFlagReturned : lBlueFlagReturned);
+		case 3:
+			ShowGenericMessage((TeamNumber == 0) ? lRedFlagCaptured : lBlueFlagCaptured);
+	}
+}
+
+
+/*--- Notify a new player ---*/ 
+reliable server function ServerNotifyNewPlayer(string PlayerName)
+{
+	NotifyNewPlayer(PlayerName);
+}
+reliable client simulated function NotifyNewPlayer(string PlayerName)
+{
+	ShowGenericMessage("" $PlayerName @ lJoinedGame);
+}
+
+
+/*--- Show the killer message ---*/ 
+unreliable client simulated function ShowKilledBy(string KillerName)
+{
+	RegisterDeath();
+	ShowGenericMessage(lKilledBy @ KillerName $ " !");
+}
+
+
+/*--- Show the killed message ---*/ 
+unreliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
+{
+	RegisterKill(bTeamKill);
+	ShowGenericMessage(lKilled @ KilledName $ " !");
+}
+
+
+/*--- Show the killer message ---*/ 
+unreliable client simulated function ShowEmptyAmmo()
+{
+	ShowGenericMessage(lEmptyWeapon);
+}
+
+
+/*--- Show a generic message ---*/ 
+unreliable client simulated function ShowGenericMessage(string text)
+{
+	if (WorldInfo.NetMode == NM_DedicatedServer || myHUD == None)
+		return;
+	DVHUD(myHUD).GameplayMessage(text);
 }
 
 

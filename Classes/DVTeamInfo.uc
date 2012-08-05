@@ -26,11 +26,11 @@ reliable server simulated function int GetScore()
 	return Score;
 }
 
-reliable server simulated function AddKill(bool bTeamKill)
+reliable server simulated function AddKill(bool bTeamKill, int ScoreAdded)
 {
 	`log("DVTI > AddKill " $ self);
-	if (!bTeamKill)
-		Score += 1;
+	if (!bTeamKill && ScoreAdded > 0)
+		Score += ScoreAdded;
 }
 
 

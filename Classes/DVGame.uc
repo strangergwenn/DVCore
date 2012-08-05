@@ -20,7 +20,8 @@ var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
-var (DVGame) const float				SpawnProtectTime;
+var (DVGame) const int 					PointsForKill;
+var (DVGame) const float				SpawnProtectTime;//TODO
 
 
 /*----------------------------------------------------------
@@ -198,7 +199,7 @@ function ScoreKill(Controller Killer, Controller Other)
 		// Kill indication to player
 		if (OtherPRI != KillerPRI)
 		{
-			KillerPRI.ScorePoint(bIsTeamKill);
+			KillerPRI.ScorePoint(bIsTeamKill, PointsForKill);
 		}
 		DVPlayerController(Other).ShowKilledBy(KillerPRI.PlayerName);
 		`log("DVG > " $Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
