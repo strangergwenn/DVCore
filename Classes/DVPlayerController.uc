@@ -35,15 +35,6 @@ var (DVPC) localized string			lKilled;
 var (DVPC) localized string			lLost;
 var (DVPC) localized string			lWon;
 
-var (DVPC) localized string			lRedFlagTaken;
-var (DVPC) localized string			lBlueFlagTaken;
-var (DVPC) localized string			lRedFlagDropped;
-var (DVPC) localized string			lBlueFlagDropped;
-var (DVPC) localized string			lRedFlagReturned;
-var (DVPC) localized string			lBlueFlagReturned;
-var (DVPC) localized string			lRedFlagCaptured;
-var (DVPC) localized string			lBlueFlagCaptured;
-
 
 /*----------------------------------------------------------
 	Private attributes
@@ -755,29 +746,6 @@ reliable server function ServerSuicide()
 /*----------------------------------------------------------
 	Notifications
 ----------------------------------------------------------*/
-
-/*--- Server flag state event ---*/
-reliable server function ServerNotifyFlagState(int FlagState, byte TeamNumber)
-{
-	NotifyFlagState(FlagState, TeamNumber);
-}
-
-/*--- Client flag status - 0 : taken, 1 : dropped, 2 : returned, 3 : captured ---*/
-reliable client simulated function NotifyFlagState(int FlagState, byte TeamNumber)
-{	
-	switch (FlagState)
-	{
-		case 0:
-			ShowGenericMessage((TeamNumber == 0) ? lRedFlagTaken : lBlueFlagTaken);
-		case 1:
-			ShowGenericMessage((TeamNumber == 0) ? lRedFlagDropped : lBlueFlagDropped);
-		case 2:
-			ShowGenericMessage((TeamNumber == 0) ? lRedFlagReturned : lBlueFlagReturned);
-		case 3:
-			ShowGenericMessage((TeamNumber == 0) ? lRedFlagCaptured : lBlueFlagCaptured);
-	}
-}
-
 
 /*--- Notify a new player ---*/ 
 reliable server function ServerNotifyNewPlayer(string PlayerName)

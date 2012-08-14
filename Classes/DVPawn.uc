@@ -32,6 +32,7 @@ var (DVPawn) const float			DeathFlickerFrequency;
 var (DVPawn) const LinearColor		OffLight;
 
 var (DVPawn) const SoundCue			FootStepSound;
+var (DVPawn) const SoundCue			JumpSound;
 var (DVPawn) const SoundCue			HitSound;
 
 var (DVPawn) const ParticleSystem	HitPSCTemplate;
@@ -429,6 +430,7 @@ event Landed(vector HitNormal, Actor FloorActor)
 	super.Landed(HitNormal, FloorActor);
 	bJumping = false;
 	ServerLogAction("LAND");
+	PlaySound(JumpSound, false, true, false, Location);
 }
 
 
