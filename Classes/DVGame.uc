@@ -163,6 +163,8 @@ function GameEnded(byte WinnerIndex)
 		PC.SignalEndGame(bIsWinner);
 	}
 	
+	ServerUploadGame();
+	
 	ClearTimer('ScoreUpdated');
 	SetTimer(RestartTimer, false, 'RestartGame');
 }
@@ -367,6 +369,34 @@ function SendServerData()
 		GetNumPlayers(),
 		MaxPlayers
 	);
+}
+
+
+/*--- Upload game statistics : secured version ---*/
+reliable server simulated function ServerUploadGame()
+{
+	local DVUserStats LStats;
+	local DVPlayerController P;
+	
+	// Secured code
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+		return;
+	
+	// Get all player controllers
+	foreach AllActors(class'DVPlayerController', P)
+	{
+		LStats = P.GetClientStats();
+		ServerLink.SaveGame(
+			LStats.Kills,
+			LStats.Deaths,
+			LStats.TeamKills,
+			LStats.Rank,
+			LStats.ShotsFired,
+			LStats.WeaponScores,
+			P.GetCurrentID()
+		);
+		`log("DVPC > Secured uploading sent for "$P);
+	}
 }
 
 

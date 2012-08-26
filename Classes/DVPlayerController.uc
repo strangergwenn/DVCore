@@ -192,31 +192,10 @@ reliable client simulated function Connect(string user, string passwd)
 }
 
 
-/*--- Upload game statistics ---*/
-reliable client simulated function UploadGame()
+/*--- Return a copy of the user statistics ---*/
+reliable client simulated function DVUserStats GetClientStats()
 {
-	// Checking data
-	`log("DVPC > Uploading game...");
-	
-	// Stats upload
-	if (LocalStats != None && LocalStats.bWasUploaded == false)
-	{
-		MasterServerLink.SaveGame(
-			LocalStats.Kills,
-			LocalStats.Deaths,
-			LocalStats.TeamKills,
-			LocalStats.Rank,
-			LocalStats.ShotsFired,
-			LocalStats.WeaponScores
-		);
-		LocalStats.SetBoolValue("bWasUploaded", true);
-		LocalStats.SaveConfig();
-		`log("DVPC > Uploading sent");
-	}
-	
-	// Will be tried again on menu
-	else
-		`log("DVPC > Uploading aborted");
+	return LocalStats;
 }
 
 
@@ -805,6 +784,13 @@ reliable client simulated function SaveIDs(string User, string Pass)
 }
 
 
+/*--- Get the player ID ---*/
+reliable client simulated function string GetCurrentID()
+{
+	return MasterServerLink.CurrentID;
+}
+
+
 /*--- Store kill in DB ---*/
 reliable client simulated function RegisterDeath()
 {
@@ -869,10 +855,8 @@ reliable client simulated function SaveGameStatistics(bool bHasWon, optional boo
 	
 	`log("DVPC > SaveGameStatistics");
 	LocalStats.SetBoolValue("bHasLeft", bLeaving);
-	LocalStats.SetBoolValue("bWasUploaded", false);
 	LocalStats.SetIntValue("Rank", GetLocalRank());
 	LocalStats.SaveConfig();
-	UploadGame();
 }
 
 

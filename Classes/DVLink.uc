@@ -19,6 +19,8 @@ var (DVLink) const float			ServerListUpdateFrequency;
 
 var (DVLink) const string 			MasterServerIP;
 
+var (DVLink) string					CurrentID;
+
 var (DVLink) localized string 		lOK;
 var (DVLink) localized string 		lNOK;
 
@@ -29,8 +31,6 @@ var (DVLink) localized string 		lNOK;
 
 var bool							bIsOpened;
 var bool							bIsConnected;
-
-var int								CurrentID;
 
 var string							LastCommandSent;
 
@@ -50,7 +50,9 @@ reliable client simulated function InitLink(DVPlayerController LinkedController)
 }
 
 
-/*--- Connect to server using player IDs ---*/
+/*--- Connect to server using player IDs
+	CONNECT,Username,Password
+---*/
 reliable client simulated function ConnectToMaster(string Username, string Password)
 {
 	local array<string> Params;
@@ -58,12 +60,13 @@ reliable client simulated function ConnectToMaster(string Username, string Passw
 	`log("DVLINK > ConnectToMaster");
 	Params.AddItem(Username);
 	Params.AddItem(Password);
-	Params.AddItem("0");
 	SendServerCommand("CONNECT", Params, false);
 }
 
 
-/*--- Register at the master server : player version ---*/
+/*--- Register at the master server : player version 
+	REG_USER,Username,Email,Password
+---*/
 reliable client simulated function RegisterUser(string Username, string Email, string Password)
 {
 	local array<string> Params;
@@ -76,28 +79,31 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 }
 
 
-/*--- Register at the master server : game server version ---*/
-reliable client simulated function RegisterServer(string Username, string Email, string Password)
+/*--- Register at the master server : game server version
+	REG_SERVER,ServerName,Email,bUsePassword
+---*/
+reliable client simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
 {
 	local array<string> Params;
 	
-	`log("DVLINK > RegisterServer");
-	Params.AddItem(Username);
+	`log("DVLINK > RegisterServer" @ServerName);
+	Params.AddItem(ServerName);
 	Params.AddItem(Email);
-	Params.AddItem(Password);
+	Params.AddItem(bUsePassword ? "1":"0");
 	SendServerCommand("REG_SERVER", Params, false);
 }
 
 
-/*--- Server heartbeat ---*/
+/*--- Server heartbeat
+	HEARTBEAT,ServerID,MapName,GameName,PlayerCount,PlayerMax
+---*/
 reliable server simulated function Heartbeat(string MapName, string GameName, int PlayerCount, int PlayerMax)
 {
 	local array<string> Params;
 	
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
-		`log("DVLINK > Heartbeat");
-		Params.AddItem(""$CurrentID);
+		Params.AddItem(CurrentID);
 		Params.AddItem(MapName);
 		Params.AddItem(GameName);
 		Params.AddItem(""$PlayerCount);
@@ -107,7 +113,9 @@ reliable server simulated function Heartbeat(string MapName, string GameName, in
 }
 
 
-/*--- Get servers ---*/
+/*--- Get servers
+	GET_SERVERS[,GameName[,MapName]]
+---*/
 reliable client simulated function GetServers(optional string GameName, optional string MapName)
 {
 	local array<string> Params;
@@ -121,7 +129,10 @@ reliable client simulated function GetServers(optional string GameName, optional
 }
 
 
-/*--- Get the best players ---*/
+/*--- Get the best players
+	TOP_PLAYERS,PlayerCount
+	LOC_PLAYERS,PlayerCount,LocalOffset
+---*/
 reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffset)
 {
 	local array<string> Params;
@@ -135,26 +146,34 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 }
 
 
-/*--- Save the current game statistics ---*/
-reliable client simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores)
+/*--- Save the current game statistics : the command is sent by the server for each client
+	SAVE_GAME,ServerID,ClientID,kills,deaths,teamkills,rank,shots
+---*/
+reliable client simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores, string clientID)
 {
 	local array<string> Params;
 	
-	`log("DVLINK > SaveGame");
-	Params.AddItem(""$CurrentID);
+	// Server + client ID
+	Params.AddItem(CurrentID);
+	Params.AddItem(clientID);
+	
+	// Data
 	Params.AddItem(""$kills);
 	Params.AddItem(""$deaths);
 	Params.AddItem(""$teamkills);
 	Params.AddItem(""$rank);
 	Params.AddItem(""$shots);
-	Params.AddItem("0");
-	SendServerCommand("SAVE_GAME", Params, true);
 	
+	// Saving
+	`log("DVLINK > SaveGame");
+	SendServerCommand("SAVE_GAME", Params, true);
 	SaveWeaponsStats(WeaponScores);
 }
 
 
-/*--- Save the current game's weapon statistics ---*/
+/*--- Save the current game's weapon statistics
+	SAVE_WGAME,ClientID,{8*WeaponScores}
+---*/
 reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
 {
 	local array<string> Params;
@@ -170,7 +189,10 @@ reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
 }
 
 
-/*--- Get all statistics ---*/
+/*--- Get all statistics
+	GET_GSTATS,ClientID
+	GET_WSTATS,ClientID
+---*/
 reliable client simulated function GetStats()
 {
 	local array<string> Params;
@@ -206,7 +228,7 @@ reliable client simulated function SendServerCommand(string Command, array<strin
 	}
 	
 	// Not yet connected
-	else if (CurrentID == 0 && bRequireNet)
+	else if (CurrentID == "0" && bRequireNet)
 	{
 		`log("DVLINK > Cannot send commands while disconnected");
 		return;
@@ -223,7 +245,7 @@ reliable client simulated function SendServerCommand(string Command, array<strin
 			Command $= ParamsString;
 		}
 		
-		`log("DVLINK > Sending command " $ Command);
+		`log("DVLINK >>" $ Command $"<<");
 		AbortTimeout();
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		SendText(Command $"\n");
@@ -318,7 +340,7 @@ event Opened()
 	else
 	{
 		bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
-		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", bUsePassword ? "1":"0");
+		RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", bUsePassword);
 	}
 }
 
@@ -366,8 +388,8 @@ event ReceivedLine(string Line)
 		// Connection speficic case
 		if ((IsEqual(LastCommandSent, "CONNECT") || IsEqual(LastCommandSent, "REG_SERVER")) && Command[1] != "0")
 		{
-			CurrentID = int(Command[1]);
 			bIsConnected = true;
+			CurrentID =  Left(Command[1], 20);
 			`log("DVLINK > Connection validated for ID" @CurrentID);
 		}
 		
@@ -384,6 +406,7 @@ event ReceivedLine(string Line)
 	// Server list
 	else if (IsEqual(Command[0], "SERVER") && PC.myHUD != None)
 	{
+		//SERVER,ServerName,Level,IP,Game,Players,MaxPlayers,bIsPassword
 		DVHUD_Menu(PC.myHUD).AddServerInfo(
 			Command[1],
 			Command[2],
@@ -391,7 +414,7 @@ event ReceivedLine(string Line)
 			Command[4], 
 			int(Command[5]),
 			int(Command[6]),
-			Command[7] != "0"
+			Left(Command[7],1) != "0"
 		);
 	}
 	
@@ -421,7 +444,7 @@ defaultproperties
 	bIsOpened=false
 	bIsConnected=false
 	
-	CurrentID=0
+	CurrentID="0"
 	TimeoutLength=5.0
 	ServerListUpdateFrequency=30.0
 	LinkMode=MODE_Text
