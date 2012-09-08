@@ -439,6 +439,7 @@ defaultproperties
 	// Settings
 	bTeamGame=true
     bPauseable=false
+    bAdminCanPause=false
 	EndGameTick=0.5
 	HeartbeatTick=10.0
 	WeaponListLength=8
