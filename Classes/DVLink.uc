@@ -446,7 +446,7 @@ defaultproperties
 	
 	CurrentID="0"
 	TimeoutLength=5.0
-	ServerListUpdateFrequency=30.0
+	ServerListUpdateFrequency=5.0
 	LinkMode=MODE_Text
 	ReceiveMode=RMODE_Event
 	
