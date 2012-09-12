@@ -47,6 +47,8 @@ var (CoreUI) localized string			lWeapon3;
 var (CoreUI) localized string			lWeapon4;
 var (CoreUI) localized string			lMultiplayerGames;
 var (CoreUI) localized string			lLocalGames;
+var (CoreUI) localized string			lLaboratory;
+var (CoreUI) localized string			lPlayerCustom;
 var (CoreUI) localized string			lServerList;
 var (CoreUI) localized string			lServerProtected;
 var (CoreUI) localized string			lActions;
