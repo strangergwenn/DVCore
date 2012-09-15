@@ -780,7 +780,7 @@ defaultproperties
 	bCaptureInput=true
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
 	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
-	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk")
+	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk","GBA_Activate")
 	
 	// Bindings
 	WidgetBindings(3)={(WidgetName="MapList",WidgetClass=class'GFxClikWidget')}

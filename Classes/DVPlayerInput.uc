@@ -92,7 +92,7 @@ simulated exec function string GetKeyBinding(string Command)
 {
     local byte i;
 
-	for (i = Bindings.Length - 1; i >= 0; i --)
+	for (i = 0; i < Bindings.Length; i++)
 	{
 		if (Bindings[i].Command == Command)
 			return string(Bindings[i].Name);
@@ -114,10 +114,12 @@ simulated exec function SetKeyBinding(name BindName, string Command)
 		if (Bindings[i].Name == BindName)
 		{
 			Bindings[i].Command = Command;
+			SaveConfig();
 		}
 		else if (Bindings[i].Command == Command)
 		{
 			Bindings[i].Name = BindName;
+			SaveConfig();
 		}
 	}
 	SaveConfig();

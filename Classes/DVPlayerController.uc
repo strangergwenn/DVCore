@@ -16,9 +16,10 @@ var (DVPC) const SoundCue			HitSound;
 
 var (DVPC) const float 				ScoreLength;
 
+var (DVPC) const int 				TickDivisor;
 var (DVPC) const int 				LeaderBoardLength;
 var (DVPC) const int 				LocalLeaderBoardOffset;
-var (DVPC) const int 				TickDivisor;
+var (DVPC) const int				ObjectCheckDistance;
 
 
 /*----------------------------------------------------------
@@ -44,6 +45,7 @@ var DVUserStats						LocalStats;
 var DVUserStats						GlobalStats;
 
 var DVConfigBench					Bench;
+var Actor							TargetObject;
 
 var class<DVWeapon> 		 		WeaponList[8];
 var class<DVWeapon> 				UserChoiceWeapon;
@@ -291,6 +293,25 @@ exec function Use()
 }
 
 
+/*--- Object activation ---*/
+exec function Activate()
+{
+	// Init
+	if (IsChatLocked())
+		return;
+	`log("DVPC > Activate" @TargetObject);
+	
+	// Activate
+	if (TargetObject != None)
+	{
+		if (TargetObject.IsA('DVButton'))
+		{
+			DVButton(TargetObject).Activate();
+		}
+	}
+}
+
+
 /*--- Fire started ---*/
 exec function StartFire(optional byte FireModeNum = 0)
 {
@@ -334,15 +355,17 @@ exec function TeamTalk()
 /*--- Tick tick tick ---*/
 event PlayerTick(float DeltaTime)
 {
+	// Data
 	local vector StartTrace, EndTrace, HitLocation, HitNormal;
+	local vector X, Y, Z;
 	local rotator TraceDir;
 	local DVPawn P;
 	local Actor Target;
-	
 	FrameCount += 1;
+	
 	if (Pawn != None && Pawn.Weapon != None && FrameCount % TickDivisor == 0)
 	{
-		// Data
+		// Input lock : freeze movement
 		P = DVPawn(Pawn);
 		P.Mesh.GetSocketWorldLocationAndRotation(P.EyeSocket, StartTrace, TraceDir);
 		EndTrace = DVWeapon(P.Weapon).GetEffectLocation();
@@ -351,6 +374,17 @@ event PlayerTick(float DeltaTime)
 		Target = None;
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
 		bShouldStop = (Target != None);
+		
+		// Object check
+		P.Mesh.GetSocketWorldLocationAndRotation(P.EyeSocket, StartTrace, TraceDir);
+		TraceDir.Pitch -= 16384;
+		GetAxes(TraceDir, X, Y, Z);
+		EndTrace = StartTrace + (ObjectCheckDistance * X + ObjectCheckDistance * Y + ObjectCheckDistance * Z);
+		TargetObject = Trace(
+			HitLocation, HitNormal,
+			EndTrace, StartTrace,
+			true,,, TRACEFLAG_Blocking
+		);
 	}
 	super.PlayerTick(DeltaTime);
 }
@@ -941,6 +975,7 @@ defaultproperties
 	TickDivisor=5
 	ScoreLength=4.0
 	LeaderBoardLength=10
+	ObjectCheckDistance=256
 	LocalLeaderBoardOffset=4
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
