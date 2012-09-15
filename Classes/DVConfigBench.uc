@@ -22,6 +22,8 @@ var (Bench) const float 		DetectionDistance;
 var (Bench) const float 		DetectionPeriod;
 var (Bench) const float 		WeaponScale;
 
+var (Bench) const bool			bAutoLaunch;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -52,7 +54,7 @@ simulated function Tick(float DeltaTime)
 	local DVPawn P;
 	CurrentPeriod -= DeltaTime;
 	
-	if (CurrentPeriod <= 0)
+	if (CurrentPeriod <= 0 && bAutoLaunch)
 	{
 		CurrentPeriod = DetectionPeriod;
 		foreach AllActors(class'DVPawn', P)
@@ -74,6 +76,7 @@ simulated function bool LaunchConfig(DVPawn P)
 	local vector WPos;
 	local rotator WRot;
 	PC = DVPlayerController(P.Controller);
+	`log("DVCB > Confugirung" @self);
 	
 	// Init
 	if (PC != None)

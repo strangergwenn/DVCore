@@ -16,10 +16,24 @@ class DVPlayerInput extends UDKPlayerInput within DVPlayerController
 var float 							LastDuckTime;
 var bool  							bHoldDuck;
 
+var IntPoint						MousePosition;
+
 
 /*----------------------------------------------------------
 	Public methods
 ----------------------------------------------------------*/
+
+/*--- Mouse input ---*/
+event PlayerInput(float DeltaTime)
+{
+	if (myHUD != None)
+	{
+		MousePosition.X = Clamp(MousePosition.X + aMouseX, 0, myHUD.SizeX);
+		MousePosition.Y = Clamp(MousePosition.Y - aMouseY, 0, myHUD.SizeY);
+	}
+	super.PlayerInput(DeltaTime);
+}
+
 
 /*--- Duck duck duck ---*/
 simulated exec function Duck()

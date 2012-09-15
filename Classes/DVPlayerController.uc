@@ -308,6 +308,10 @@ exec function Activate()
 		{
 			DVButton(TargetObject).Activate();
 		}
+		if (TargetObject.IsA('DVConfigBench'))
+		{
+			DVConfigBench(TargetObject).LaunchConfig(DVPawn(Pawn));
+		}
 	}
 }
 
@@ -376,14 +380,16 @@ event PlayerTick(float DeltaTime)
 		bShouldStop = (Target != None);
 		
 		// Object check
-		P.Mesh.GetSocketWorldLocationAndRotation(P.EyeSocket, StartTrace, TraceDir);
-		TraceDir.Pitch -= 16384;
+		GetPlayerViewPoint(StartTrace, TraceDir);
+		StartTrace.Z -=  150;
+		TraceDir.Yaw -= 8192;
+		TraceDir.Pitch -= 1000;
 		GetAxes(TraceDir, X, Y, Z);
 		EndTrace = StartTrace + (ObjectCheckDistance * X + ObjectCheckDistance * Y + ObjectCheckDistance * Z);
 		TargetObject = Trace(
 			HitLocation, HitNormal,
 			EndTrace, StartTrace,
-			true,,, TRACEFLAG_Blocking
+			true,,, TRACEFLAG_Bullet
 		);
 	}
 	super.PlayerTick(DeltaTime);
@@ -975,7 +981,7 @@ defaultproperties
 	TickDivisor=5
 	ScoreLength=4.0
 	LeaderBoardLength=10
-	ObjectCheckDistance=256
+	ObjectCheckDistance=1024
 	LocalLeaderBoardOffset=4
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
