@@ -967,7 +967,7 @@ defaultproperties
 	TickDivisor=5
 	ScoreLength=4.0
 	LeaderBoardLength=10
-	ObjectCheckDistance=400
+	ObjectCheckDistance=300
 	LocalLeaderBoardOffset=4
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
