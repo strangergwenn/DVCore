@@ -302,13 +302,13 @@ exec function Activate()
 	`log("DVPC > Activate" @TargetObject);
 	
 	// Activate
-	if (TargetObject != None)
+	if (TargetObject != None && VSize(TargetObject.Location - Pawn.Location) < ObjectCheckDistance)
 	{
 		if (TargetObject.IsA('DVButton'))
 		{
 			DVButton(TargetObject).Activate();
 		}
-		if (TargetObject.IsA('DVConfigBench'))
+		else if (TargetObject.IsA('DVConfigBench'))
 		{
 			DVConfigBench(TargetObject).LaunchConfig(DVPawn(Pawn));
 		}
@@ -361,7 +361,6 @@ event PlayerTick(float DeltaTime)
 {
 	// Data
 	local vector StartTrace, EndTrace, HitLocation, HitNormal;
-	local vector X, Y, Z;
 	local rotator TraceDir;
 	local DVPawn P;
 	local Actor Target;
@@ -378,19 +377,6 @@ event PlayerTick(float DeltaTime)
 		Target = None;
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
 		bShouldStop = (Target != None);
-		
-		// Object check
-		GetPlayerViewPoint(StartTrace, TraceDir);
-		StartTrace.Z -=  150;
-		TraceDir.Yaw -= 8192;
-		TraceDir.Pitch -= 1000;
-		GetAxes(TraceDir, X, Y, Z);
-		EndTrace = StartTrace + (ObjectCheckDistance * X + ObjectCheckDistance * Y + ObjectCheckDistance * Z);
-		TargetObject = Trace(
-			HitLocation, HitNormal,
-			EndTrace, StartTrace,
-			true,,, TRACEFLAG_Bullet
-		);
 	}
 	super.PlayerTick(DeltaTime);
 }
@@ -981,7 +967,7 @@ defaultproperties
 	TickDivisor=5
 	ScoreLength=4.0
 	LeaderBoardLength=10
-	ObjectCheckDistance=1024
+	ObjectCheckDistance=400
 	LocalLeaderBoardOffset=4
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'

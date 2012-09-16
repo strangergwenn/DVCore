@@ -92,6 +92,30 @@ replication
 	Various methods
 ----------------------------------------------------------*/
 
+
+/*--- Target designation --*/
+simulated function Tick(float DeltaTime)
+{
+	// Init
+	local vector Impact, SL, Unused;
+	local rotator SR;
+	FrameCount += 1;
+	
+	if (FrameCount % TickDivisor == 0)
+	{
+		// Trace
+		SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation('Mount1', SL, SR);
+		DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
+			Impact,
+			Unused,
+			SL + vector(SR) * 10000.0,
+			SL,
+			true,,, TRACEFLAG_Bullet
+		);
+	}
+}
+
+
 /* --- Attachment ---*/
 simulated function TimeWeaponEquipping()
 {
