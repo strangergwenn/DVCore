@@ -78,7 +78,6 @@ replication
 		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength, MaxScore;
 }
 
-
 /*----------------------------------------------------------
 	Events and net behaviour
 ----------------------------------------------------------*/
@@ -121,8 +120,6 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 /*--- Launch autoconnection ---*/
 simulated function AutoConnect()
 {
-	`log("DVPC > autoConnect");
-	
 	if (Len(LocalStats.UserName) > 3
 	 && Len(LocalStats.Password) > 3
 	 && MasterServerLink != None)
@@ -135,7 +132,6 @@ simulated function AutoConnect()
 /*--- Called when the connection has been established ---*/
 function SignalConnected()
 {
-	`log("DVPC > Setting name " @LocalStats.UserName);
 	SetName(LocalStats.UserName);
 	LocalStats.SaveConfig();
 }
@@ -158,16 +154,14 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	// First data : autoconnection if available
 	if (Command == "INIT" && bIsOK)
 	{
+		AutoConnect();
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
-			MasterServerLink.GetServers();
-			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 			DVHUD_Menu(myHUD).AutoConnect();
 		}
-		AutoConnect();
 	}
 	
-	// Upload & get back the stats on main menu
+	// Upload & get back the stats on main menu, store the player ID in PRI
 	else if (Command == "CONNECT" && bIsOK && myHUD != None)
 	{
 		if (myHUD.IsA('DVHUD_Menu'))
@@ -175,6 +169,11 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 			DVHUD_Menu(myHUD).SignalConnected();
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
 			MasterServerLink.GetStats();
+		}
+		else if (PlayerReplicationInfo != None)
+		{
+			DVPlayerRepInfo(PlayerReplicationInfo).SetClientId(MasterServerLink.CurrentID);
+			`log("DVPC > Logged in with ID" @MasterServerLink.CurrentID);
 		}
 	}
 }
@@ -195,9 +194,9 @@ reliable client simulated function Connect(string user, string passwd)
 
 
 /*--- Return a copy of the user statistics ---*/
-reliable client simulated function DVUserStats GetClientStats()
+reliable server simulated function DVUserStats GetClientStats()
 {
-	return LocalStats;
+	return GlobalStats;
 }
 
 
@@ -218,12 +217,12 @@ reliable client event TcpGetStats(array<string> Data)
 	if (InStr(Data[0], "GET_GSTATS") != -1)
 	{
 		`log("DVPC > Got game data");
-		GlobalStats.SetIntValue("Kills", 	int(Data[1]));
-		GlobalStats.SetIntValue("Deaths", 	int(Data[2]));
-		GlobalStats.SetIntValue("TeamKills", int(Data[3]));
-		GlobalStats.SetIntValue("Points", 	int(Data[5]));
-		GlobalStats.SetIntValue("Shots", 	int(Data[6]));
-		GlobalStats.SetIntValue("Headshots", int(Data[7]));
+		GlobalStats.SetIntValue("Kills", 		int(Data[1]));
+		GlobalStats.SetIntValue("Deaths", 		int(Data[2]));
+		GlobalStats.SetIntValue("TeamKills", 	int(Data[3]));
+		GlobalStats.SetIntValue("Points", 		int(Data[5]));
+		GlobalStats.SetIntValue("ShotsFired", 	int(Data[6]));
+		GlobalStats.SetIntValue("Headshots", 	int(Data[7]));
 	}
 	
 	// Weapon stats
@@ -388,60 +387,6 @@ function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDele
 
 
 /*----------------------------------------------------------
-	Music management
-----------------------------------------------------------*/
-
-reliable server simulated function StartMusicIfAvailable()
-{
-	if (!bMusicStarted && WorldInfo != None)
-	{
-		`log("DVPC > StartMusicIfAvailable");
-		bMusicStarted = true;
-		ClientPlaySound(GetTrackIntro());
-		SetTimer(GetIntroLength(), false, 'StartMusicLoop');
-	}
-}
-
-
-/*--- Music loop ---*/
-reliable server simulated function StartMusicLoop()
-{
-	`log("DVPC > StartMusicLoop");
-	ClearTimer('StartMusicLoop');
-	ClientPlaySound(GetTrackLoop());
-}
-
-
-/*--- Music sound if used ---*/
-unreliable client event ClientPlaySound(SoundCue ASound)
-{
-	if (LocalStats.bBackgroundMusic)
-		ClientHearSound(ASound, self, Location, false, false);
-}
-
-
-/*--- Get the music track to play here ---*/
-reliable server simulated function SoundCue GetTrackIntro()
-{
-	return DVGame(WorldInfo.Game).GetTrackIntro();
-}
-
-
-/*--- Get the music track to play here ---*/
-reliable server simulated function SoundCue GetTrackLoop()
-{
-	return DVGame(WorldInfo.Game).GetTrackLoop();
-}
-
-
-/*--- Get the music track to play here ---*/
-reliable server simulated function float GetIntroLength()
-{
-	return DVGame(WorldInfo.Game).GetIntroLength();
-}
-
-
-/*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
 
@@ -459,10 +404,15 @@ function ConfigureWeapons(DVConfigBench TheBench)
 reliable client simulated function ClientSignalHit(Controller InstigatedBy, bool bWasHeadshot)
 {
 	ServerSignalHit(InstigatedBy, bWasHeadshot);
+	if (bWasHeadshot)
+	{
+		LocalStats.SetIntValue("HeadShots" , LocalStats.HeadShots + 1);
+	}
 }
 reliable server simulated function ServerSignalHit(Controller InstigatedBy, bool bWasHeadshot)
 {
 	DVPlayerController(InstigatedBy).NotifyHit(bWasHeadshot);
+	GlobalStats.SetIntValue("HeadShots" , GlobalStats.HeadShots + 1);
 }
 
 
@@ -471,16 +421,12 @@ reliable server simulated function NotifyHit(bool bWasHeadshot)
 {
 	PlayHitSound(bWasHeadshot);
 }
-
-
-/*--- Play the hit sound ---*/ 
 unreliable client simulated function PlayHitSound(bool bWasHeadshot)
 {
 	if(LocalStats.bUseSoundOnHit)
+	{
 		PlaySound(HitSound);
-	
-	if (bWasHeadshot)
-		LocalStats.SetIntValue("HeadShots" , LocalStats.HeadShots + 1);
+	}
 }
 
 
@@ -663,7 +609,6 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 /*--- Register the weapon to use on respawn ---*/
 reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon, bool bShouldKill)
 {
-	`log("DVPC > Respawn, kill=" $bShouldKill);
 	if (Pawn != None)
 	{
 		if (bShouldKill)
@@ -802,41 +747,68 @@ unreliable client simulated function ShowGenericMessage(string text)
 /*--- Remember client ---*/
 reliable client simulated function SaveIDs(string User, string Pass)
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		return;
-	LocalStats.SetStringValue("UserName", User);
-	LocalStats.SetStringValue("PassWord", Pass);
-	LocalStats.SaveConfig();
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		LocalStats.SetStringValue("UserName", User);
+		LocalStats.SetStringValue("PassWord", Pass);
+		LocalStats.SaveConfig();
+	}
 }
 
 
 /*--- Get the player ID ---*/
-reliable client simulated function string GetCurrentID()
+reliable server simulated function string GetCurrentID()
 {
-	return MasterServerLink.CurrentID;
+	if (PlayerReplicationInfo != None)
+		return DVPlayerRepInfo(PlayerReplicationInfo).CurrentId;
+	else 
+		return "TELL_GWENN_ABOUT_THIS";
 }
 
 
 /*--- Store kill in DB ---*/
 reliable client simulated function RegisterDeath()
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		return;
-	LocalStats.SetIntValue("Deaths" , LocalStats.Deaths + 1);
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		LocalStats.SetIntValue("Deaths" , LocalStats.Deaths + 1);
+	}
 }
 
 
 /*--- Store shot in DB ---*/
+reliable server simulated function ServerRegisterShot()
+{
+	GlobalStats.SetIntValue("ShotsFired" , GlobalStats.ShotsFired + 1);
+}
 reliable client simulated function RegisterShot()
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		return;
-	LocalStats.SetIntValue("ShotsFired" , LocalStats.ShotsFired + 1);
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		LocalStats.SetIntValue("ShotsFired" , LocalStats.ShotsFired + 1);
+	}
 }
 
 
-/*--- Store kill in DB ---*/
-exec reliable client simulated function RegisterKill(optional bool bTeamKill)
+/*--- Store kill in DB : server side ---*/
+reliable server simulated function StoreKillData(bool bIsTeamKill)
+{
+	local int index;
+	index = GetCurrentWeaponIndex();
+	if (bIsTeamKill)
+	{
+		GlobalStats.SetIntValue("TeamKills" , GlobalStats.TeamKills + 1);
+	}
+	else
+	{
+		GlobalStats.SetIntValue("Kills" , GlobalStats.Kills + 1);
+		GlobalStats.SetArrayIntValue("WeaponScores", GlobalStats.WeaponScores[index] + 1, index);
+	}
+}
+
+
+/*--- Store kill in DB : client side ---*/
+reliable client simulated function RegisterKill(optional bool bTeamKill)
 {
 	local int index;
 	if (WorldInfo.NetMode == NM_DedicatedServer)
@@ -865,7 +837,6 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 	{
 		if (WeaponList[i] == DVPawn(Pawn).CurrentWeaponClass)
 		{
-			`log("DVPC > GetCurrentWeaponIndex" @i);
 			return i;
 		}
 	}
@@ -876,13 +847,13 @@ reliable client simulated function byte GetCurrentWeaponIndex()
 /*--- End of game : saving ---*/
 reliable client simulated function SaveGameStatistics(bool bHasWon, optional bool bLeaving)
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-		return;
-	
-	`log("DVPC > SaveGameStatistics");
-	LocalStats.SetBoolValue("bHasLeft", bLeaving);
-	LocalStats.SetIntValue("Rank", GetLocalRank());
-	LocalStats.SaveConfig();
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		LocalStats.SetBoolValue("bHasLeft", bLeaving);
+		LocalStats.SetBoolValue("bHasWon", bHasWon);
+		LocalStats.SetIntValue("Rank", GetLocalRank());
+		LocalStats.SaveConfig();
+	}
 }
 
 
@@ -912,7 +883,7 @@ reliable client simulated function array<DVPlayerRepInfo> GetPlayerList()
 	local array<DVPlayerRepInfo> PRList;
 	local DVPlayerRepInfo PRI;
 	
-	ForEach AllActors(class'DVPlayerRepInfo', PRI)
+	foreach AllActors(class'DVPlayerRepInfo', PRI)
 	{
 		PRList.AddItem(PRI);
 		`log("DVPC > GetPlayerList" @PRI);
@@ -933,6 +904,58 @@ simulated function int SortPlayers(DVPlayerRepInfo A, DVPlayerRepInfo B)
 simulated function array<string> GetBestPlayers(bool bIsLocal)
 {
 	return (bIsLocal) ? LeaderBoardStructure : LeaderBoardStructure2;
+}
+
+
+/*----------------------------------------------------------
+	Music management
+----------------------------------------------------------*/
+
+reliable server simulated function StartMusicIfAvailable()
+{
+	if (!bMusicStarted && WorldInfo != None)
+	{
+		bMusicStarted = true;
+		ClientPlaySound(GetTrackIntro());
+		SetTimer(GetIntroLength(), false, 'StartMusicLoop');
+	}
+}
+
+
+/*--- Music loop ---*/
+reliable server simulated function StartMusicLoop()
+{
+	ClearTimer('StartMusicLoop');
+	ClientPlaySound(GetTrackLoop());
+}
+
+
+/*--- Music sound if used ---*/
+unreliable client event ClientPlaySound(SoundCue ASound)
+{
+	if (LocalStats.bBackgroundMusic)
+		ClientHearSound(ASound, self, Location, false, false);
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackIntro()
+{
+	return DVGame(WorldInfo.Game).GetTrackIntro();
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function SoundCue GetTrackLoop()
+{
+	return DVGame(WorldInfo.Game).GetTrackLoop();
+}
+
+
+/*--- Get the music track to play here ---*/
+reliable server simulated function float GetIntroLength()
+{
+	return DVGame(WorldInfo.Game).GetIntroLength();
 }
 
 

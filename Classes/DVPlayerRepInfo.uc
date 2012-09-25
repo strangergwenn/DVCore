@@ -14,12 +14,15 @@ class DVPlayerRepInfo extends PlayerReplicationInfo;
 
 var int								DeathCount;
 var int								KillCount;
+
 var bool							bUseAddon;
+
+var repnotify string				CurrentId;
 
 replication
 {
 	if (bNetDirty)
-		DeathCount, KillCount, bUseAddon;
+		CurrentId, DeathCount, KillCount, bUseAddon;
 }
 
 
@@ -31,6 +34,7 @@ replication
 simulated event ReplicatedEvent(name VarName)
 {
 	local DVPawn DVP;
+	
 	if ( VarName == 'Team' )
 	{
 		foreach WorldInfo.AllPawns(class'DVPawn', DVP)
@@ -41,8 +45,21 @@ simulated event ReplicatedEvent(name VarName)
 			}
 		}
 	}
+	
+	if ( VarName == 'CurrentId' )
+	{
+		`log("Updated client ID" @CurrentId);
+	}
 
 	super.ReplicatedEvent(VarName);
+}
+
+
+/*--- Client ID ---*/
+reliable server simulated function SetClientId (string newId)
+{
+	CurrentId = newId;
+	`log("Updated client ID" @CurrentId);
 }
 
 

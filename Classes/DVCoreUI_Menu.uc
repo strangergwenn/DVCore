@@ -147,10 +147,20 @@ function GetServerContent()
 /*--- Add a possibly new server to the local database ---*/
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
-	if (IPList.Find(IP) < 0)
+	local int index;
+	index = IPList.Find(IP);
+	
+	if (MaxPlayers != 0)
 	{
-		ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
-		IPList.AddItem(IP);
+		if (index < 0)
+		{
+			ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
+			IPList.AddItem(IP);
+		}
+		else
+		{
+			ServerList[index] = FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword);
+		}
 	}
 }
 

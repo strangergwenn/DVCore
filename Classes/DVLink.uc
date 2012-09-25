@@ -42,7 +42,7 @@ var DVPlayerController				PC;
 ----------------------------------------------------------*/
 
 /*--- Initialization ---*/
-reliable client simulated function InitLink(DVPlayerController LinkedController)
+simulated function InitLink(DVPlayerController LinkedController)
 {
 	`log("DVLINK > InitLink");
 	PC = LinkedController;
@@ -53,7 +53,7 @@ reliable client simulated function InitLink(DVPlayerController LinkedController)
 /*--- Connect to server using player IDs
 	CONNECT,Username,Password
 ---*/
-reliable client simulated function ConnectToMaster(string Username, string Password)
+simulated function ConnectToMaster(string Username, string Password)
 {
 	local array<string> Params;
 	
@@ -82,7 +82,7 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 /*--- Register at the master server : game server version
 	REG_SERVER,ServerName,Email,bUsePassword
 ---*/
-reliable client simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
+reliable server simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
 {
 	local array<string> Params;
 	
@@ -149,11 +149,12 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 /*--- Save the current game statistics : the command is sent by the server for each client
 	SAVE_GAME,ServerID,ClientID,kills,deaths,teamkills,rank,shots
 ---*/
-reliable client simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores, string clientID)
+reliable server simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores, string clientID)
 {
 	local array<string> Params;
 	
 	// Server + client ID
+	`log("DVLINK > I am" @CurrentID @"and he is" @clientID);
 	Params.AddItem(CurrentID);
 	Params.AddItem(clientID);
 	
@@ -174,7 +175,7 @@ reliable client simulated function SaveGame(int kills, int deaths, int teamkills
 /*--- Save the current game's weapon statistics
 	SAVE_WGAME,ClientID,{8*WeaponScores}
 ---*/
-reliable client simulated function SaveWeaponsStats(array<int> WeaponScores)
+reliable server simulated function SaveWeaponsStats(array<int> WeaponScores)
 {
 	local array<string> Params;
 	local int i;
@@ -216,7 +217,7 @@ simulated function AbortTimeout()
 ----------------------------------------------------------*/
 
 /*--- Send a command to the master server ---*/
-reliable client simulated function SendServerCommand(string Command, array<string> Params, bool bRequireNet)
+simulated function SendServerCommand(string Command, array<string> Params, bool bRequireNet)
 {
 	local string ParamsString;
 	
@@ -389,7 +390,7 @@ event ReceivedLine(string Line)
 		if ((IsEqual(LastCommandSent, "CONNECT") || IsEqual(LastCommandSent, "REG_SERVER")) && Command[1] != "0")
 		{
 			bIsConnected = true;
-			CurrentID =  Left(Command[1], 20);
+			CurrentID = Left(Command[1], 20);
 			`log("DVLINK > Connection validated for ID" @CurrentID);
 		}
 		

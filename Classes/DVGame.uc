@@ -203,7 +203,12 @@ function ScoreKill(Controller Killer, Controller Other)
 		{
 			KillerPRI.ScorePoint(bIsTeamKill, PointsForKill);
 		}
+		DVPlayerController(Killer).StoreKillData(bIsTeamKill);
 		DVPlayerController(Other).ShowKilledBy(KillerPRI.PlayerName);
+		DVPlayerController(Other).GlobalStats.SetIntValue(
+			"Deaths" ,
+			DVPlayerController(Other).GlobalStats.Deaths + 1
+		);
 		`log("DVG > " $Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
 	}
 	
@@ -375,7 +380,7 @@ function SendServerData()
 /*--- Upload game statistics : secured version ---*/
 reliable server simulated function ServerUploadGame()
 {
-	local DVUserStats LStats;
+	local DVUserStats GStats;
 	local DVPlayerController P;
 	
 	// Secured code
@@ -385,16 +390,17 @@ reliable server simulated function ServerUploadGame()
 	// Get all player controllers
 	foreach AllActors(class'DVPlayerController', P)
 	{
-		LStats = P.GetClientStats();
+		GStats = P.GetClientStats();
 		ServerLink.SaveGame(
-			LStats.Kills,
-			LStats.Deaths,
-			LStats.TeamKills,
-			LStats.Rank,
-			LStats.ShotsFired,
-			LStats.WeaponScores,
+			GStats.Kills,
+			GStats.Deaths,
+			GStats.TeamKills,
+			GStats.Rank,
+			GStats.ShotsFired,
+			GStats.WeaponScores,
 			P.GetCurrentID()
 		);
+		`log("DEBUG SUG SF=" $ GStats.ShotsFired);
 		`log("DVPC > Secured uploading sent for "$P);
 	}
 }

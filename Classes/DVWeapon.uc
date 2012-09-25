@@ -459,6 +459,7 @@ simulated function InstantFire()
 	if (Role == ROLE_Authority)
 	{
 		SetFlashLocation(RealImpact.HitLocation);
+		DVPlayerController(DVPawn(Owner).Controller).ServerRegisterShot();
 	}
 }
 
