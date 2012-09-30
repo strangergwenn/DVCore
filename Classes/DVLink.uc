@@ -70,8 +70,6 @@ simulated function ConnectToMaster(string Username, string Password)
 reliable client simulated function RegisterUser(string Username, string Email, string Password)
 {
 	local array<string> Params;
-	
-	`log("DVLINK > RegisterUser");
 	Params.AddItem(Username);
 	Params.AddItem(Email);
 	Params.AddItem(Password);
@@ -85,8 +83,6 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 reliable server simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
 {
 	local array<string> Params;
-	
-	`log("DVLINK > RegisterServer" @ServerName);
 	Params.AddItem(ServerName);
 	Params.AddItem(Email);
 	Params.AddItem(bUsePassword ? "1":"0");
@@ -154,7 +150,6 @@ reliable server simulated function SaveGame(int kills, int deaths, int teamkills
 	local array<string> Params;
 	
 	// Server + client ID
-	`log("DVLINK > I am" @CurrentID @"and he is" @clientID);
 	Params.AddItem(CurrentID);
 	Params.AddItem(clientID);
 	
@@ -166,26 +161,32 @@ reliable server simulated function SaveGame(int kills, int deaths, int teamkills
 	Params.AddItem(""$shots);
 	
 	// Saving
-	`log("DVLINK > SaveGame");
+	`log("DVLINK > SaveGame for" @clientID);
 	SendServerCommand("SAVE_GAME", Params, true);
-	SaveWeaponsStats(WeaponScores);
+	SaveWeaponsStats(WeaponScores, clientID);
 }
 
 
 /*--- Save the current game's weapon statistics
 	SAVE_WGAME,ClientID,{8*WeaponScores}
 ---*/
-reliable server simulated function SaveWeaponsStats(array<int> WeaponScores)
+reliable server simulated function SaveWeaponsStats(array<int> WeaponScores, string clientID)
 {
 	local array<string> Params;
 	local int i;
 	
-	Params.AddItem(""$CurrentID);
-	`log("DVLINK > SaveWeaponsStats");
+	// Server + client ID
+	Params.AddItem(CurrentID);
+	Params.AddItem(clientID);
+	
+	// Data
 	for (i = 0; i < WeaponScores.Length; i++)
 	{
 		Params.AddItem("" $ WeaponScores[i]);
 	}
+	
+	// Saving
+	`log("DVLINK > SaveWeaponsStats for" @clientID);
 	SendServerCommand("SAVE_WGAME", Params, true);
 }
 
@@ -197,7 +198,6 @@ reliable server simulated function SaveWeaponsStats(array<int> WeaponScores)
 reliable client simulated function GetStats()
 {
 	local array<string> Params;
-	`log("DVLINK > GetStats");
 
 	Params.AddItem(""$CurrentID);
 	SendServerCommand("GET_GSTATS", Params, true);
