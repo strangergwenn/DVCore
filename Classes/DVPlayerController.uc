@@ -992,6 +992,8 @@ defaultproperties
 	LeaderBoardLength=10
 	ObjectCheckDistance=300
 	LocalLeaderBoardOffset=4
+	DesiredFOV=100.000000
+	DefaultFOV=100.000000
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
 	InputClass=class'DVPlayerInput'

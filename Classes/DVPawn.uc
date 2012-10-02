@@ -856,7 +856,7 @@ defaultproperties
 	bHasGotTeamColors=false
 	
 	// Default
-	DefaultFOV=90
+	DefaultFOV=100
 	RecoilAngle=0.0
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

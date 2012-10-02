@@ -20,6 +20,13 @@ var (DVPickup) const SoundCue			PickupSound;
 
 
 /*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
+
+var DynamicLightEnvironmentComponent LightEnvironment;
+
+
+/*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
 
@@ -67,6 +74,7 @@ function SetRespawn()
 simulated function InitializePickup()
 {
 	SetPickupMesh();
+	PickupMesh.SetLightEnvironment(LightEnvironment);
 }
 
 simulated function SetPickupMesh()
@@ -122,19 +130,21 @@ defaultproperties
 {
     // Lighting
  	Begin Object Class=DynamicLightEnvironmentComponent Name=PickupLightEnvironment
+		bEnabled=true
  	    bDynamic=true
- 	    bCastShadows=true
+ 	    bCastShadows=false
  	End Object
+  	LightEnvironment=PickupLightEnvironment
+  	Components.Add(PickupLightEnvironment)
 	
  	// Mesh
 	Begin Object Class=StaticMeshComponent Name=BaseMeshComp
 		LightEnvironment=PickupLightEnvironment
-		LightingChannels=(BSP=true,Dynamic=true,Static=true,CompositeDynamic=true)
-		bForceDirectLightMap=true
-		bCastDynamicShadow=false
 		CollideActors=false
-		bAcceptsLights=true
 		CastShadow=false
+		bCastDynamicShadow=false
+		bAcceptsLights=true
+		bForceDirectLightMap=true
 	End Object
 	PickupMesh=BaseMeshComp
 	Components.Add(BaseMeshComp)
