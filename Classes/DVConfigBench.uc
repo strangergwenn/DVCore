@@ -29,6 +29,8 @@ var (Bench) const bool			bAutoLaunch;
 	Private attributes
 ----------------------------------------------------------*/
 
+var DynamicLightEnvironmentComponent	LightEnvironment;
+
 var SkeletalMeshComponent		Mesh;
 
 var DVPlayerController			PC;
@@ -135,6 +137,7 @@ defaultProperties
 		bDynamic=true
 	End Object
 	Components.Add(MyLightEnvironment)
+	LightEnvironment=MyLightEnvironment
 	
 	// Mesh
 	Begin Object class=SkeletalMeshComponent name=Bench

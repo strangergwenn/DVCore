@@ -148,6 +148,7 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	if (Owner.IsA('DVConfigBench'))
 	{
 		MeshCpnt.AttachComponentToSocket(SkeletalMeshComponent(Mesh), SocketName);
+		Mesh.SetLightEnvironment(DVConfigBench(Owner).LightEnvironment);
 	}
 	
 	// Standard game
