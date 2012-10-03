@@ -138,7 +138,7 @@ defaultProperties
 	
 	// Mesh
 	Begin Object class=SkeletalMeshComponent name=Bench
-		Scale=0.7
+		Scale=0.9
 		BlockActors=true
 		BlockZeroExtent=true
 		BlockRigidBody=true
