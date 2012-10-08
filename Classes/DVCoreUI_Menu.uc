@@ -216,8 +216,10 @@ function UpdateMapList()
 		for (i = 0; i < ProviderList.length; i++)
 		{
 			TempMapName = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
-			if (IsInArray(TempMapName, IgnoredMaps) == -1) 
+			if (IsInArray(Caps(TempMapName), IgnoredMaps) == -1)
+			{
 				MapList.AddItem(UDKUIDataProvider_MapInfo(ProviderList[i]));
+			}
 		}
 		bMapsInitialized = true;
 	}
@@ -789,7 +791,7 @@ defaultproperties
 	// Game settings
 	bCaptureInput=true
 	MovieInfo=SwfMovie'DV_CoreUI.MainMenu'
-	IgnoredMaps=("LD","FX","AMB","ART","DefaultMap")
+	IgnoredMaps=("LD","FX","AMB","ART","FX","PROPS","LIGHTS","DECALS","ENVIRO","ENVIRONMENT","DEFAULTMAP")
 	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk","GBA_Activate")
 	
 	// Bindings
