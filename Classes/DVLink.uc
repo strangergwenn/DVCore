@@ -143,9 +143,10 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 
 
 /*--- Save the current game statistics : the command is sent by the server for each client
-	SAVE_GAME,ServerID,ClientID,kills,deaths,teamkills,rank,shots
+	SAVE_GAME,ServerID,ClientID,kills,deaths,teamkills,rank,shots,headshots
+	
 ---*/
-reliable server simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, array<int> WeaponScores, string clientID)
+reliable server simulated function SaveGame(int kills, int deaths, int teamkills, int rank, int shots, int headshots, array<int> WeaponScores, string clientID)
 {
 	local array<string> Params;
 	
@@ -159,6 +160,7 @@ reliable server simulated function SaveGame(int kills, int deaths, int teamkills
 	Params.AddItem(""$teamkills);
 	Params.AddItem(""$rank);
 	Params.AddItem(""$shots);
+	Params.AddItem(""$headshots);
 	
 	// Saving
 	`log("DVLINK > SaveGame for" @clientID);

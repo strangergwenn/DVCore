@@ -397,6 +397,7 @@ reliable server simulated function ServerUploadGame()
 			GStats.TeamKills,
 			GStats.Rank,
 			GStats.ShotsFired,
+			GStats.Headshots,
 			GStats.WeaponScores,
 			P.GetCurrentID()
 		);

@@ -665,10 +665,14 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	}
 				
 	// Kill marker
-	KM = Spawn(class'DVKillMarker', self,,,);
-	if (Role == ROLE_Authority)
+	if (len(UserName) > 0 && len(KillerName) > 0)
 	{
-		KM.SetPlayerData(UserName, KillerName, TeamLight, bWasHS);
+		KM = Spawn(class'DVKillMarker', self,,,);
+		if (Role == ROLE_Authority)
+		{
+			KM.SetPlayerData(UserName, KillerName, TeamLight, bWasHS);
+			`log("DVP > PlayDying KM" @UserName @KillerName @self);
+		}
 	}
 
 	CheckHitInfo(HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
