@@ -454,11 +454,15 @@ function OnAddonWidgetClick(GFxClikWidget.EventData ev)
 	// Vars
 	local DVWeapon wp;
 	local GFxObject button;
+	local string buttonName;
+	local int addonID;
 	
 	// Addon ID
 	wp = PC.Bench.Weapon;
 	button = ev._this.GetObject("target");
-	wp.RequestAddon(int(Right(button.GetString("name"), 1)));
+	buttonName = button.GetString("name");
+	addonID = int(Right(buttonName, len(buttonName) - len("Config")));
+	wp.RequestAddon(addonID);
 }
 
 

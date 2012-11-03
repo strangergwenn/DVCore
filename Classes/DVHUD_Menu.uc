@@ -35,6 +35,7 @@ simulated function PostBeginPlay()
 	local DVPlayerController PC;
 	super.PostBeginPlay();
 	PC = DVPlayerController(PlayerOwner);
+	PC.FOV(PC.Default.DefaultFOV);
 	
 	// Movie
 	HudMovie = new HUDClass;

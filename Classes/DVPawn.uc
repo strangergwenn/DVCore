@@ -305,6 +305,7 @@ simulated function EndZoom()
 simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out rotator out_CamRot, out float out_FOV)
 {	
 	// Locked
+	out_FOV = DefaultFOV;
 	if (Controller == None || DVPlayerController(Controller).IsCameraLocked())
 		return true;
 	
@@ -320,7 +321,6 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 	// Standard viewpoint
 	else
 	{
-		out_FOV = DefaultFOV;
 		out_CamLoc = GetPawnViewLocation();
 		
 		if (Controller != None)
