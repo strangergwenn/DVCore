@@ -27,7 +27,6 @@ var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
 var (DVWeapon) float						RecoilAngle;
 var (DVWeapon) float 						ZoomedFOV;
-var (DVWeapon) float 						KineticImpulse;
 
 var (DVWeapon) int							MaxAmmo;
 var (DVWeapon) int							TickDivisor;

@@ -98,7 +98,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (FireRateBonus != 0.0)
 		wp.FireInterval[0] /= FireRateBonus;
 	if (KineticBonus != 0.0)
-		wp.KineticImpulse *= KineticBonus;
+		wp.InstantHitMomentum[0] *= KineticBonus;
 	if (PrecisionBonus != 0.0)
 		wp.Spread[0] /= PrecisionBonus;
 		
