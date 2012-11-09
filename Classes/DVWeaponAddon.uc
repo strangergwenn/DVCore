@@ -27,6 +27,7 @@ var (Addon) float			AmmoBonus;
 var (Addon) byte			SocketID;
 
 var (Addon) bool			bUseLens;
+var (Addon) bool			bSilenced;
 
 var (Addon) DVWeapon		Weap;
 
@@ -90,6 +91,10 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (bUseLens && !wp.bHasLens)
 		wp.bHasLens = true;
 	
+	// Silencer
+	if (bSilenced && !wp.bSilenced)
+		wp.bSilenced = true;
+	
 	// Bonus
 	if (AmmoBonus != 0.0)
 		wp.MaxAmmo *= AmmoBonus;
@@ -100,7 +105,10 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (KineticBonus != 0.0)
 		wp.InstantHitMomentum[0] *= KineticBonus;
 	if (PrecisionBonus != 0.0)
+	{
 		wp.Spread[0] /= PrecisionBonus;
+		wp.RecoilAngle /= PrecisionBonus;
+	}
 		
 	
 	`log("DVWA > Mounted add-on" @self);
@@ -132,6 +140,7 @@ simulated function DetachFromWeapon(DVWeapon wp)
 	{
 		wp.ZoomOffset = wp.default.ZoomOffset;
 	}
+	wp.bSilenced = false;
 	wp.bHasLens = false;
 	
 	// Bonus
@@ -205,4 +214,5 @@ defaultproperties
 	ZoomedFOV=0.0
 	AmmoBonus=0.0
 	bUseLens=false
+	bSilenced=false
 }

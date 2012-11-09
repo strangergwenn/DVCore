@@ -14,6 +14,7 @@ class DVWeapon extends UDKWeapon
 ----------------------------------------------------------*/
 
 var (DVWeapon) const SoundCue				WeaponEmptySound;
+var (DVWeapon) const SoundCue				SilencedWeaponSound;
 var (DVWeapon) const array<SoundCue>		WeaponFireSnd;
 var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 
@@ -22,6 +23,7 @@ var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
 var (DVWeapon) vector						ZoomOffset;
 
 var (DVWeapon) bool							bHasLens;
+var (DVWeapon) bool							bSilenced;
 
 var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
@@ -539,7 +541,8 @@ simulated function ProcessInstantHit(byte FiringMode, ImpactInfo Impact, optiona
 /*--- Muzzle flash ---*/
 simulated function PlayFiringEffects()
 {
-	MuzzleFlashPSC.ActivateSystem();
+	if (!bSilenced)
+		MuzzleFlashPSC.ActivateSystem();
 }
 
 
@@ -616,7 +619,12 @@ simulated function FireParticleSystem(ParticleSystem ps, vector loc, rotator rot
 /*--- Sound ---*/
 simulated function PlayFiringSound()
 {
-	if (CurrentFireMode<WeaponFireSnd.Length)
+	if (bSilenced && SilencedWeaponSound != None)
+	{
+			MakeNoise(1.0);
+			PlaySound(SilencedWeaponSound, false, true, false, Owner.Location);
+	}
+	else if (CurrentFireMode<WeaponFireSnd.Length)
 	{
 		if ( WeaponFireSnd[CurrentFireMode] != None )
 		{
