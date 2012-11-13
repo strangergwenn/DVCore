@@ -845,6 +845,6 @@ defaultproperties
 	bHasGotTeamColors=false
 	
 	// Default
-	DefaultFOV=90
+	DefaultFOV=85
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }
