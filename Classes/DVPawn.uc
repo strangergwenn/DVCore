@@ -349,7 +349,7 @@ reliable server function SetGroundSpeed(float NewSpeed)
 
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
-{	
+{
 	// Weapon adjustment
 	if (Weapon != None)
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());

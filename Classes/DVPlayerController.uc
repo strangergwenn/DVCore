@@ -594,7 +594,9 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 	{
 		Bench.ConfiguringEnded(self);
 		Bench = None;
+		bShouldKill = true;
 		bConfiguring = false;
+		DVPawn(Pawn).HideMesh(true);
 	}
 	if (NewWeapon == None)
 	{
