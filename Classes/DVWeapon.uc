@@ -504,7 +504,8 @@ simulated function FireAmmunition()
 	// Firing
 	PlayFiringSound();
 	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
-	P.GetWeaponRecoil(RecoilAngle);
+	if (!(HasLensEffect() && bZoomed))
+		P.GunRecoilNode.bPlayRecoil = true;
 	Super.FireAmmunition();
 }
 
@@ -703,7 +704,6 @@ defaultproperties
 	FireInterval(0)=1.0
 	FireInterval(1)=1.0
 	WeaponRange=22000
-	RecoilAngle=100.0
 	Spread(0)=0.0
 	Spread(1)=0.0
 

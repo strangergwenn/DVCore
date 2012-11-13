@@ -71,8 +71,6 @@ var bool							bZoomed;
 var bool							bJumping;
 var bool							bHasGotTeamColors;
 
-var float							RecoilAngle;
-var float							RecoilLength;
 var float							FeignDeathStartTime;
 
 
@@ -208,6 +206,7 @@ simulated function WeaponClassChanged()
 			`log("DVP > Spawned " $ Weapon);
 		}
 	}
+	AimNode.SetActiveProfileByName('ShoulderRocket');
 	WeaponChanged(DVWeapon(Weapon));
 }
 
@@ -330,8 +329,6 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 		SetGroundSpeed(UnzoomedGroundSpeed);
 	}
 
-	// Recoil and end
-	out_camRot.Pitch += RecoilAngle;
 	return true;
 }
 
@@ -352,12 +349,7 @@ reliable server function SetGroundSpeed(float NewSpeed)
 
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
-{
-	if (RecoilAngle > 0.0)
-	{
-		RecoilAngle -= DeltaTime * RecoilLength;
-	}
-	
+{	
 	// Weapon adjustment
 	if (Weapon != None)
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
@@ -450,13 +442,6 @@ reliable client simulated function bool GetAddonStatus()
 reliable server simulated function SetAddonStatus(bool NewStatus)
 {
 	DVPlayerRepInfo(PlayerReplicationInfo).SetAddonState(NewStatus);
-}
-
-
-/*--- Recoil ---*/
-simulated function GetWeaponRecoil(float angle)
-{
-	RecoilAngle += angle;
 }
 
 
@@ -860,7 +845,6 @@ defaultproperties
 	bHasGotTeamColors=false
 	
 	// Default
-	DefaultFOV=100
-	RecoilAngle=0.0
+	DefaultFOV=90
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

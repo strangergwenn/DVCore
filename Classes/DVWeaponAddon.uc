@@ -107,7 +107,6 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (PrecisionBonus != 0.0)
 	{
 		wp.Spread[0] /= PrecisionBonus;
-		wp.RecoilAngle /= PrecisionBonus;
 	}
 		
 	
