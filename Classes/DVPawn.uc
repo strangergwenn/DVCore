@@ -25,6 +25,8 @@ var (DVPawn) const float 			StandardEyeHeight;
 var (DVPawn) const float			ZoomedGroundSpeed;
 var (DVPawn) const float			UnzoomedGroundSpeed;
 
+var (DVPawn) const float			MaxRunTime;
+var (DVPawn) const float			SprintDamage;
 var (DVPawn) const float			HeadshotMultiplier;
 var (DVPawn) const float			JumpDamageMultiplier;
 var (DVPawn) const float			DeathFlickerFrequency;
@@ -69,10 +71,10 @@ var string							UserName;
 var bool 							bWasHS;
 var bool							bZoomed;
 var bool							bJumping;
+var bool							bRunning;
 var bool							bHasGotTeamColors;
 
 var float							FeignDeathStartTime;
-
 
 
 /*----------------------------------------------------------
@@ -349,7 +351,7 @@ reliable server function SetGroundSpeed(float NewSpeed)
 
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
-{
+{	
 	// Weapon adjustment
 	if (Weapon != None)
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
@@ -430,6 +432,23 @@ event Landed(vector HitNormal, Actor FloorActor)
 simulated function float GetJumpingFactor()
 {
 	return (bJumping ? JumpDamageMultiplier : 1.0);
+}
+
+/*--- Running ? ---*/
+function SetRunning(bool status)
+{
+	Mesh.GlobalAnimRateScale = ((status) ? WalkingPct : 1.0);
+	bRunning = status;
+	
+	if (status)
+	{
+		TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+		SetTimer(MaxRunTime, false, 'StopRunning');
+	}
+}
+function StopRunning()
+{
+	bRunning = false;
 }
 
 
@@ -840,11 +859,14 @@ defaultproperties
 	bWasHS=false
 	bZoomed=false
 	bJumping=false
-	bCanCrouch=true
+	bCanCrouch=false
 	bLimitFallAccel=true
 	bHasGotTeamColors=false
 	
 	// Default
+	MaxRunTime=5.0
+	WalkingPct=1.5
+	SprintDamage=10.0
 	DefaultFOV=85
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

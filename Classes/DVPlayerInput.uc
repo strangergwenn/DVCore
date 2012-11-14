@@ -35,13 +35,16 @@ event PlayerInput(float DeltaTime)
 }
 
 
-/*--- Duck duck duck ---*/
+/*--- Ducking is mapped to running so this is RUNNING ---*/
 simulated exec function Duck()
 {
 	// Chatting
 	if (IsChatLocked())
 		return;
-	
+		
+	bRun = 1;
+	DVPawn(Pawn).SetRunning(true);
+	/*
 	if (bHoldDuck)
 	{
 		bHoldDuck = false;
@@ -55,17 +58,19 @@ simulated exec function Duck()
 	{
 		bHoldDuck = true;
 	}
-	LastDuckTime = WorldInfo.TimeSeconds;
+	LastDuckTime = WorldInfo.TimeSeconds;*/
 }
 
 
-/*--- Stop ducking ---*/
+/*--- Stop running (yeah, running) ---*/
 simulated exec function UnDuck()
-{
+{/*
 	if (!bHoldDuck)
 	{
 		bDuck = 0;
-	}
+	}*/
+	bRun = 0;
+	DVPawn(Pawn).SetRunning(false);
 }
 
 
