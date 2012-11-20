@@ -13,7 +13,7 @@ class DVPlayerInput extends UDKPlayerInput within DVPlayerController
 	Private attributes
 ----------------------------------------------------------*/
 
-var float 							LastDuckTime;
+var float 							LastAdvanceTime;
 var bool  							bHoldDuck;
 
 var IntPoint						MousePosition;
@@ -31,6 +31,13 @@ event PlayerInput(float DeltaTime)
 		MousePosition.X = Clamp(MousePosition.X + aMouseX, 0, myHUD.SizeX);
 		MousePosition.Y = Clamp(MousePosition.Y - aMouseY, 0, myHUD.SizeY);
 	}
+	
+	if (!bWasForward)
+	{
+		bRun = 0;
+		DVPawn(Pawn).SetRunning(false);
+	}
+		
 	super.PlayerInput(DeltaTime);
 }
 
@@ -41,34 +48,18 @@ simulated exec function Duck()
 	// Chatting
 	if (IsChatLocked())
 		return;
-		
-	bRun = 1;
-	DVPawn(Pawn).SetRunning(true);
-	/*
-	if (bHoldDuck)
-	{
-		bHoldDuck = false;
-		bDuck = 0;
-		return;
-	}
 	
-	bDuck=1;
-	
-	if (WorldInfo.TimeSeconds - LastDuckTime < DoubleClickTime)
+	if (Pawn.Health > DVPawn(Pawn).SprintDamage)
 	{
-		bHoldDuck = true;
+		bRun = 1;
+		DVPawn(Pawn).SetRunning(true);
 	}
-	LastDuckTime = WorldInfo.TimeSeconds;*/
 }
 
 
 /*--- Stop running (yeah, running) ---*/
 simulated exec function UnDuck()
-{/*
-	if (!bHoldDuck)
-	{
-		bDuck = 0;
-	}*/
+{
 	bRun = 0;
 	DVPawn(Pawn).SetRunning(false);
 }

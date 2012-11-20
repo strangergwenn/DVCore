@@ -25,7 +25,7 @@ var (DVPawn) const float 			StandardEyeHeight;
 var (DVPawn) const float			ZoomedGroundSpeed;
 var (DVPawn) const float			UnzoomedGroundSpeed;
 
-var (DVPawn) const float			MaxRunTime;
+var (DVPawn) const float			SprintDamagePeriod;
 var (DVPawn) const float			SprintDamage;
 var (DVPawn) const float			HeadshotMultiplier;
 var (DVPawn) const float			JumpDamageMultiplier;
@@ -434,21 +434,36 @@ simulated function float GetJumpingFactor()
 	return (bJumping ? JumpDamageMultiplier : 1.0);
 }
 
+
 /*--- Running ? ---*/
-function SetRunning(bool status)
+simulated function SetRunning(bool status)
 {
 	Mesh.GlobalAnimRateScale = ((status) ? WalkingPct : 1.0);
 	bRunning = status;
 	
 	if (status)
 	{
-		TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
-		SetTimer(MaxRunTime, false, 'StopRunning');
+		TakeRunningDamage();
+		SetTimer(SprintDamagePeriod, true, 'TakeRunningDamage');
 	}
+	else
+	{
+		ClearTimer('TakeRunningDamage');
+	}
+	
+	bForceNetUpdate = true;
 }
-function StopRunning()
+
+
+/* Running is painful */
+simulated function TakeRunningDamage()
 {
-	bRunning = false;
+	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+	
+	if (Health < SprintDamage)
+	{
+		SetRunning(false);
+	}
 }
 
 
@@ -864,9 +879,9 @@ defaultproperties
 	bHasGotTeamColors=false
 	
 	// Default
-	MaxRunTime=5.0
+	SprintDamagePeriod=0.5
+	SprintDamage=3.5
 	WalkingPct=1.5
-	SprintDamage=10.0
 	DefaultFOV=85
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
 }

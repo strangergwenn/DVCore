@@ -377,9 +377,9 @@ event PlayerTick(float DeltaTime)
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
 		bShouldStop = (Target != None);
 	}
+	
 	super.PlayerTick(DeltaTime);
 }
-
 
 /*--- Nope ---*/
 function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDelegate=CanUnpause)
@@ -964,6 +964,25 @@ reliable server simulated function float GetIntroLength()
 /*----------------------------------------------------------
 	States
 ----------------------------------------------------------*/
+
+state PlayerWalking
+{
+	/* Movement control */
+	function ProcessMove( float DeltaTime, vector newAccel, eDoubleClickDir DoubleClickMove, rotator DeltaRot)
+	{
+		if (DoubleClickMove == DCLICK_Forward && Pawn.Health > DVPawn(Pawn).SprintDamage)
+		{
+			bRun = 1;
+			DVPawn(Pawn).SetRunning(true);
+		}
+		
+	    if( (Pawn != None) && (Pawn.Acceleration != newAccel) )
+		{
+			Pawn.Acceleration = newAccel;
+		}
+	}
+}
+
 
 state Dead
 {
