@@ -880,7 +880,7 @@ defaultproperties
 	
 	// Default
 	SprintDamagePeriod=0.5
-	SprintDamage=3.5
+	SprintDamage=4.0
 	WalkingPct=1.5
 	DefaultFOV=85
 	OffLight=(R=0.0,G=0.0,B=0.0,A=0.0)
