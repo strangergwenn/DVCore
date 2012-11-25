@@ -13,8 +13,8 @@ class DVGame extends UDKGame;
 ----------------------------------------------------------*/
 
 var (DVGame) const class<DVWeapon> 		DefaultWeaponList[8];
-
 var (DVGame) const class<DVWeaponAddon> DefaultAddonList[16];
+var (DVGame) const Material 			DefaultIconList[24];
 
 var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 

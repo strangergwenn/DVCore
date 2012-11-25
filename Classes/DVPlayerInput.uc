@@ -49,7 +49,7 @@ simulated exec function Duck()
 	if (IsChatLocked())
 		return;
 	
-	if (!bRun && Pawn.Health > DVPawn(Pawn).SprintDamage)
+	if (bRun == 0 && Pawn.Health > DVPawn(Pawn).SprintDamage)
 	{
 		bRun = 1;
 		DVPawn(Pawn).SetRunning(true);
