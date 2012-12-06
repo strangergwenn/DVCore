@@ -88,8 +88,27 @@ simulated function PostBeginPlay()
 	// HUD register
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
+	OpenWeaponMenu();
+	SetTimer(5.0, false, 'OpenWeaponMenu');
+}
+
+
+/*-- Open the weapon choice menu --*/
+simulated function OpenWeaponMenu()
+{
+	local DVPlayerController PC;
+	PC = DVPlayerController(PlayerOwner);
 	HudMovie.PC = PC;
-	HudMovie.OpenRespawnMenu(false);
+	HudMovie.InitParts();
+	HudMovie.Scene.GotoAndPlayI(0);
+	HudMovie.Scene.GotoAndPlayI(2);
+}
+
+
+/*-- Open the weapon choice menu --*/
+simulated function DisarmWeaponMenu()
+{
+	ClearTimer('OpenWeaponMenu');
 }
 
 
