@@ -16,7 +16,7 @@ var (Database) config array<int>				WeaponScores;
 
 var (Database) config int						ShotsFired;
 var (Database) config int						teamkills;
-var (Database) config int						Headshots;
+var (Database) config int						headshots;
 var (Database) config int						Kills;
 var (Database) config int						Deaths;
 

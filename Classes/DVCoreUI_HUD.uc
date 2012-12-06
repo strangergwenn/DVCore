@@ -224,6 +224,12 @@ function SetupAddonWidget(string WidgetName, string LoadClass)
 	SetLabel(WidgetName $".WDesc", 	wpClass.default.lAddonL1, false);
 	SetLabel(WidgetName $".WStats", GetSlotName(wpClass.default.SocketID), false);
 	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
+	
+	// Forbidden add-on ?
+	if (wpClass.default.bLongRail == false)
+	{
+		GetSymbol(WidgetName).SetVisible(false);
+	}
 }
 
 

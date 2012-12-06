@@ -78,7 +78,7 @@ simulated function bool LaunchConfig(DVPawn P)
 	local vector WPos;
 	local rotator WRot;
 	PC = DVPlayerController(P.Controller);
-	`log("DVCB > Confugirung" @self);
+	`log("DVCB > Configuring" @self);
 	
 	// Init
 	if (PC != None)

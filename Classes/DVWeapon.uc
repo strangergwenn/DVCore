@@ -24,6 +24,8 @@ var (DVWeapon) vector						ZoomOffset;
 
 var (DVWeapon) bool							bHasLens;
 var (DVWeapon) bool							bSilenced;
+var (DVWeapon) bool							bLongRail;
+var (DVWeapon) bool							bCannonMount;
 
 var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
@@ -90,7 +92,7 @@ replication
 
 
 /*----------------------------------------------------------
-	Various methods
+		Various methods
 ----------------------------------------------------------*/
 
 
@@ -102,17 +104,20 @@ simulated function Tick(float DeltaTime)
 	local rotator SR;
 	FrameCount += 1;
 	
-	if (FrameCount % TickDivisor == 0)
+	if (FrameCount % TickDivisor == 0 && Owner != None)
 	{
 		// Trace
 		SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation('Mount1', SL, SR);
-		DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
-			Impact,
-			Unused,
-			SL + vector(SR) * 10000.0,
-			SL,
-			true,,, TRACEFLAG_Bullet
-		);
+		if (DVPawn(Owner) != None)
+		{
+			DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
+				Impact,
+				Unused,
+				SL + vector(SR) * 10000.0,
+				SL,
+				true,,, TRACEFLAG_Bullet
+			);
+		}
 	}
 }
 

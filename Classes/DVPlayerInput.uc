@@ -32,7 +32,7 @@ event PlayerInput(float DeltaTime)
 		MousePosition.Y = Clamp(MousePosition.Y - aMouseY, 0, myHUD.SizeY);
 	}
 	
-	if (!bWasForward)
+	if (!bWasForward && Pawn != None)
 	{
 		bRun = 0;
 		DVPawn(Pawn).SetRunning(false);
