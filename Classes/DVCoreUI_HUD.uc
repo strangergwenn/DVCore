@@ -209,7 +209,7 @@ reliable client function ClosePlayerList()
 	Data
 ----------------------------------------------------------*/
 
-/*--- Set up an add-on widget : returns true if successful ---*/
+/*--- Set up an add-on widget, returns true if successful ---*/
 function bool SetupAddonWidget(string WidgetName, string LoadClass)
 {
 	// Vars
