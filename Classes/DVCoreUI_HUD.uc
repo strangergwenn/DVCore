@@ -31,6 +31,8 @@ var (HUD) localized string 	lPV;
 	Private attributes
 ----------------------------------------------------------*/
 
+var class<DVWeapon> 		CurrentWeaponClass;
+	
 var GFxClikWidget 			ResumeButtonMC;
 var GFxClikWidget 			RestartButtonMC;
 var GFxClikWidget 			SwitchTeamButtonMC;
@@ -94,6 +96,7 @@ simulated function InitParts()
 	WarningMC.SetVisible(false);
 	SniperMC.SetVisible(false);
 	ChatMC.SetText("");
+	CurrentWeaponClass = None;
 }
 
 
@@ -206,30 +209,30 @@ reliable client function ClosePlayerList()
 	Data
 ----------------------------------------------------------*/
 
-/*--- Set up an add-on widget ---*/
-function SetupAddonWidget(string WidgetName, string LoadClass)
+/*--- Set up an add-on widget : returns true if successful ---*/
+function bool SetupAddonWidget(string WidgetName, string LoadClass)
 {
 	// Vars
+	local bool res1, res2;
 	local string ClassToLoad;
-	local class<DVWeaponAddon> wpClass;
+	local class<DVWeaponAddon> aClass;
 	if (PC.Pawn != None)
 	{
 		ModuleName = DVPawn(PC.Pawn).ModuleName;
 	}
 	ClassToLoad = ModuleName $ "." $ LoadClass;
-	wpClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
+	aClass = class<DVWeaponAddon>(DynamicLoadObject(ClassToLoad, class'Class', false));
 	
 	// Data
-	SetLabel(WidgetName $".WName", 	wpClass.default.lAddonName, true);
-	SetLabel(WidgetName $".WDesc", 	wpClass.default.lAddonL1, false);
-	SetLabel(WidgetName $".WStats", GetSlotName(wpClass.default.SocketID), false);
-	SetupIcon(WidgetName$".WIcon",	wpClass.static.GetIcon());
+	SetLabel(WidgetName $".WName", 	aClass.default.lAddonName, true);
+	SetLabel(WidgetName $".WDesc", 	aClass.default.lAddonL1, false);
+	SetLabel(WidgetName $".WStats", GetSlotName(aClass.default.SocketID), false);
+	SetupIcon(WidgetName$".WIcon",	aClass.static.GetIcon());
 	
 	// Forbidden add-on ?
-	if (wpClass.default.bLongRail == false)
-	{
-		GetSymbol(WidgetName).SetVisible(false);
-	}
+	res1 = aClass.default.bRequiresLongRail && !CurrentWeaponClass.default.bLongRail;
+	res2 = aClass.default.bRequiresCannonMount && !CurrentWeaponClass.default.bCannonMount;
+	return (!(res1 || res2));
 }
 
 
@@ -318,12 +321,18 @@ reliable client function UpdateWeaponList()
 reliable client function UpdateAddonList()
 {
 	// Vars
+	local bool res;
 	local byte i;
 	local DVWeapon wp;
 	local GFxObject TempObject;
 	
 	// Init
 	wp = DVWeapon(PC.Pawn.Weapon);
+	if (wp == None)
+	{
+		return;
+	}
+	CurrentWeaponClass = wp.Class;
 	SetLabel("CannonTitle", lCannon, true);
 	SetLabel("AmmoTitle", lAmmo, true);
 	SetLabel("SightTitle", lRail, true);
@@ -333,7 +342,10 @@ reliable client function UpdateAddonList()
 	{
 		if (wp.AddonList[i] != None)
 		{
-			SetupAddonWidget("Config"$i, string(wp.AddonList[i]));
+			res = SetupAddonWidget("Config"$i, string(wp.AddonList[i]));
+			TempObject = GetSymbol("Config"$i);
+			if (TempObject != None && res != true)
+				TempObject.SetVisible(false);
 		}
 		else
 		{

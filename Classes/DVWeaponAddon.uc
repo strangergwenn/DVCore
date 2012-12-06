@@ -28,8 +28,8 @@ var (Addon) byte			SocketID;
 
 var (Addon) bool			bUseLens;
 var (Addon) bool			bSilenced;
-var (Addon) bool			bLongRail;
-var (Addon) bool			bCannonMount;
+var (Addon) bool			bRequiresLongRail;
+var (Addon) bool			bRequiresCannonMount;
 
 var (Addon) DVWeapon		Weap;
 
@@ -216,6 +216,6 @@ defaultproperties
 	AmmoBonus=0.0
 	bUseLens=false
 	bSilenced=false
-	bLongRail=true
-	bCannonMount=true
+	bRequiresLongRail=false
+	bRequiresCannonMount=false
 }
