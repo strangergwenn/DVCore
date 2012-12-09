@@ -65,14 +65,14 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
-var string			 				KillerName;
-var string							UserName;
-
+var repnotify bool					bRunning;
 var bool 							bWasHS;
 var bool							bZoomed;
 var bool							bJumping;
-var bool							bRunning;
 var bool							bHasGotTeamColors;
+
+var string			 				KillerName;
+var string							UserName;
 
 var float							FeignDeathStartTime;
 
@@ -84,7 +84,7 @@ var float							FeignDeathStartTime;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight, KM;
+		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight, KM, bJumping, bRunning;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -100,6 +100,12 @@ simulated event ReplicatedEvent(name VarName)
 	{
 		if (PlayerReplicationInfo.Team != None)
 			UpdateTeamColor(GetTeamIndex());
+		return;
+	}
+	// Sprint
+	if ( VarName == 'bRunning')
+	{
+		
 		return;
 	}
 	else
@@ -436,7 +442,7 @@ simulated function float GetJumpingFactor()
 
 
 /*--- Running ? ---*/
-simulated function SetRunning(bool status)
+reliable client simulated function SetRunning(bool status)
 {
 	Mesh.GlobalAnimRateScale = ((status) ? WalkingPct : 1.0);
 	bRunning = status;
@@ -456,14 +462,26 @@ simulated function SetRunning(bool status)
 
 
 /* Running is painful */
-simulated function TakeRunningDamage()
+reliable client simulated function TakeRunningDamage()
 {
-	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
-	
+	HurtSprint();
+	ServerHurtSprint();
 	if (Health < SprintDamage)
 	{
 		SetRunning(false);
 	}
+	bForceNetUpdate = true;
+}
+
+
+/*--- Hurt ---*/
+reliable client simulated function HurtSprint()
+{
+	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+}
+reliable server simulated function ServerHurtSprint()
+{
+	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
 }
 
 
@@ -576,6 +594,7 @@ event PlayFootStepSound(int FootDown)
 simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocation, vector Momentum, class<DamageType> DamageType, optional TraceHitInfo HitInfo, optional Actor DamageCauser)
 {
 	local vector EndTrace, BloodImpact, BloodNormal;
+	local vector ApplyImpulse, ShotDir;
 	local DVPlayerController Attacker;
 	local Actor SplatteredActor;
 	
@@ -620,6 +639,16 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		if (!SplatteredActor.IsA('Pawn'))
 			SpawnBloodDecal(BloodImpact, BloodNormal);
 	}
+	
+	// Physics
+	shotDir = Normal(Momentum);
+	ApplyImpulse = (DamageType.Default.KDamageImpulse * shotDir);
+	if(Velocity.Z > -10)
+	{
+		ApplyImpulse += Vect(0,0,1) * DamageType.default.KDeathUpKick;
+	}
+	Mesh.WakeRigidBody();
+	Mesh.AddImpulse(ApplyImpulse, HitLocation, HitInfo.BoneName, true);
 	
 	// UI
 	DVHUD(DVPlayerController(Controller).myHUD).ShowHit();

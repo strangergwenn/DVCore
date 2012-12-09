@@ -590,7 +590,6 @@ simulated function string GetPlayerName()
 /*--- Call this to respawn the player ---*/
 reliable server simulated function HUDRespawn(bool bShouldKill, optional class<DVWeapon> NewWeapon)
 {
-	DVHUD(myHUD).DisarmWeaponMenu();
 	if (bConfiguring)
 	{
 		Bench.ConfiguringEnded(self);
@@ -630,6 +629,7 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon)
 {
 	UserChoiceWeapon = NewWeapon;
+	DVHUD(myHUD).DisarmWeaponMenu();
 }
 
 

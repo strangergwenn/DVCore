@@ -89,7 +89,7 @@ simulated function PostBeginPlay()
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
 	OpenWeaponMenu();
-	SetTimer(5.0, false, 'OpenWeaponMenu');
+	SetTimer(1.0, true, 'OpenWeaponMenu');
 }
 
 
@@ -180,6 +180,7 @@ function ToggleRespawnMenu()
 	if (P == None && !bRespawnOpened)
 	{
 		HudMovie.OpenRespawnMenu(true);
+		SetTimer(1.0, true, 'OpenWeaponMenu');
 		bRespawnOpened = true;
 	}
 	if (P != None && bRespawnOpened)
