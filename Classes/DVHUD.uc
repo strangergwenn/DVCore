@@ -89,7 +89,7 @@ simulated function PostBeginPlay()
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
 	OpenWeaponMenu();
-	SetTimer(1.0, true, 'OpenWeaponMenu');
+	SetTimer(2.0, true, 'OpenWeaponMenu');
 }
 
 
