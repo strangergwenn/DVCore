@@ -397,6 +397,7 @@ function ConfigureWeapons(DVConfigBench TheBench)
 	bConfiguring = true;
 	SetViewTargetWithBlend(TheBench);
 	DVHUD(myHUD).OpenWeaponConfig();
+	DVPawn(Pawn).HideMesh(true);
 }
 
 

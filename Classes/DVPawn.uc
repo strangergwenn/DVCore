@@ -535,7 +535,14 @@ simulated function SetPawnRBChannels(bool bRagdollMode)
 simulated function HideMesh(bool Invisible)
 {
     if ( LocalPlayer(PlayerController(Controller).Player) != None )
+    {
+    	if (Weapon != None)
+    	{
+    		Weapon.Mesh.SetHidden(Invisible);
+    		SetAddonStatus(false);
+    	}
         Mesh.SetHidden(Invisible);
+    }
 }
 
 
