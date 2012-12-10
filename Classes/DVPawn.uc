@@ -477,11 +477,17 @@ reliable client simulated function TakeRunningDamage()
 /*--- Hurt ---*/
 reliable client simulated function HurtSprint()
 {
-	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+	if (Health > SprintDamage)
+	{
+		TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+	}
 }
 reliable server simulated function ServerHurtSprint()
 {
-	TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+	if (Health > SprintDamage)
+	{
+		TakeDamage(SprintDamage, Controller, Location, vect(0, 0, 0), class'DamageType');
+	}
 }
 
 
