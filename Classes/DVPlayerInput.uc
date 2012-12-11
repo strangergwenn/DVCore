@@ -90,8 +90,6 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 			DVHUD_Menu(myHUD).HudMovie.ForceValidate();
 		else if (KeyName == 'Escape')
 			DVHUD_Menu(myHUD).HudMovie.HidePopup();
-		
-		`log("DVPI > Pressed" @KeyName);
 	}
 	return false;
 }

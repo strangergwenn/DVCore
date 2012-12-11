@@ -485,7 +485,7 @@ simulated function GetStatsContent()
 	if (PC.LocalStats.bHasLeft)
 		SetLabel("Stat30", lFledGame, false);
 	else
-		SetLabel("Stat30", lTeamHas $ (PC.LocalStats.bHasWon ? lWon : lLost), false);
+		SetLabel("Stat30", lTeamHas @ (PC.LocalStats.bHasWon ? lWon : lLost), false);
 	
 	SetLabel("Stat31", lLastRank @string(PC.LocalStats.Rank), false);
 	SetLabel("Stat32", string(PC.LocalStats.Kills) @lVictims, false);
@@ -519,7 +519,7 @@ simulated function UpdateLeaderboard(GFxObject List, bool bIsLocal)
 		DataProvider.SetElementObject(i, TempObj);
 	}
 	List.SetObject("dataProvider", DataProvider);
-	List.SetInt("selectedIndex", (bIsLocal ? PC.LocalLeaderBoardOffset - 1 : 0));
+	List.SetInt("selectedIndex", (bIsLocal ? PC.LocalLeaderBoardOffset : 0));
 }
 
 

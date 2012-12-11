@@ -461,6 +461,7 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	`log("CoreUI > Weapon selected");
 	SetGameUnPaused();
 	PC.HUDRespawn(!bFirstFrame, NewWeapon);
+	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	bFirstFrame = false;
 	bInMenu = false;
 }
@@ -489,6 +490,7 @@ function OnValidateConfig(GFxClikWidget.EventData ev)
 {
 	`log("CoreUI > Respawning with weapon configured");
 	PC.Bench.Weapon.SaveConfig();
+	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
 	SetGameUnPaused();
@@ -557,6 +559,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 		PC.HUDRespawn(true);
 		bWasKilled = false;
 	}
+	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	SetGameUnPaused();
 	PC.LockCamera(false);
 	bInMenu = false;

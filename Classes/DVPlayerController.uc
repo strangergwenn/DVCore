@@ -167,7 +167,7 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
 			DVHUD_Menu(myHUD).SignalConnected();
-			MasterServerLink.GetLeaderboard(LeaderBoardLength, LocalLeaderBoardOffset);
+			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 			MasterServerLink.GetStats();
 		}
 		else if (PlayerReplicationInfo != None)
@@ -604,7 +604,6 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 		NewWeapon = UserChoiceWeapon;
 	}
 	ServerSetUserChoice(NewWeapon, bShouldKill);
-	SetUserChoice(NewWeapon);
 	ServerReStartPlayer();
 }
 

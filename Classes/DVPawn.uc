@@ -664,9 +664,14 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	Mesh.AddImpulse(ApplyImpulse, HitLocation, HitInfo.BoneName, true);
 	
 	// UI
-	DVHUD(DVPlayerController(Controller).myHUD).ShowHit();
+	if (DVPlayerController(Controller).myHUD != None)
+	{
+		DVHUD(DVPlayerController(Controller).myHUD).ShowHit();
+	}
 	if (HitSound != None)
+	{
 		PlaySound(HitSound, false, true, false, Location);
+	}
 	
 	Super.TakeDamage(Damage, InstigatedBy, HitLocation, Momentum, DamageType, HitInfo, DamageCauser);
 }

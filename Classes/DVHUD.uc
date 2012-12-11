@@ -12,9 +12,10 @@ class DVHUD extends UDKHUD;
 	Public attributes
 ----------------------------------------------------------*/
 
-var (DVHUD) const LinearColor			OrangeColor;
-var (DVHUD) const LinearColor			BlueColor;
 var (DVHUD) const class<DVCoreUI_HUD>	HUDClass;
+
+var (DVHUD) const color					OrangeColor;
+var (DVHUD) const color					BlueColor;
 
 var (DVHUD) const float					GameplayMessageTime;
 var (DVHUD) const float					HitWarningLength;
@@ -59,6 +60,9 @@ event PostRender()
 				HudMovie.UpdateScore(TI1.GetScore(), TI0.GetScore(), myOwner.GetTargetScore());
 		}
 	}
+	
+	// Debug
+	PutShadedText(WhiteColor, "Work in Progress", 300, 10);
 	
 	// End
 	ToggleRespawnMenu();
@@ -209,6 +213,31 @@ function DrawMessageText(HudLocalizedMessage LocalMessage, float ScreenX, float 
 {}
 
 
+/*--- TEMPORARY ---*/
+function PutShadedText(color col, string StringMessage2, float ScreenX, float ScreenY)
+{
+	PutText(col, StringMessage2, ScreenX, ScreenY, true);
+	PutText(col, StringMessage2, ScreenX, ScreenY, false);
+}
+function PutText(color col, string StringMessage2, float ScreenX, float ScreenY, bool bIsShade)
+{
+	Canvas.Font = GetFontSizeIndex(1);
+	
+	if (bIsShade)
+	{
+		Canvas.SetPos(ScreenX + 1.5, ScreenY);
+		Canvas.SetDrawColor(0,0,0,255);
+		Canvas.DrawText(StringMessage2, false, 1.00, 1.2, TextRenderInfo );
+	}
+	else
+	{
+		Canvas.SetPos(ScreenX, ScreenY);
+		Canvas.SetDrawColor(col.R, col.G, col.B, 255);
+		Canvas.DrawText(StringMessage2, false, , , TextRenderInfo );
+	}
+}
+
+
 /*----------------------------------------------------------
 	Properties
 ----------------------------------------------------------*/
@@ -222,6 +251,6 @@ defaultproperties
 	HitWarningLength=0.2
 	GameplayMessageTime=3.0
 	
-	OrangeColor=(R=255.0,G=50.0,B=20.0,A=0.0)
-	BlueColor=(R=20.0,G=100.0,B=255.0,A=0.0)
+	OrangeColor=(R=255,G=50,B=20,A=0)
+	BlueColor=(R=20,G=100,B=255,A=0)
 }

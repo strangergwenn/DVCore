@@ -127,9 +127,9 @@ reliable client simulated function GetServers(optional string GameName, optional
 
 /*--- Get the best players
 	TOP_PLAYERS,PlayerCount
-	LOC_PLAYERS,PlayerCount,LocalOffset
+	LOC_PLAYERS,PlayerCount,ID
 ---*/
-reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffset)
+reliable client simulated function GetLeaderboard(int PlayerCount, string ID)
 {
 	local array<string> Params;
 	
@@ -137,7 +137,7 @@ reliable client simulated function GetLeaderboard(int PlayerCount, int LocalOffs
 	PC.CleanBestPlayer();
 	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
-	Params.AddItem(""$LocalOffset);
+	Params.AddItem(""$ID);
 	SendServerCommand("LOC_PLAYERS", Params, false);
 }
 
@@ -409,16 +409,19 @@ event ReceivedLine(string Line)
 	// Server list
 	else if (IsEqual(Command[0], "SERVER") && PC.myHUD != None)
 	{
-		//SERVER,ServerName,Level,IP,Game,Players,MaxPlayers,bIsPassword
-		DVHUD_Menu(PC.myHUD).AddServerInfo(
-			Command[1],
-			Command[2],
-			Command[3],
-			Command[4], 
-			int(Command[5]),
-			int(Command[6]),
-			Left(Command[7],1) != "0"
-		);
+		if (DVHUD_Menu(PC.myHUD) != None)
+		{
+			//SERVER,ServerName,Level,IP,Game,Players,MaxPlayers,bIsPassword
+			DVHUD_Menu(PC.myHUD).AddServerInfo(
+				Command[1],
+				Command[2],
+				Command[3],
+				Command[4], 
+				int(Command[5]),
+				int(Command[6]),
+				Left(Command[7],1) != "0"
+			);
+		}
 	}
 	
 	// Player statistics
