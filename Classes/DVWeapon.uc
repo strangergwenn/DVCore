@@ -79,6 +79,10 @@ var repnotify string			PlayerAddonClass1;
 var repnotify string			PlayerAddonClass2;
 var repnotify string			PlayerAddonClass3;
 
+var string						OldPlayerAddonClass1;
+var string						OldPlayerAddonClass2;
+var string						OldPlayerAddonClass3;
+
 var DVWeaponAddon				Addon1;
 var DVWeaponAddon				Addon2;
 var DVWeaponAddon				Addon3;
@@ -100,20 +104,20 @@ simulated event ReplicatedEvent(name VarName)
 {	
 	if (VarName == 'PlayerAddonClass1')
 	{
-		RemoveAddon(Addon1);
-		SpawnAddon(PlayerAddonClass1);
+		 SetAddon(Addon1,OldPlayerAddonClass1, PlayerAddonClass1);
+		OldPlayerAddonClass1 = PlayerAddonClass1;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass2')
 	{
-		RemoveAddon(Addon2);
-		SpawnAddon(PlayerAddonClass2);
+		 SetAddon(Addon2,OldPlayerAddonClass2, PlayerAddonClass2);
+		OldPlayerAddonClass2 = PlayerAddonClass2;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass3')
 	{
-		RemoveAddon(Addon3);
-		SpawnAddon(PlayerAddonClass3);
+		 SetAddon(Addon3,OldPlayerAddonClass3, PlayerAddonClass3);
+		OldPlayerAddonClass3 = PlayerAddonClass3;
 		return;
 	}
 	else
@@ -323,12 +327,15 @@ function RequestAddon(byte AddonID)
 	{
 		case 1:
 			SetAddon(Addon1, PlayerAddonClass1, string(AddonList[AddonID]));
+			OldPlayerAddonClass1 = PlayerAddonClass1;
 			break;		
 		case 2:
 			SetAddon(Addon2, PlayerAddonClass2, string(AddonList[AddonID]));
+			OldPlayerAddonClass2 = PlayerAddonClass2;
 			break;
 		case 3:
 			SetAddon(Addon3, PlayerAddonClass3, string(AddonList[AddonID]));
+			OldPlayerAddonClass3 = PlayerAddonClass3;
 			break;
 	}
 	`log("WPDBG RequestAddon" @AddonID @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
