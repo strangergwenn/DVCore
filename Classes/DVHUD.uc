@@ -62,7 +62,7 @@ event PostRender()
 	}
 	
 	// Debug
-	PutShadedText(WhiteColor, "Work in Progress", 300, 10);
+	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED PRE ALPHA - CL 1048", 400, 10);
 	
 	// End
 	ToggleRespawnMenu();

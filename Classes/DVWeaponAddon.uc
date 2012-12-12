@@ -75,6 +75,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	Mesh.SetLightEnvironment(wp.Mesh.LightEnvironment);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
 	Weap = wp;
+	Mesh.SetHidden(false);
 	
 	// Properties override
 	if (SmoothingFactor != 0.0)
@@ -110,7 +111,6 @@ simulated function AttachToWeapon(DVWeapon wp)
 	{
 		wp.Spread[0] /= PrecisionBonus;
 	}
-		
 	
 	`log("DVWA > Mounted add-on" @self);
 }
@@ -218,4 +218,6 @@ defaultproperties
 	bSilenced=false
 	bRequiresLongRail=false
 	bRequiresCannonMount=false
+	bOnlyRelevantToOwner=false
+	bOnlyDirtyReplication=false
 }

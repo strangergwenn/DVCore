@@ -91,11 +91,14 @@ simulated function InitParts()
 	Progress2MC = 	GetSymbol("T1.Progress");
 	
 	// Various init
-	ScoreListBlue.SetVisible(false);
-	ScoreListRed.SetVisible(false);
-	WarningMC.SetVisible(false);
-	SniperMC.SetVisible(false);
-	ChatMC.SetText("");
+	if (ChatMC != None)
+	{
+		ScoreListBlue.SetVisible(false);
+		ScoreListRed.SetVisible(false);
+		WarningMC.SetVisible(false);
+		SniperMC.SetVisible(false);
+		ChatMC.SetText("");
+	}
 	CurrentWeaponClass = None;
 }
 
@@ -107,7 +110,14 @@ simulated function InitParts()
 /*--- Ammo & health bars ---*/
 simulated function UpdateInfo(int health, int ammo, int max)
 {
-	if (max == 0) max = 1;
+	if (max == 0)
+	{
+		max = 1;
+	}
+	if (HealthMC == None)
+	{
+		return;
+	}
 	
 	// Bars
 	HealthMC.GotoAndStopI(health);
@@ -129,10 +139,13 @@ simulated function UpdateInfo(int health, int ammo, int max)
 /*--- Score update ---*/
 simulated function UpdateScore(int s1, int s2, int max)
 {
-	Score1MC.SetText("" $ s1 @ lPointsOn @max);
-	Score2MC.SetText("" $ s2 @ lPointsOn @max);
-	Progress1MC.GotoAndStopI(round(100.0 * (float(s1) / float(max))));
-	Progress2MC.GotoAndStopI(round(100.0 * (float(s2) / float(max))));
+	if (Score1MC != None)
+	{
+		Score1MC.SetText("" $ s1 @ lPointsOn @max);
+		Score2MC.SetText("" $ s2 @ lPointsOn @max);
+		Progress1MC.GotoAndStopI(round(100.0 * (float(s1) / float(max))));
+		Progress2MC.GotoAndStopI(round(100.0 * (float(s2) / float(max))));
+	}
 }
 
 
@@ -174,34 +187,42 @@ simulated function SendChatMessage()
 /*--- New chat line ---*/
 simulated function UpdateChat(string text)
 {
-	ChatMC.SetText(text);
+	if (ChatMC != None)
+		ChatMC.SetText(text);
 }
 
 
 /*--- Should we using the sniper effect ---*/
 simulated function SetSniperState(bool bZooming)
 {
-	SniperMC.SetVisible(bZooming);
+	if (SniperMC != None)
+		SniperMC.SetVisible(bZooming);
 }
 
 
 /*--- Open the player list ---*/
 reliable client function OpenPlayerList(array<DVPlayerRepInfo> PRList)
 {
-	ScoreListRed.SetVisible(true);
-	ScoreListBlue.SetVisible(true);
-	FillPlayerList(ScoreListRed, PRList, 0);
-	FillPlayerList(ScoreListBlue, PRList, 1);
-	bListOpened = true;
+	if (ScoreListRed != None)
+	{
+		ScoreListRed.SetVisible(true);
+		ScoreListBlue.SetVisible(true);
+		FillPlayerList(ScoreListRed, PRList, 0);
+		FillPlayerList(ScoreListBlue, PRList, 1);
+		bListOpened = true;
+	}
 }
 
 
 /*--- Close the player list ---*/
 reliable client function ClosePlayerList()
 {
-	ScoreListRed.SetVisible(false);
-	ScoreListBlue.SetVisible(false);
-	bListOpened = false;
+	if (ScoreListRed != None)
+	{
+		ScoreListRed.SetVisible(false);
+		ScoreListBlue.SetVisible(false);
+		bListOpened = false;
+	}
 }
 
 

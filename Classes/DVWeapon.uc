@@ -102,21 +102,22 @@ replication
 
 simulated event ReplicatedEvent(name VarName)
 {	
+	`log("DVW > ReplicatedEvent" @VarName);
 	if (VarName == 'PlayerAddonClass1')
 	{
-		 SetAddon(Addon1,OldPlayerAddonClass1, PlayerAddonClass1);
+		SetAddon(Addon1,OldPlayerAddonClass1, PlayerAddonClass1);
 		OldPlayerAddonClass1 = PlayerAddonClass1;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass2')
 	{
-		 SetAddon(Addon2,OldPlayerAddonClass2, PlayerAddonClass2);
+		SetAddon(Addon2,OldPlayerAddonClass2, PlayerAddonClass2);
 		OldPlayerAddonClass2 = PlayerAddonClass2;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass3')
 	{
-		 SetAddon(Addon3,OldPlayerAddonClass3, PlayerAddonClass3);
+		SetAddon(Addon3,OldPlayerAddonClass3, PlayerAddonClass3);
 		OldPlayerAddonClass3 = PlayerAddonClass3;
 		return;
 	}
@@ -147,13 +148,16 @@ simulated function Tick(float DeltaTime)
 		SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation('Mount1', SL, SR);
 		if (DVPawn(Owner) != None)
 		{
-			DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
-				Impact,
-				Unused,
-				SL + vector(SR) * 10000.0,
-				SL,
-				true,,, TRACEFLAG_Bullet
-			);
+			if (DVPawn(Owner).Controller != None)
+			{
+				DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
+					Impact,
+					Unused,
+					SL + vector(SR) * 10000.0,
+					SL,
+					true,,, TRACEFLAG_Bullet
+				);
+			}
 		}
 	}
 }
@@ -168,10 +172,9 @@ simulated function TimeWeaponEquipping()
 	AmmoCount = MaxAmmo;
 	if (WorldInfo.NetMode != NM_DedicatedServer)
 	{
-		`log("WPDBG TimeWeaponEquipping" @AddonClass1 @AddonClass2 @AddonClass3 @self);
+		`log("DVW > TimeWeaponEquipping" @AddonClass1 @AddonClass2 @AddonClass3 @self);
 		ServerSetAddonClasses(AddonClass1, AddonClass2, AddonClass3);
 	}
-	`log("WPDBG TimeWeaponEquipping2" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
 	
 	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) && ZP != None)
 	{
@@ -182,36 +185,11 @@ simulated function TimeWeaponEquipping()
 	SetTimer(0.5, false, 'WeaponEquipped');
 }
 
-/*--- Addon classes ---*/
-reliable server simulated function ServerSetAddonClasses(string A1, string A2, string A3)
-{
-	if (WorldInfo.NetMode == NM_DedicatedServer || WorldInfo.NetMode == NM_StandAlone)
-	{
-		PlayerAddonClass1 = A1;
-		PlayerAddonClass2 = A2;
-		PlayerAddonClass3 = A3;
-		bForceNetUpdate = true;
-		`log("WPDBG ServerSetAddonClasses OK : " @self);
-	}
-	`log("WPDBG ServerSetAddonClasses" @A1 @A2 @A3 @self);
-	`log("WPDBG ServerSetAddonClasses2" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
-}
-
 
 /*--- Config bench ---*/
 simulated function TimeBenchEquipping()
 {
 	ServerSetAddonClasses(AddonClass1, AddonClass2, AddonClass3);
-}
-
-
-/*--- Save status ---*/
-simulated function SaveStatus()
-{
-	AddonClass1 = PlayerAddonClass1;
-	AddonClass2 = PlayerAddonClass2;
-	AddonClass3 = PlayerAddonClass3;
-	SaveConfig();
 }
 
 /*--- Weapon attachment ---*/
@@ -259,7 +237,7 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	SpawnAddon(PlayerAddonClass1);
 	SpawnAddon(PlayerAddonClass2);
 	SpawnAddon(PlayerAddonClass3);
-	`log("WPDBG AttachWeaponTo2" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
+	`log("DVW > AttachWeaponTo" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
 }
 
 
@@ -299,6 +277,30 @@ simulated function int AddAmmo(int amount)
 	Add-ons management
 ----------------------------------------------------------*/
 
+/*--- Save status ---*/
+simulated function SaveStatus()
+{
+	AddonClass1 = PlayerAddonClass1;
+	AddonClass2 = PlayerAddonClass2;
+	AddonClass3 = PlayerAddonClass3;
+	SaveConfig();
+}
+
+
+/*--- Addon classes ---*/
+reliable server simulated function ServerSetAddonClasses(string A1, string A2, string A3)
+{
+	if (WorldInfo.NetMode == NM_DedicatedServer || WorldInfo.NetMode == NM_StandAlone)
+	{
+		PlayerAddonClass1 = A1;
+		PlayerAddonClass2 = A2;
+		PlayerAddonClass3 = A3;
+		bForceNetUpdate = true;
+	}
+	`log("DVW > ServerSetAddonClasses" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
+}
+
+
 /*--- Fill the available addons list ---*/
 simulated function FillAddonList()
 {
@@ -323,6 +325,8 @@ simulated function FillAddonList()
 /*--- Manage an add-on request (add or delete) ---*/
 function RequestAddon(byte AddonID)
 {
+	`log("DVW > RequestAddon" @AddonID @self);
+	
 	switch (AddonList[AddonID].default.SocketID)
 	{
 		case 1:
@@ -338,13 +342,14 @@ function RequestAddon(byte AddonID)
 			OldPlayerAddonClass3 = PlayerAddonClass3;
 			break;
 	}
-	`log("WPDBG RequestAddon" @AddonID @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
 }
 
 
 /*--- Add-on toggle ---*/
-function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
-{	
+reliable client function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
+{
+	`log("DVW > SetAddon -" @OldAddon @"-" @OldClass @"-" @NewClass @self);
+	
 	if (OldClass != "")
 		RemoveAddon(OldAddon);
 	if (OldClass != NewClass)
@@ -356,6 +361,8 @@ function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 simulated function SpawnAddon(string AddonClass)
 {
 	local DVWeaponAddon NewAddon;
+	`log("DVW > SpawnAddon" @AddonClass @"-" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);	
+	
 	if (AddonClass != "")
 	{
 		NewAddon = GetAddon(AddonClass);
@@ -378,13 +385,14 @@ simulated function SpawnAddon(string AddonClass)
 				break;
 		}
 	}
-	`log("WPDBG SpawnAddon" @AddonClass @"-" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);	
 }
 
 
 /*--- Add-on deletion ---*/
 function RemoveAddon(DVWeaponAddon OldAddon)
 {
+	`log("DVW > RemoveAddon" @OldAddon @self);	
+	
 	if (OldAddon != None)
 	{
 		switch (OldAddon.SocketID)
@@ -406,13 +414,14 @@ function RemoveAddon(DVWeaponAddon OldAddon)
 				break;
 		}
 	}
-	`log("WPDBG RemoveAddon" @OldAddon @self);	
 }
 
 
 /*--- Add-on loading ---*/
 simulated function DVWeaponAddon GetAddon(string AddonClass)
 {
+	`log("DVW > GetAddon" @AddonClass @self);
+	
 	if (AddonClass != "")
 	{
 		return Spawn(
@@ -423,7 +432,6 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 			self
 		);
 	}
-	`log("WPDBG GetAddon" @AddonClass @self);
 }
 
 
