@@ -89,6 +89,7 @@ simulated function bool LaunchConfig(DVPawn P)
 		
 		// Weapon spawn
 		Weapon = Spawn(P.CurrentWeaponClass, self,, WPos);
+		Weapon.TimeBenchEquipping();
 		Weapon.AttachWeaponTo(Mesh, WeaponSocket);
 		Weapon.Mesh.SetScale3D(Vect(1,1,1) * WeaponScale);
 		return true;

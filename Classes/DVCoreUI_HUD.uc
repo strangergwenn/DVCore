@@ -489,7 +489,7 @@ function OnAddonWidgetClick(GFxClikWidget.EventData ev)
 function OnValidateConfig(GFxClikWidget.EventData ev)
 {
 	`log("CoreUI > Respawning with weapon configured");
-	PC.Bench.Weapon.SaveConfig();
+	PC.Bench.Weapon.SaveStatus();
 	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
