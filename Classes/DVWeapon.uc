@@ -399,7 +399,7 @@ function RemoveAddon(DVWeaponAddon OldAddon)
 				break;
 		}
 	}
-	`log("WPDBG RemoveAddon" @AddonClass @"-" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);	
+	`log("WPDBG RemoveAddon" @OldAddon @self);	
 }
 
 
