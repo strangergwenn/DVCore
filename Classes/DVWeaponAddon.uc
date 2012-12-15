@@ -67,7 +67,10 @@ simulated function name MountSocket()
 simulated function AttachToWeapon(DVWeapon wp)
 {
 	if (MountSocket() == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
+	{
 		return;
+	}
+	`log("DVWA > AttachToWeapon" @self);
 	
 	// Mesh
 	AttachComponent(Mesh);
@@ -111,8 +114,6 @@ simulated function AttachToWeapon(DVWeapon wp)
 	{
 		wp.Spread[0] /= PrecisionBonus;
 	}
-	
-	`log("DVWA > Mounted add-on" @self);
 }
 
 

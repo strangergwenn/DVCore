@@ -65,7 +65,7 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
-var repnotify bool					bRunning;
+var bool							bRunning;
 var bool 							bWasHS;
 var bool							bZoomed;
 var bool							bJumping;
@@ -100,12 +100,6 @@ simulated event ReplicatedEvent(name VarName)
 	{
 		if (PlayerReplicationInfo.Team != None)
 			UpdateTeamColor(GetTeamIndex());
-		return;
-	}
-	// Sprint
-	if ( VarName == 'bRunning')
-	{
-		
 		return;
 	}
 	else
@@ -577,7 +571,7 @@ simulated function WeaponFired(Weapon InWeapon, bool bViaReplication, optional v
 {
 	if (Weapon != None)
 	{
-		DVWeapon(Weapon).PlayFiringEffects();
+		DVWeapon(Weapon).PlayFiringEffects(HitLocation);
 		if ( HitLocation != Vect(0,0,0) && (WorldInfo.NetMode == NM_ListenServer || WorldInfo.NetMode == NM_Standalone || bViaReplication) )
 		{
 			DVWeapon(Weapon).PlayImpactEffects(HitLocation);
@@ -623,13 +617,18 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		Attacker = DVPlayerController(InstigatedBy);
 		if (Attacker != None)
 		{
-			KillerName = Attacker.GetPlayerName();
+			if (KillerName == "")
+			{
+				KillerName = Attacker.GetPlayerName();
+			}
 			if (Attacker.Pawn != None)
 				Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
 		}
 	}
-	if (Controller != None)
+	if (Controller != None && UserName == "")
+	{
 		UserName = DVPlayerController(Controller).GetPlayerName();
+	}
 	
 	// Headshot management
 	if (HitInfo.BoneName == 'b_Head' || HitInfo.BoneName == 'b_Neck')
@@ -642,12 +641,14 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	// Logging
 	ServerLogAction("HIT");
 	if (InstigatedBy != None)
+	{
 		DVPlayerController(Controller).ClientSignalHit(InstigatedBy, bWasHS);
+	}
 	
 	// Blood impact
 	EndTrace = HitLocation + Momentum * 10.0;
 	SplatteredActor = Trace(BloodImpact, BloodNormal, EndTrace, HitLocation, true,,,TRACEFLAG_Bullet);
-	if (SplatteredActor != None)
+	if (SplatteredActor != None && !bRunning)
 	{
 		if (!SplatteredActor.IsA('Pawn'))
 			SpawnBloodDecal(BloodImpact, BloodNormal);
@@ -668,7 +669,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	{
 		DVHUD(DVPlayerController(Controller).myHUD).ShowHit();
 	}
-	if (HitSound != None)
+	if (HitSound != None && !bRunning)
 	{
 		PlaySound(HitSound, false, true, false, Location);
 	}
@@ -687,7 +688,9 @@ simulated function SpawnBloodDecal(vector BLocation, vector BRotation)
 	
 	/*--- Random settings ---*/
 	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
 		return;
+	}
 	DecalSize = FRand() * 200.0;
 	DecalTemplate = BloodDecals[Rand(BloodDecals.Length)];
 	
@@ -926,6 +929,8 @@ defaultproperties
 	bHasGotTeamColors=false
 	
 	// Default
+	UserName=""
+	KillerName=""
 	SprintDamagePeriod=0.5
 	SprintDamage=4.0
 	WalkingPct=1.5

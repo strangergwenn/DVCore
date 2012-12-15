@@ -96,7 +96,7 @@ var array< class<DVWeaponAddon> > AddonList;
 replication
 {
 	if ( bNetDirty )
-		bZoomed, Addon1, Addon2, Addon3, bWeaponEmpty, PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
+		bZoomed, bWeaponEmpty, PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
 }
 
 
@@ -638,9 +638,9 @@ simulated function ProcessInstantHit(byte FiringMode, ImpactInfo Impact, optiona
 
 
 /*--- Muzzle flash ---*/
-simulated function PlayFiringEffects()
+simulated function PlayFiringEffects(vector HitLocation)
 {
-	if (!bSilenced)
+	if (!bSilenced && MuzzleFlashPSC != None)
 		MuzzleFlashPSC.ActivateSystem();
 }
 

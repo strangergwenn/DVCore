@@ -335,7 +335,10 @@ event Opened()
 	// On client : get the server list
 	if (WorldInfo.NetMode != NM_DedicatedServer)
 	{
-		SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+		if (DVHUD_Menu(PC.myHUD) != None)
+		{
+			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+		}
 		SignalController("INIT", true, "");
 	}
 	
