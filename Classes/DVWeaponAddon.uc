@@ -68,6 +68,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 {
 	if (MountSocket() == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
 	{
+		`warn("DVWA > AttachToWeapon error" @self);
 		return;
 	}
 	`log("DVWA > AttachToWeapon" @self);
@@ -77,8 +78,8 @@ simulated function AttachToWeapon(DVWeapon wp)
 	Mesh.SetShadowParent(wp.Mesh);
 	Mesh.SetLightEnvironment(wp.Mesh.LightEnvironment);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
-	Weap = wp;
 	Mesh.SetHidden(false);
+	Weap = wp;
 	
 	// Properties override
 	if (SmoothingFactor != 0.0)
@@ -111,9 +112,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (KineticBonus != 0.0)
 		wp.InstantHitMomentum[0] *= KineticBonus;
 	if (PrecisionBonus != 0.0)
-	{
 		wp.Spread[0] /= PrecisionBonus;
-	}
 }
 
 
@@ -139,9 +138,7 @@ simulated function DetachFromWeapon(DVWeapon wp)
 	if (ZoomedFOV != 0.0)
 		wp.ZoomedFOV = wp.default.ZoomedFOV;
 	if (ZoomOffset != vect(0,0,0))
-	{
 		wp.ZoomOffset = wp.default.ZoomOffset;
-	}
 	wp.bSilenced = false;
 	wp.bHasLens = false;
 	
