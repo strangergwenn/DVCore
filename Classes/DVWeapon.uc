@@ -103,19 +103,19 @@ replication
 simulated event ReplicatedEvent(name VarName)
 {	
 	`log("DVW > ReplicatedEvent" @VarName);
-	if (VarName == 'PlayerAddonClass1')
+	if (VarName == 'PlayerAddonClass1' && PlayerAddonClass1 != OldPlayerAddonClass1)
 	{
 		SetAddon(Addon1,OldPlayerAddonClass1, PlayerAddonClass1);
 		OldPlayerAddonClass1 = PlayerAddonClass1;
 		return;
 	}
-	if (VarName == 'PlayerAddonClass2')
+	if (VarName == 'PlayerAddonClass2' && PlayerAddonClass2 != OldPlayerAddonClass2)
 	{
 		SetAddon(Addon2,OldPlayerAddonClass2, PlayerAddonClass2);
 		OldPlayerAddonClass2 = PlayerAddonClass2;
 		return;
 	}
-	if (VarName == 'PlayerAddonClass3')
+	if (VarName == 'PlayerAddonClass3' && PlayerAddonClass3 != OldPlayerAddonClass3)
 	{
 		SetAddon(Addon3,OldPlayerAddonClass3, PlayerAddonClass3);
 		OldPlayerAddonClass3 = PlayerAddonClass3;
@@ -167,17 +167,17 @@ simulated function Tick(float DeltaTime)
 simulated function TimeWeaponEquipping()
 {
 	local DVPawn ZP;
-	
 	ZP = DVPawn(Owner);
 	AmmoCount = MaxAmmo;
-	if (WorldInfo.NetMode != NM_DedicatedServer)
+	
+	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) 
+	 && ZP != None)
 	{
 		`log("DVW > TimeWeaponEquipping" @AddonClass1 @AddonClass2 @AddonClass3 @self);
-		ServerSetAddonClasses(AddonClass1, AddonClass2, AddonClass3);
-	}
-	
-	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) && ZP != None)
-	{
+		if (WorldInfo.NetMode == NM_StandAlone)
+		{
+			SetupAddons();
+		}
 		ZP.CurrentWeaponClass = self.class;
 		ZP.WeaponClassChanged();
 	}
@@ -234,10 +234,24 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
 	// Weapon add-ons
-	SpawnAddon(PlayerAddonClass1);
-	SpawnAddon(PlayerAddonClass2);
-	SpawnAddon(PlayerAddonClass3);
+	if (WorldInfo.NetMode == NM_StandAlone)
+	{
+		SpawnAddon(PlayerAddonClass1);
+		SpawnAddon(PlayerAddonClass2);
+		SpawnAddon(PlayerAddonClass3);
+	}
+	else if (Role == ROLE_Authority)
+	{
+		SetupAddons();
+	}
 	`log("DVW > AttachWeaponTo" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
+}
+
+
+/*--- Addons ---*/
+reliable client simulated function SetupAddons()
+{
+	ServerSetAddonClasses(AddonClass1, AddonClass2, AddonClass3);
 }
 
 
@@ -284,6 +298,7 @@ simulated function SaveStatus()
 	AddonClass2 = PlayerAddonClass2;
 	AddonClass3 = PlayerAddonClass3;
 	SaveConfig();
+	`log("DVW > SaveStatus" @AddonClass1 @AddonClass2 @AddonClass3 @self);
 }
 
 
@@ -323,7 +338,7 @@ simulated function FillAddonList()
 
 
 /*--- Manage an add-on request (add or delete) ---*/
-function RequestAddon(byte AddonID)
+simulated function RequestAddon(byte AddonID)
 {
 	`log("DVW > RequestAddon" @AddonID @self);
 	
@@ -346,9 +361,9 @@ function RequestAddon(byte AddonID)
 
 
 /*--- Add-on toggle ---*/
-reliable client function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
+simulated function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 {
-	`log("DVW > SetAddon -" @OldAddon @"-" @OldClass @"-" @NewClass @self);
+	`log("DVW > SetAddon -" @OldClass @"-" @NewClass @self);
 	
 	if (OldClass != "")
 		RemoveAddon(OldAddon);
@@ -389,7 +404,7 @@ simulated function SpawnAddon(string AddonClass)
 
 
 /*--- Add-on deletion ---*/
-function RemoveAddon(DVWeaponAddon OldAddon)
+simulated function RemoveAddon(DVWeaponAddon OldAddon)
 {
 	`log("DVW > RemoveAddon" @OldAddon @self);	
 	
@@ -420,11 +435,10 @@ function RemoveAddon(DVWeaponAddon OldAddon)
 /*--- Add-on loading ---*/
 simulated function DVWeaponAddon GetAddon(string AddonClass)
 {
-	`log("DVW > GetAddon" @AddonClass @self);
-	
+	local DVWeaponAddon wpAdd;
 	if (AddonClass != "")
 	{
-		return Spawn(
+		wpAdd = Spawn(
 			class<DVWeaponAddon>(DynamicLoadObject(
 				GetModuleName() $"." $AddonClass,
 				class'Class',
@@ -432,6 +446,8 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 			self
 		);
 	}
+	`log("DVW > GetAddon >" @AddonClass @">" @wpAdd @self);
+	return wpAdd;
 }
 
 
@@ -661,7 +677,9 @@ simulated function PlayImpactEffects(vector HitLocation)
 	if (P != None)
 	{		
 		// Taking fire !
-		HitActor = Trace(NewHitLoc, HitNormal, (HitLocation - (HitNormal * 32)), HitLocation + (HitNormal * 32), true,, HitInfo, TRACEFLAG_Bullet);
+		HitActor = Trace(NewHitLoc, HitNormal, (HitLocation - (HitNormal * 32)), 
+			HitLocation + (HitNormal * 32),
+			true,, HitInfo, TRACEFLAG_Bullet);
 		if(Pawn(HitActor) != none)
 		{
 			CheckHitInfo(HitInfo, Pawn(HitActor).Mesh, -HitNormal, NewHitLoc);
@@ -675,7 +693,8 @@ simulated function PlayImpactEffects(vector HitLocation)
 		}
 		
 		// Particle system template
-		if ( HitActor != None && (Pawn(HitActor) == None || Vehicle(HitActor) != None) && (ImpactEffect.ParticleTemplate != None))
+		if ( HitActor != None && (Pawn(HitActor) == None || Vehicle(HitActor) != None) 
+		 && (ImpactEffect.ParticleTemplate != None))
 		{
 			HitNormal = normal(FireDir - ( 2 *  HitNormal * (FireDir dot HitNormal) ) ) ;
 			FireParticleSystem(ImpactEffect.ParticleTemplate, HitLocation, rotator(HitNormal));
@@ -822,6 +841,9 @@ defaultproperties
 	EffectSockets(1)=MF
 	
 	// Initialization
+	OldPlayerAddonClass1=""
+	OldPlayerAddonClass2=""
+	OldPlayerAddonClass3=""
 	bZoomed=false
 	bHidden=false
 	bWeaponEmpty=false
