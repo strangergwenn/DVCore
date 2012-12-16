@@ -106,14 +106,20 @@ simulated function PostBeginPlay()
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
 {
-	local string TeamName;
 	super.Possess(aPawn, bVehicleTransition);
 	UpdatePawnColor();
-	
-	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
-	ShowGenericMessage(lYouAreInTeam @ TeamName);
+	ShowTeam();
 	bConfiguring = false;
 	HideScores();
+}
+
+
+/*--- Inform of the team ---*/
+reliable client simulated function ShowTeam()
+{
+	local string TeamName;
+	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
+	ShowGenericMessage(lYouAreInTeam @ TeamName);
 }
 
 
@@ -339,7 +345,7 @@ exec function SwitchTeam()
 		return;
 	
 	super.SwitchTeam();
-	DVHUD(myHUD).GameplayMessage(lTeamSwitch);	
+	DVHUD(myHUD).GameplayMessage(lTeamSwitch);
 }
 
 

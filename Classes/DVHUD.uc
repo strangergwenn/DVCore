@@ -62,7 +62,7 @@ event PostRender()
 	}
 	
 	// Debug
-	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED PRE ALPHA - CL 1048", 400, 10);
+	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED PRE ALPHA - CL 1089", 400, 10);
 	
 	// End
 	ToggleRespawnMenu();
@@ -221,7 +221,7 @@ function PutShadedText(color col, string StringMessage2, float ScreenX, float Sc
 }
 function PutText(color col, string StringMessage2, float ScreenX, float ScreenY, bool bIsShade)
 {
-	Canvas.Font = GetFontSizeIndex(1);
+	Canvas.Font = GetFontSizeIndex(0);
 	
 	if (bIsShade)
 	{

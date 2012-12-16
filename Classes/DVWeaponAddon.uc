@@ -74,12 +74,13 @@ simulated function AttachToWeapon(DVWeapon wp)
 	`log("DVWA > AttachToWeapon" @self);
 	
 	// Mesh
+	Weap = wp;
 	AttachComponent(Mesh);
+	Mesh.SetHidden(false);
 	Mesh.SetShadowParent(wp.Mesh);
 	Mesh.SetLightEnvironment(wp.Mesh.LightEnvironment);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
-	Mesh.SetHidden(false);
-	Weap = wp;
+	`log("DVWA > Spawned and attached" @Mesh @"to" @wp.Mesh @self);
 	
 	// Properties override
 	if (SmoothingFactor != 0.0)
@@ -127,7 +128,10 @@ simulated function DetachFromWeapon(DVWeapon wp)
 		Mesh.SetHidden(true);
 		
 		if (wp.Mesh != None)
+		{
+			`log("DVWA > Detaching from" @wp.Mesh @self);
 			SkeletalMeshComponent(wp.Mesh).DetachComponent(Mesh);
+		}
 	}
 	
 	// Properties override
@@ -144,7 +148,10 @@ simulated function DetachFromWeapon(DVWeapon wp)
 	
 	// Bonus
 	if (AmmoBonus != 0.0)
+	{
 		wp.MaxAmmo /= AmmoBonus;
+		wp.AddAmmo(wp.MaxAmmo);
+	}
 	if (DamageBonus != 0.0)
 		wp.InstantHitDamage[0] /= DamageBonus;
 	if (FireRateBonus != 0.0)
@@ -216,6 +223,4 @@ defaultproperties
 	bSilenced=false
 	bRequiresLongRail=false
 	bRequiresCannonMount=false
-	bOnlyRelevantToOwner=false
-	bOnlyDirtyReplication=false
 }
