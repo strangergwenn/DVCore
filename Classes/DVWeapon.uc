@@ -96,7 +96,7 @@ var array< class<DVWeaponAddon> > AddonList;
 replication
 {
 	if ( bNetDirty )
-		bZoomed, bWeaponEmpty, PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
+		MaxAmmo, bZoomed, bWeaponEmpty, PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
 }
 
 

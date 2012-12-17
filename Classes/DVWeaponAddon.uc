@@ -105,7 +105,10 @@ simulated function AttachToWeapon(DVWeapon wp)
 	
 	// Bonus
 	if (AmmoBonus != 0.0)
+	{
 		wp.MaxAmmo *= AmmoBonus;
+		wp.AddAmmo(wp.MaxAmmo);
+	}
 	if (DamageBonus != 0.0)
 		wp.InstantHitDamage[0] *= DamageBonus;
 	if (FireRateBonus != 0.0)
@@ -150,7 +153,6 @@ simulated function DetachFromWeapon(DVWeapon wp)
 	if (AmmoBonus != 0.0)
 	{
 		wp.MaxAmmo /= AmmoBonus;
-		wp.AddAmmo(wp.MaxAmmo);
 	}
 	if (DamageBonus != 0.0)
 		wp.InstantHitDamage[0] /= DamageBonus;

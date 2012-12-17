@@ -23,13 +23,13 @@ var (DVPickup) const SoundCue			PickupSound;
 	Private attributes
 ----------------------------------------------------------*/
 
-var DynamicLightEnvironmentComponent LightEnvironment;
+var DynamicLightEnvironmentComponent 	LightEnvironment;
+var PointLightComponent 				FlagLight;
 
 
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
-
 
 /*--- Taken directly from Actor.uc since it overrides PickupFactory.uc ---*/
 simulated event SetInitialState()
@@ -81,6 +81,7 @@ simulated function SetPickupMesh()
 {
 	AttachComponent(PickupMesh);
 	SetPickupVisible();
+	FlagLight.SetEnabled(true);
 }
 
 
@@ -93,6 +94,7 @@ auto state Pickup
 	function SpawnCopyFor(Pawn P)
 	{
 		PlaySound(PickupSound, false, true);
+		FlagLight.SetEnabled(false);
 	}
 	
 	function bool ValidTouch(Pawn Other)
@@ -118,6 +120,7 @@ auto state Pickup
 	event BeginState(name PreviousStateName)
 	{
 		TriggerEventClass(class'SeqEvent_PickupStatusChange', None, 0);
+		FlagLight.SetEnabled(true);
 	}
 }
 
@@ -136,6 +139,19 @@ defaultproperties
  	End Object
   	LightEnvironment=PickupLightEnvironment
   	Components.Add(PickupLightEnvironment)
+  	
+	// Ambient light
+	Begin Object class=PointLightComponent name=DynLightComponent
+		Brightness=20.0
+		LightColor=(R=250,G=140,B=10)
+		Radius=140.0
+		bEnabled=true
+		CastShadows=false
+		bRenderLightShafts=false
+		LightingChannels=(Dynamic=true,CompositeDynamic=true)
+	End Object
+	FlagLight=DynLightComponent
+	Components.Add(DynLightComponent)
 	
  	// Mesh
 	Begin Object Class=StaticMeshComponent Name=BaseMeshComp
