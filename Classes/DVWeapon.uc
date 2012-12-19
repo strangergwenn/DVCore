@@ -16,9 +16,10 @@ class DVWeapon extends UDKWeapon
 var (DVWeapon) const SoundCue				WeaponEmptySound;
 var (DVWeapon) const SoundCue				SilencedWeaponSound;
 var (DVWeapon) const array<SoundCue>		WeaponFireSnd;
-var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 
+var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
+var (DVWeapon) const class<UDKExplosionLight> MuzzleFlashLightClass;
 
 var (DVWeapon) vector						ZoomOffset;
 
@@ -27,6 +28,7 @@ var (DVWeapon) bool							bSilenced;
 var (DVWeapon) bool							bLongRail;
 var (DVWeapon) bool							bCannonMount;
 
+var (DVWeapon) float						MuzzleFlashDuration;
 var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
 var (DVWeapon) float						RecoilAngle;
@@ -69,6 +71,7 @@ var (DVWeapon) localized string				lWeaponDamage;
 ----------------------------------------------------------*/
 
 var ParticleSystemComponent		MuzzleFlashPSC;
+var	UDKExplosionLight			MuzzleFlashLight;
 
 var bool						bWeaponEmpty;
 var bool						bZoomed;
@@ -265,6 +268,8 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 		
 		if (MeshCpnt != None)
 			MeshCpnt.DetachComponent(Mesh);
+		if (MuzzleFlashLight != None)
+			SkeletalMeshComponent(Mesh).DetachComponent(MuzzleFlashLight);
 	}
 	
 	// Weapon add-ons
@@ -284,6 +289,49 @@ simulated function int AddAmmo(int amount)
 	AmmoCount = Clamp(AmmoCount + amount, 0, MaxAmmo);
 	
 	return AmmoCount - PreviousAmmo;
+}
+
+
+/*----------------------------------------------------------
+	Muzzle flash light
+----------------------------------------------------------*/
+
+/*--- Spawn or reset the light ---*/
+simulated function CauseMuzzleFlash()
+{
+	if (MuzzleFlashLight == None)
+	{
+		if (MuzzleFlashLightClass != None)
+		{
+			MuzzleFlashLight = new(Outer) MuzzleFlashLightClass;
+			if (Mesh != None)
+			{
+				SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashLight, EffectSockets[0]);
+			}
+		}
+	}
+	else
+	{
+		MuzzleFlashLight.ResetLight();
+	}
+	SetTimer(MuzzleFlashDuration,false, 'MuzzleFlashTimer');
+
+}
+
+/*--- Flash callback ---*/
+simulated function MuzzleFlashTimer()
+{
+	if (MuzzleFlashLight != None)
+	{
+		MuzzleFlashLight.SetEnabled(false);
+	}
+}
+
+/*--- Stop the flash ---*/
+simulated function StopMuzzleFlash()
+{
+	ClearTimer('MuzzleFlashTimer');
+	MuzzleFlashTimer();
 }
 
 
@@ -656,8 +704,14 @@ simulated function ProcessInstantHit(byte FiringMode, ImpactInfo Impact, optiona
 /*--- Muzzle flash ---*/
 simulated function PlayFiringEffects(vector HitLocation)
 {
-	if (!bSilenced && MuzzleFlashPSC != None)
-		MuzzleFlashPSC.ActivateSystem();
+	if (!bSilenced)
+	{
+		if(MuzzleFlashPSC != None)
+		{
+			MuzzleFlashPSC.ActivateSystem();
+		}
+		CauseMuzzleFlash();
+	}
 }
 
 
@@ -835,6 +889,7 @@ defaultproperties
 	
 	// Effects
 	MuzzleFlashPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
+	MuzzleFlashDuration=0.3
 	WeaponFireSnd[0]=None
 	WeaponFireSnd[1]=None
 	EffectSockets(0)=MF
@@ -846,6 +901,7 @@ defaultproperties
 	OldPlayerAddonClass3=""
 	bZoomed=false
 	bHidden=false
+	bSilenced=false
 	bWeaponEmpty=false
 	bOnlyRelevantToOwner=false
 	bOnlyDirtyReplication=false
