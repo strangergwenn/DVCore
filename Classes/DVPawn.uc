@@ -620,6 +620,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 			if (KillerName == "")
 			{
 				KillerName = Attacker.GetPlayerName();
+				bForceNetUpdate = true;
 			}
 			if (Attacker.Pawn != None)
 				Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
@@ -628,6 +629,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	if (Controller != None && UserName == "")
 	{
 		UserName = DVPlayerController(Controller).GetPlayerName();
+		bForceNetUpdate = true;
 	}
 	
 	// Headshot management
