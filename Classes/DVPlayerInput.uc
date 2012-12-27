@@ -23,7 +23,7 @@ var IntPoint						MousePosition;
 	Public methods
 ----------------------------------------------------------*/
 
-/*--- Mouse input ---*/
+/** @brief Mouse input */
 event PlayerInput(float DeltaTime)
 {
 	if (myHUD != None)
@@ -41,8 +41,16 @@ event PlayerInput(float DeltaTime)
 	super.PlayerInput(DeltaTime);
 }
 
+/**
+ * @brief Reset the mouse at the center of the screen
+ */
+function ResetMouse()
+{
+	MousePosition.X = myHUD.SizeX / 2;
+	MousePosition.Y = myHUD.SizeY / 2;
+}
 
-/*--- Ducking is mapped to running so this is RUNNING ---*/
+/** @brief Ducking is mapped to running so this is RUNNING */
 simulated exec function Duck()
 {
 	// Chatting
@@ -57,7 +65,7 @@ simulated exec function Duck()
 }
 
 
-/*--- Stop running (yeah, running) ---*/
+/** @brief Stop running (yeah, running) */
 simulated exec function UnDuck()
 {
 	bRun = 0;
@@ -65,7 +73,7 @@ simulated exec function UnDuck()
 }
 
 
-/*--- Jump ---*/
+/** @brief Jump */
 exec function Jump()
 {
 	// Chatting
@@ -76,7 +84,7 @@ exec function Jump()
 }
 
 
-/*--- Key pressed delegate ---*/
+/** @brief Key pressed delegate */
 function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float AmountDepressed, optional bool bGamepad)
 {
 	// Main menu keys
@@ -91,11 +99,18 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 		else if (KeyName == 'Escape')
 			DVHUD_Menu(myHUD).HudMovie.HidePopup();
 	}
+	
+	// New menu
+	else if (GHUD(myHUD) != None)
+	{
+		GHUD(myHUD).KeyPressed(KeyName, IEvent);
+		return true;
+	}
 	return false;
 }
 
 
-/*--- Get a key current binding ---*/
+/** @brief Get a key current binding */
 simulated exec function string GetKeyBinding(string Command)
 {
     local byte i;
@@ -108,7 +123,7 @@ simulated exec function string GetKeyBinding(string Command)
 }
 
 
-/*--- Switch a key binding ---*/
+/** @brief Switch a key binding */
 simulated exec function SetKeyBinding(name BindName, string Command)
 {
 	// Init
@@ -134,7 +149,7 @@ simulated exec function SetKeyBinding(name BindName, string Command)
 }
 
 
-/*--- Permit to lock movement when stuck ---*/
+/** @brief Permit to lock movement when stuck */
 simulated function PostProcessInput(float DeltaTime)
 {
 	if (bShouldStop && aBaseY > 0.0)
