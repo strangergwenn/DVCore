@@ -188,8 +188,9 @@ simulated function GMenu GetMenuByName(string SearchName)
  * @param Text				Button name
  * @param Comment			Button help
  * @param CB				Method to call on button press
+ * @return added item
  */
-simulated function AddButton(vector Pos, string Text, string Comment, delegate<GButton.PressCB> CB)
+simulated function GButton AddButton(vector Pos, string Text, string Comment, delegate<GButton.PressCB> CB)
 {
 	local GButton Temp;
 	Temp = Spawn(ButtonClass, self, , Location + (Pos >> Rotation));
@@ -197,20 +198,23 @@ simulated function AddButton(vector Pos, string Text, string Comment, delegate<G
 	Temp.SetPress(CB);
 	Temp.SetRotation(Rotation);
 	Items.AddItem(Temp);
+	return Temp;
 }
 
 /**
  * @brief Add a label on the menu
  * @param Pos				Offset from menu origin
  * @param Text				Label name
+ * @return added item
  */
-simulated function AddLabel(vector Pos, string Text)
+simulated function GLabel AddLabel(vector Pos, string Text)
 {
 	local GLabel Temp;
 	Temp = Spawn(LabelClass, self, , Location + (Pos >> Rotation));
 	Temp.Set(Text, "");
 	Temp.SetRotation(Rotation);
 	Items.AddItem(Temp);
+	return Temp;
 }
 
 /**
@@ -218,17 +222,24 @@ simulated function AddLabel(vector Pos, string Text)
  */
 simulated function PostBeginPlay()
 {
+	local vector X, Y, Z;
 	local rotator ViewRot;
 	super.PostBeginPlay();
 	PreviousMenu = GetRelatedMenu(true);
 	NextMenu = GetRelatedMenu(false);
 	
-	// Viewpoint 
-	ViewRot = Rotation;
+	// Viewpoint rotation (spawn a reference actor)
+	ViewRot.Pitch -= 0;
 	ViewRot.Yaw -= 16384;
-	ViewPoint = Spawn(class'GViewPoint', self,, Location + (ViewOffset >> Rotation), ViewRot);
+	ViewRot.Roll -= 0;
+	GetAxes(ViewRot, X, Y, Z);
+	ViewPoint = Spawn(
+		class'GViewPoint', self,,
+		Location + (ViewOffset >> Rotation),
+		OrthoRotation(X >> Rotation, Y >> Rotation, Z >> Rotation)
+	);
 	
-	// Menu switching
+	// Menu switching buttons
 	if (PreviousMenu != None)
 	{
 		AddButton(Vect(-220,0,0), PreviousMenu.MenuName, PreviousMenu.MenuComment, GoPrevious);
@@ -239,7 +250,7 @@ simulated function PostBeginPlay()
 	}
 	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
 	
-	// Label
+	// Helper label
 	Label = Spawn(LabelClass, self, , Location);
 	Label.SetRotation(Rotation);
 	Label.Set(MenuName @"-" @MenuComment, "");

@@ -5,7 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GTextField extends GButton
+class GTextField extends GToggleButton
 	placeable;
 
 
@@ -99,5 +99,4 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
-	bIsToggle=true
 }

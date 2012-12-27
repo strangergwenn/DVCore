@@ -5,7 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GButton extends GLabel
+class GToggleButton extends GButton
 	placeable;
 
 
@@ -13,18 +13,18 @@ class GButton extends GLabel
 	Public attributes
 ----------------------------------------------------------*/
 
-var (Button) const float			ClickTimeout;
+var (Button) const vector			EffectLoc;
 
-var (Button) const SoundCue 		ClickSound;
+var (Button) const rotator			EffectRot;
+
+var (Button) const ParticleSystem	Effect;
 
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
-var bool							bClicking;
-
-var delegate<PressCB>				PressEvent;
+var bool							bIsActive;
 
 
 /*----------------------------------------------------------
@@ -32,21 +32,45 @@ var delegate<PressCB>				PressEvent;
 ----------------------------------------------------------*/
 
 /**
- * @brief Method definition for press event callbacks
- * @param Reference				Caller actor
+ * @brief Set the label data and activates it
+ * @param T					Text to display
+ * @param C					Comment to display
  */
-delegate PressCB(Actor Caller)
+simulated function Set(string T, string C)
 {
-	`log(Caller @"was clicked");
+	super.Set(T, C);
+	TextMaterial.SetVectorParameterValue('Color', (bIsActive ? OnLight : OffLight));
 }
 
 /**
- * @brief Register the button callback
- * @param CB				Press callback
+ * @brief Set the button state
+ * @param bNewState			New state to set
  */
-simulated function SetPress(delegate<PressCB> CB)
+simulated function SetState(bool bNewState)
 {
-	PressEvent = CB;
+	if (bEnabled)
+	{
+		bIsActive = bNewState;
+		if (bNewState && Effect != None && WorldInfo.NetMode != NM_DedicatedServer)
+		{
+			WorldInfo.MyEmitterPool.SpawnEmitter(
+				Effect,
+				Location + (EffectLoc >> Rotation),
+				EffectRot + Rotation
+			);
+		}
+	}
+	MoveSmooth((bNewState ? -ClickMove : ClickMove) >> Rotation);
+	TextMaterial.SetVectorParameterValue('Color', (bNewState ? OnLight : OffLight));
+}
+
+/**
+ * @brief Get the button state
+ * @return					true if on
+ */
+simulated function bool GetState()
+{
+	return bIsActive;
 }
 
 /**
@@ -54,7 +78,6 @@ simulated function SetPress(delegate<PressCB> CB)
  */
 simulated function OverIn()
 {
-	MoveSmooth((-ClickMove) >> Rotation);
 	GMenu(Owner).SetLabel(Comment);
 	PlayUISound(OverSound);
 }
@@ -65,21 +88,9 @@ simulated function OverIn()
  */
 simulated function OverOut()
 {
-	MoveSmooth(ClickMove >> Rotation);
 	GMenu(Owner).SetLabel("");
 }
 
-/**
- * @brief Signal a press event from HUD
- * @param					true if right click (false if left)
- */
-simulated function Press(bool bIsRightClick)
-{
-	`log("GB > Press" @bIsRightClick @Text);
-	bClicking = true;
-	ClearTimer('PressTimeout');
-	SetTimer(ClickTimeout, false, 'PressTimeout');
-}
 
 /**
  * @brief Signal a release event from HUD
@@ -89,12 +100,13 @@ simulated function Release(bool bIsRightClick)
 {
 	if (bEnabled)
 	{
-		`log("GB > Release" @bIsRightClick @Text);
+		`log("GTB > Release" @bIsRightClick @Text);
 		
 		// Toggle mode
 		if (bClicking)
 		{
 			bClicking = false;
+			SetState(!bisActive);
 			if (!bIsRightClick)
 			{
 				PressEvent(self);
@@ -119,14 +131,6 @@ simulated function PostBeginPlay()
 	SetPress(PressCB);
 }
 
-/**
- * @brief Click has failed
- */
-simulated function PressTimeout()
-{
-	bClicking = false;
-}
-
 
 /*----------------------------------------------------------
 	Properties
@@ -135,19 +139,7 @@ simulated function PressTimeout()
 defaultproperties
 {
 	// Behaviour
-	ClickMove=(X=0,Y=10,Z=0)
-	bClicking=false
-	ClickTimeout=1.0
-	OverSound=SoundCue'DV_Sound.UI.A_Click'
-	ClickSound=SoundCue'DV_Sound.UI.A_Bip'
-	
-	// Text
-	TextOffsetX=30.0
-	TextOffsetY=670.0
-	
-	// Mesh
-	Begin Object Name=LabelMesh
-		StaticMesh=StaticMesh'DV_UI.Mesh.SM_Button'
-		Rotation=(Yaw=32768)
-	End Object
+	bIsActive=false
+	EffectLoc=(X=70,Y=0,Z=35)
+	Effect=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
 }

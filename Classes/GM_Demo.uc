@@ -25,6 +25,15 @@ class GM_Demo extends GMenu
 	Button callbacks
 ----------------------------------------------------------*/
 
+/**
+ * @brief Method definition for press event callbacks
+ * @param Reference				Caller actor
+ */
+delegate GoVoid(Actor Caller)
+{
+	`log(Caller @"was clicked");
+}
+
 
 /*----------------------------------------------------------
 	Private methods
@@ -35,8 +44,13 @@ class GM_Demo extends GMenu
  */
 simulated function PostBeginPlay()
 {
+	local GButton fire;
 	super.PostBeginPlay();
-	//AddButton(Vect(0,0,50), "Quit", "Quit", GoExit);
+	
+	fire = Spawn(class'GToggleButton', self, , Location + (Vect(0,0,100) >> Rotation));
+	fire.Set("FIRE", "There is a fire...");
+	fire.SetPress(GoVoid);
+	fire.SetRotation(Rotation);
 }
 
 /*----------------------------------------------------------
