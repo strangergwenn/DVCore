@@ -111,6 +111,7 @@ function KeyPressed(name Key, EInputEvent Evt)
 		if (GLabel(Target) != FocusActor && FocusActor != None)
 		{
 			FocusActor.LostFocus();
+			FocusActor = None;
 		}
 		
 		// Button press and release
@@ -131,7 +132,32 @@ function KeyPressed(name Key, EInputEvent Evt)
 	// Keyboard events
 	else if (Evt == IE_Pressed && FocusActor.IsA('GTextField'))
 	{
-		GTextField(FocusActor).KeyPressed(Key);
+		switch(Key)
+		{
+			case 'Left':
+			case 'Up':
+			case 'Down':
+			case 'Right':
+			case 'Home':
+			case 'End':
+			case 'Insert':
+			case 'PageUp':
+			case 'PageDown':
+			case 'LeftAlt':
+			case 'RightAlt':
+			case 'RightShift':
+			case 'ScrollLock':
+			case 'LeftControl':
+			case 'RightControl':
+			case 'MouseScrollUp':
+			case 'MouseScrollDown':
+			case 'ThumbMouseButton':
+			case 'ThumbMouseButton2':
+				break;
+			
+			default:
+				GTextField(FocusActor).KeyPressed(Key);
+		}
 	}
 }
 

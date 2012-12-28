@@ -24,6 +24,8 @@ var (Button) const SoundCue 		ClickSound;
 
 var bool							bClicking;
 
+var GMenu 							TargetMenu;
+
 var delegate<PressCB>				PressEvent;
 
 
@@ -47,6 +49,15 @@ delegate PressCB(Actor Caller)
 simulated function SetPress(delegate<PressCB> CB)
 {
 	PressEvent = CB;
+}
+
+/**
+ * @brief Set a menu target
+ * @param Trg				Menu to open
+ */
+simulated function SetTarget(GMenu Trg)
+{
+	TargetMenu = Trg;
 }
 
 /**

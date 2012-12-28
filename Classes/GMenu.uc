@@ -35,8 +35,7 @@ var (Menu) GViewPoint					ViewPoint;
 var GLabel								Label;
 var array<GLabel>						Items;
 
-var GMenu 								PreviousMenu;
-var GMenu 								NextMenu;
+var GMenu								Origin;
 
 
 /*----------------------------------------------------------
@@ -59,6 +58,35 @@ simulated function SetLabel(string Text)
 	}
 }
 
+/**
+ * @brief Set the previous menu data
+ * @param Org				Previous menu reference
+ */
+simulated function SetOrigin(GMenu Org)
+{
+	Origin = Org;
+}
+
+/**
+ * @brief Check the string presence in an array
+ * @param str					String to search
+ * @param data					Array to search in
+ * @param bInvert				Invert the searching mode
+ * @return Index found or -1
+ */
+function int IsInArray(string str, array<string> data, optional bool bInvert)
+{
+	local byte i;
+	
+	for (i = 0; i < data.Length; i++)
+	{
+		if (   (!bInvert && InStr(str, data[i]) != -1)
+			|| (bInvert && InStr(data[i], str) != -1))
+			return i;
+	}
+	return -1;
+}
+
 
 /*----------------------------------------------------------
 	Button callbacks
@@ -66,31 +94,37 @@ simulated function SetLabel(string Text)
 
 /**
  * @brief Exit the game
+ * @param Caller			Caller actor
  */
 delegate GoExit(Actor Caller)
 {
+	`log("GM > GoExit" @self);
 	ConsoleCommand("quit");
 }
 
 /**
- * @brief Go to previous
+ * @brief Change menu
+ * @param Caller			Caller actor
  */
-delegate GoPrevious(Actor Caller)
+delegate GoChangeMenu(Actor Caller)
 {
-	if (PreviousMenu != None)
+	`log("GM > GoChangeMenu" @self);
+	if (GButton(Caller).TargetMenu != None)
 	{
-		ChangeMenu(PreviousMenu);
+		ChangeMenu(GButton(Caller).TargetMenu);
 	}
 }
 
 /**
- * @brief Go to next
+ * @brief Back button
+ * @param Reference				Caller actor
  */
-delegate GoNext(Actor Caller)
+delegate GoBack(Actor Caller)
 {
-	if (NextMenu != None)
+	`log("GM > GoBack" @self);
+	if (Origin != None)
 	{
-		ChangeMenu(NextMenu);
+		ChangeMenu(Origin);
 	}
 }
 
@@ -112,6 +146,7 @@ simulated function ChangeMenu(GMenu NewMenu)
 
 	if (PC != None)
 	{
+		NewMenu.SetOrigin(self);
 		TransitionParams.BlendTime = 0.5;
 		TransitionParams.BlendFunction = VTBlend_EaseInOut;
 		TransitionParams.BlendExp = 2.0;
@@ -183,6 +218,23 @@ simulated function GMenu GetMenuByName(string SearchName)
 }
 
 /**
+ * @brief Add a menu link on the menu
+ * @param Pos				Offset from menu origin
+ * @param Target			Target menu
+ * @return added item
+ */
+simulated function GButton AddMenuLink(vector Pos, GMenu Target)
+{
+	local GButton Temp;
+	if (Target != None)
+	{
+		Temp = AddButton(Pos, Target.MenuName, Target.MenuComment, GoChangeMenu);
+		Temp.SetTarget(Target);
+	}
+	return Temp;
+}
+
+/**
  * @brief Add a button on the menu
  * @param Pos				Offset from menu origin
  * @param Text				Button name
@@ -190,10 +242,11 @@ simulated function GMenu GetMenuByName(string SearchName)
  * @param CB				Method to call on button press
  * @return added item
  */
-simulated function GButton AddButton(vector Pos, string Text, string Comment, delegate<GButton.PressCB> CB)
+simulated function GButton AddButton(vector Pos, string Text, string Comment, delegate<GButton.PressCB> CB,
+	optional class<GButton> SpawnClass=ButtonClass)
 {
 	local GButton Temp;
-	Temp = Spawn(ButtonClass, self, , Location + (Pos >> Rotation));
+	Temp = Spawn(SpawnClass, self, , Location + (Pos >> Rotation));
 	Temp.Set(Text, Comment);
 	Temp.SetPress(CB);
 	Temp.SetRotation(Rotation);
@@ -225,8 +278,6 @@ simulated function PostBeginPlay()
 	local vector X, Y, Z;
 	local rotator ViewRot;
 	super.PostBeginPlay();
-	PreviousMenu = GetRelatedMenu(true);
-	NextMenu = GetRelatedMenu(false);
 	
 	// Viewpoint rotation (spawn a reference actor)
 	ViewRot.Pitch -= 0;
@@ -239,22 +290,26 @@ simulated function PostBeginPlay()
 		OrthoRotation(X >> Rotation, Y >> Rotation, Z >> Rotation)
 	);
 	
-	// Menu switching buttons
-	if (PreviousMenu != None)
-	{
-		AddButton(Vect(-220,0,0), PreviousMenu.MenuName, PreviousMenu.MenuComment, GoPrevious);
-	}
-	if (NextMenu != None)
-	{
-		AddButton(Vect(220,0,0), NextMenu.MenuName, NextMenu.MenuComment, GoNext);
-	}
-	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
-	
-	// Helper label
+	// Helper label and custom UI
 	Label = Spawn(LabelClass, self, , Location);
 	Label.SetRotation(Rotation);
 	Label.Set(MenuName @"-" @MenuComment, "");
 	Items.AddItem(Label);
+	SpawnUI();
+}
+
+/**
+ * @brief Launch the UI fo this menu
+ */
+simulated function SpawnUI()
+{
+	local GMenu PreviousMenu, NextMenu;
+	PreviousMenu = GetRelatedMenu(true);
+	NextMenu = GetRelatedMenu(false);
+	
+	AddMenuLink(Vect(-220,0,0), PreviousMenu);
+	AddMenuLink(Vect(220,0,0), NextMenu);
+	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
 }
 
 /**

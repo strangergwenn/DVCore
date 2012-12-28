@@ -112,7 +112,6 @@ simulated function Over()
 simulated function OverIn()
 {
 	MoveSmooth((-ClickMove) >> Rotation);
-	GMenu(Owner).SetLabel(Comment);
 	PlayUISound(OverSound);
 }
 
@@ -123,7 +122,6 @@ simulated function OverIn()
 simulated function OverOut()
 {
 	MoveSmooth(ClickMove >> Rotation);
-	GMenu(Owner).SetLabel("");
 }
 
 /**
@@ -179,8 +177,9 @@ simulated event Tick(float DeltaTime)
 		else if (bOver)
 		{
 			OverIn();
-			bTickEnabled = false;
-			SetTimer(0.5, false, 'EnableTick');
+			// TODO xxx
+			//bTickEnabled = false;
+			//SetTimer(0.25, false, 'EnableTick');
 		}
 		bLastOver = bOver;
 		bOver = false;

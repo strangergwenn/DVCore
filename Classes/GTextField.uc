@@ -10,10 +10,6 @@ class GTextField extends GToggleButton
 
 
 /*----------------------------------------------------------
-	Public attributes
-----------------------------------------------------------*/
-
-/*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
@@ -61,12 +57,48 @@ simulated function SetState(bool bNewState)
  */
 simulated function KeyPressed(name Key)
 {
-	if (bEnabled)
+	if (bEnabled && bIsActive)
 	{
-		if (Key == 'BackSpace')
-			Text = Left(Text, Len(Text) -1);
-		else
-			Text $= Key;
+		switch(Key)
+		{
+			case 'BackSpace':
+				Text = Left(Text, Len(Text) -1);
+				break;
+			case 'Enter':
+				break;
+			case 'NumPadOne':
+				Text $= "1";
+				break;
+			case 'NumPadTwo':
+				Text $= "2";
+				break;
+			case 'NumPadThree':
+				Text $= "3";
+				break;
+			case 'NumPadFour':
+				Text $= "4";
+				break;
+			case 'NumPadFive':
+				Text $= "5";
+				break;
+			case 'NumPadSix':
+				Text $= "6";
+				break;
+			case 'NumPadSeven':
+				Text $= "7";
+				break;
+			case 'NumPadEight':
+				Text $= "8";
+				break;
+			case 'NumPadNine':
+				Text $= "9";
+				break;
+			case 'NumPadZero':
+				Text $= "0";
+				break;
+			default:
+				Text $= Key;
+		}
 	}
 }
 
@@ -75,8 +107,8 @@ simulated function KeyPressed(name Key)
  */
 simulated function LostFocus()
 {
+	SetState(false);
 }
-
 
 
 /*----------------------------------------------------------
@@ -89,7 +121,7 @@ simulated function LostFocus()
 simulated function PostBeginPlay()
 {
 	super.PostBeginPlay();
-	Set("", "I am a text field");
+	Set("", "Text field");
 }
 
 
@@ -99,4 +131,5 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
+	Effect=None
 }
