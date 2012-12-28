@@ -109,6 +109,22 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 	return false;
 }
 
+/**
+ * Process a character input event (typing) routed through unrealscript from another object. This method is assigned as the value for the
+ * OnRecievedNativeInputKey delegate so that native input events are routed to this unrealscript function.
+ * @param	ControllerId	the controller that generated this character input event
+ * @param	Unicode			the character that was typed
+ * @return	True to consume the character, false to pass it on.
+ */
+function bool InputChar(int ControllerId, string Unicode)
+{
+	if (GHUD(myHUD) != None)
+	{
+		GHUD(myHUD).CharPressed(Unicode);
+		return true;
+	}
+	return false;
+}
 
 /** @brief Get a key current binding */
 simulated exec function string GetKeyBinding(string Command)
@@ -121,7 +137,6 @@ simulated exec function string GetKeyBinding(string Command)
 			return string(Bindings[i].Name);
 	}
 }
-
 
 /** @brief Switch a key binding */
 simulated exec function SetKeyBinding(name BindName, string Command)
@@ -148,7 +163,6 @@ simulated exec function SetKeyBinding(name BindName, string Command)
 	SaveConfig();
 }
 
-
 /** @brief Permit to lock movement when stuck */
 simulated function PostProcessInput(float DeltaTime)
 {
@@ -164,4 +178,5 @@ simulated function PostProcessInput(float DeltaTime)
 defaultproperties
 {
 	OnReceivedNativeInputKey=KeyInput
+	OnReceivedNativeInputChar=InputChar
 }

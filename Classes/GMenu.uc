@@ -17,6 +17,8 @@ class GMenu extends Actor
 
 var (Menu) const int					Index;
 
+var (Menu) const float					MenuSwitchTime;
+
 var (Menu) const vector					ViewOffset;
 
 var (Menu) const string					MenuName;
@@ -64,7 +66,10 @@ simulated function SetLabel(string Text)
  */
 simulated function SetOrigin(GMenu Org)
 {
-	Origin = Org;
+	if (Origin == None)
+	{
+		Origin = Org;
+	}
 }
 
 /**
@@ -74,7 +79,7 @@ simulated function SetOrigin(GMenu Org)
  * @param bInvert				Invert the searching mode
  * @return Index found or -1
  */
-function int IsInArray(string str, array<string> data, optional bool bInvert)
+simulated function int IsInArray(string str, array<string> data, optional bool bInvert)
 {
 	local byte i;
 	
@@ -85,6 +90,34 @@ function int IsInArray(string str, array<string> data, optional bool bInvert)
 			return i;
 	}
 	return -1;
+}
+
+
+/*----------------------------------------------------------
+	Key methods
+----------------------------------------------------------*/
+
+/**
+ * @brief Called on tab key
+ * @param bIsGoingUp			Is the player going up ?
+ */
+simulated function Tab(bool bIsGoingUp)
+{
+}
+
+/**
+ * @brief Called on tab key
+ * @param bIsGoingUp			Is the player going up ?
+ */
+simulated function Scroll(bool bIsGoingUp)
+{
+}
+
+/**
+ * @brief Called on tab key
+ */
+simulated function Enter()
+{
 }
 
 
@@ -147,11 +180,12 @@ simulated function ChangeMenu(GMenu NewMenu)
 	if (PC != None)
 	{
 		NewMenu.SetOrigin(self);
-		TransitionParams.BlendTime = 0.5;
+		TransitionParams.BlendTime = MenuSwitchTime;
 		TransitionParams.BlendFunction = VTBlend_EaseInOut;
 		TransitionParams.BlendExp = 2.0;
 		TransitionParams.bLockOutgoing = false;
 		PC.SetViewTarget(NewMenu.ViewPoint, TransitionParams);
+		GHUD(PC.myHUD).SetCurrentMenu(NewMenu, MenuSwitchTime);
 	}
 }
 
@@ -334,6 +368,7 @@ defaultproperties
 	MenuComment="Change menu"
 	
 	// Behaviour
+	MenuSwitchTime=0.7
 	bEdShouldSnap=true
 	ButtonClass=class'GButton'
 	LabelClass=class'GLabel'

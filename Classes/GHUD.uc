@@ -24,6 +24,9 @@ var (HUD) const Texture2D 			CursorTexture;
 	Private attributes
 ----------------------------------------------------------*/
 
+var bool							bCaps;
+var bool							bSwitching;
+
 var string							DebugText;
 
 var vector							TargetLocation;
@@ -33,6 +36,8 @@ var Vector2D 						OldMousePosition;
 var Actor							Target;
 
 var GLabel							FocusActor;
+
+var GMenu							CurrentMenu;
 
 
 /*----------------------------------------------------------
@@ -52,6 +57,7 @@ simulated function PostBeginPlay()
 		if (Temp.Index == 0)
 		{
 			Temp.ChangeMenu(Temp);
+			SetCurrentMenu(Temp, Temp.MenuSwitchTime);
 			return;
 		}
 	}
@@ -89,76 +95,6 @@ event PostRender()
 		);
 	}
 	super.PostRender();
-}
-
-/**
- * @brief Register the last key
- * @param Key					Key used
- * @param Evt					Event type
- */
-function KeyPressed(name Key, EInputEvent Evt)
-{
-	Debug(""$Key);
-	if (Target == None)
-	{
-		return;
-	}
-
-	// Mouse events
-	if (Key == 'LeftMouseButton' || Key == 'RightMouseButton')
-	{
-		// Focus was lost
-		if (GLabel(Target) != FocusActor && FocusActor != None)
-		{
-			FocusActor.LostFocus();
-			FocusActor = None;
-		}
-		
-		// Button press and release
-		if (Target.IsA('GButton'))
-		{
-			if (Evt == IE_Pressed)
-			{
-				FocusActor = GLabel(Target);
-				GButton(Target).Press((Key == 'RightMouseButton'));
-			}
-			else if (Evt == IE_Released)
-			{
-				GButton(Target).Release((Key == 'RightMouseButton'));
-			}
-		}
-	}
-	
-	// Keyboard events
-	else if (Evt == IE_Pressed && FocusActor.IsA('GTextField'))
-	{
-		switch(Key)
-		{
-			case 'Left':
-			case 'Up':
-			case 'Down':
-			case 'Right':
-			case 'Home':
-			case 'End':
-			case 'Insert':
-			case 'PageUp':
-			case 'PageDown':
-			case 'LeftAlt':
-			case 'RightAlt':
-			case 'RightShift':
-			case 'ScrollLock':
-			case 'LeftControl':
-			case 'RightControl':
-			case 'MouseScrollUp':
-			case 'MouseScrollDown':
-			case 'ThumbMouseButton':
-			case 'ThumbMouseButton2':
-				break;
-			
-			default:
-				GTextField(FocusActor).KeyPressed(Key);
-		}
-	}
 }
 
 /**
@@ -202,6 +138,26 @@ function GetMouseWorldLocation()
 }
 
 /**
+ * @brief Register the current menu
+ * @param NewM					New menu to use
+ * @param SwitchTime			Freeze time
+ */
+function SetCurrentMenu(GMenu NewM, float SwitchTime)
+{
+	bSwitching = true;
+	CurrentMenu = NewM;
+	SetTimer(SwitchTime, false, 'UnFreeze');
+}
+
+/**
+ * @brief Un-freeze the HUD
+ */
+function UnFreeze()
+{
+	bSwitching = false;
+}
+
+/**
  * @brief Reset the mouse at the center of the screen
  */
 function ResetMouse()
@@ -227,6 +183,100 @@ function Debug(string Data)
 	DebugText = Data;
 }
 
+/**
+ * @brief Add a character
+ * @param Unicode				Character typed
+ */
+function CharPressed(string Unicode)
+{
+	if (FocusActor != None && !bSwitching)
+	{
+		if (FocusActor.IsA('GTextField'))
+		{
+			GTextField(FocusActor).KeyPressed(Unicode);
+		}
+	}
+}
+
+/**
+ * @brief Register the last key
+ * @param Key					Key used
+ * @param Evt					Event type
+ */
+function KeyPressed(name Key, EInputEvent Evt)
+{
+	Debug(""$Key);
+	if (bSwitching)
+	{
+		return;
+	}
+
+	// Mouse events
+	if (Target != None && (Key == 'LeftMouseButton' || Key == 'RightMouseButton'))
+	{
+		// Focus was lost
+		if (GLabel(Target) != FocusActor && FocusActor != None)
+		{
+			FocusActor.LostFocus();
+			FocusActor = None;
+		}
+		
+		// Button press and release
+		if (Target.IsA('GButton'))
+		{
+			if (Evt == IE_Pressed)
+			{
+				FocusActor = GLabel(Target);
+				GButton(Target).Press((Key == 'RightMouseButton'));
+			}
+			else if (Evt == IE_Released)
+			{
+				GButton(Target).Release((Key == 'RightMouseButton'));
+			}
+		}
+	}
+	
+	// Caps
+	else if (Key == 'LeftShift' || Key == 'LeftShift')
+	{
+		bCaps = (Evt != IE_Released);
+	}
+	
+	// Menu interaction
+	else if (CurrentMenu != None && (Evt == IE_Pressed || Evt == IE_Repeat))
+	{
+		switch (Key)
+		{
+			case 'BackSpace':
+				break;
+			case 'Tab':
+				CurrentMenu.Tab(bCaps);
+				break;
+			case 'Enter':
+				CurrentMenu.Enter();
+				break;
+			case 'Escape':
+				CurrentMenu.GoBack(None);
+				break;
+			case 'MouseScrollUp':
+				CurrentMenu.Scroll(true);
+				break;
+			case 'MouseScrollDown':
+				CurrentMenu.Scroll(false);
+				break;
+			default : return;
+		}
+		
+		if (FocusActor != None)
+		{
+			if (FocusActor.IsA('GTextField'))
+			{
+				GTextField(FocusActor).KeyPressed(""$Key);
+			}
+		}
+	}
+}
+
 
 /*----------------------------------------------------------
 	Properties
@@ -234,6 +284,8 @@ function Debug(string Data)
 
 defaultproperties
 {
+	bSwitching=false
+	bCaps=false
 	bUseCursor=true
 	TraceOffset=64.0
 	CursorColor=(R=255,G=255,B=255,A=255)

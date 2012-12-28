@@ -15,6 +15,8 @@ class GTextField extends GToggleButton
 
 var bool							bEditing;
 
+var bool							bClearNext;
+
 
 /*----------------------------------------------------------
 	Public methods
@@ -52,62 +54,42 @@ simulated function SetState(bool bNewState)
 }
 
 /**
- * @brief Key callback
- * @param Key				Name of the pressed key
- */
-simulated function KeyPressed(name Key)
-{
-	if (bEnabled && bIsActive)
-	{
-		switch(Key)
-		{
-			case 'BackSpace':
-				Text = Left(Text, Len(Text) -1);
-				break;
-			case 'Enter':
-				break;
-			case 'NumPadOne':
-				Text $= "1";
-				break;
-			case 'NumPadTwo':
-				Text $= "2";
-				break;
-			case 'NumPadThree':
-				Text $= "3";
-				break;
-			case 'NumPadFour':
-				Text $= "4";
-				break;
-			case 'NumPadFive':
-				Text $= "5";
-				break;
-			case 'NumPadSix':
-				Text $= "6";
-				break;
-			case 'NumPadSeven':
-				Text $= "7";
-				break;
-			case 'NumPadEight':
-				Text $= "8";
-				break;
-			case 'NumPadNine':
-				Text $= "9";
-				break;
-			case 'NumPadZero':
-				Text $= "0";
-				break;
-			default:
-				Text $= Key;
-		}
-	}
-}
-
-/**
  * @brief Called when the focus is lost (click etc)
  */
 simulated function LostFocus()
 {
 	SetState(false);
+}
+
+/**
+ * @brief Key callback
+ * @param Key				Name of the pressed key
+ */
+simulated function KeyPressed(string Key)
+{
+	if (bClearNext)
+	{
+		bClearNext = false;
+		return;	
+	}
+	
+	if (Key != "" && bEnabled && bIsActive)
+	{
+		`log("GTF > KeyPressed" @Key);
+		if (Key == "BackSpace")
+		{
+			bClearNext = true;
+			Text = Left(Text, Len(Text) -1);
+		}
+		else if (Len(Key) == 1)
+		{
+			Text $= Key;
+		}
+		else
+		{
+			bClearNext = true;
+		}
+	}
 }
 
 
@@ -121,7 +103,7 @@ simulated function LostFocus()
 simulated function PostBeginPlay()
 {
 	super.PostBeginPlay();
-	Set("", "Text field");
+	Set("...", "Text field");
 }
 
 
@@ -131,5 +113,15 @@ simulated function PostBeginPlay()
 
 defaultproperties
 {
+	Begin Object Name=LabelMesh
+		StaticMesh=StaticMesh'DV_UI.Mesh.SM_SimpleLabel'
+		Scale=0.8
+	End Object
+	
+	bClearNext=false
 	Effect=None
+	TextScale=5.0
+	TextOffsetX=30.0
+	TextOffsetY=25.0
+	TextMaterialTemplate=Material'DV_UI.Material.M_EmissiveLabel'
 }

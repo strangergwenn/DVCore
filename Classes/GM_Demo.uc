@@ -44,15 +44,9 @@ delegate GoVoid(Actor Caller)
  */
 simulated function SpawnUI()
 {
-	local GButton fire;
 	super.SpawnUI();
 	
-	fire = Spawn(class'GToggleButton', self, , Location + (Vect(0,0,100) >> Rotation));
-	fire.Set("FIRE", "There is a fire...");
-	fire.SetPress(GoVoid);
-	fire.SetRotation(Rotation);
-	
-	AddMenuLink(Vect(0,0,200), GetMenuByID(2000));
+	AddMenuLink(Vect(0,0,100), GetMenuByID(2000));
 	
 	Spawn(class'GTextField', self, , Location + (Vect(0,0,300) >> Rotation));
 }
