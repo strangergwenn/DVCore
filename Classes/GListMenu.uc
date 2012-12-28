@@ -15,6 +15,8 @@ class GListMenu extends GMenu
 	Public attributes
 ----------------------------------------------------------*/
 
+var (Menu) const int					ListMinSize;
+
 var (Menu) const vector					ListOffset;
 var (Menu) const vector					ScrollOffset;
 
@@ -26,6 +28,9 @@ var (Menu) const class<GListItem>		ListItemClass;
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
+
+var int									ListCount;
+var int									ScrollCount;
 
 var string								CurrentData;
 
@@ -79,17 +84,22 @@ delegate GoSelect(Actor Caller)
 simulated function Scroll(bool bIsGoingUp)
 {
 	local Actor Temp;
-	foreach AllActors(ListItemClass, Temp)
+	if (( bIsGoingUp && (ScrollCount < ListCount - ListMinSize))
+	 || (!bIsGoingUp && (ScrollCount > ListMinSize - ListCount)))
 	{
-		Temp.SetCollisionType(COLLIDE_NoCollision);
-	}
-	foreach AllActors(ListItemClass, Temp)
-	{
-		Temp.MoveSmooth((bIsGoingUp? -ScrollOffset : ScrollOffset) >> Rotation);
-	}
-	foreach AllActors(ListItemClass, Temp)
-	{
-		Temp.SetCollisionType(COLLIDE_BlockAll);
+		foreach AllActors(ListItemClass, Temp)
+		{
+			Temp.SetCollisionType(COLLIDE_NoCollision);
+		}
+		foreach AllActors(ListItemClass, Temp)
+		{
+			Temp.MoveSmooth((bIsGoingUp? -ScrollOffset : ScrollOffset) >> Rotation);
+		}
+		foreach AllActors(ListItemClass, Temp)
+		{
+			Temp.SetCollisionType(COLLIDE_BlockAll);
+		}
+		ScrollCount += (bIsGoingUp ? 1 : -1);
 	}
 }
 
@@ -144,6 +154,10 @@ function UpdateList()
 
 defaultproperties
 {
+	ListCount=0
+	ScrollCount=0
+	ListMinSize=6
+	
 	MenuName="List menu"
 	MenuComment="List some items"
 	ListItemClass=class'GListItem'

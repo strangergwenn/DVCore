@@ -37,12 +37,11 @@ delegate GoLaunch(Actor Caller)
  */
 function UpdateList()
 {
-	local byte i, Count;
+	local byte i;
 	local GButton Temp;
 	local string TempData;
 	local array<UDKUIResourceDataProvider> ProviderList;
 
-	Count = 0;
 	class'UDKUIDataStore_MenuItems'.static.GetAllResourceDataProviders(class'UDKUIDataProvider_MapInfo', ProviderList);
 	for (i = 0; i < ProviderList.length; i++)
 	{
@@ -50,14 +49,14 @@ function UpdateList()
 		if (IsInArray(Caps(TempData), IgnoreList) == -1)
 		{
 			Temp = AddButton(
-				ListOffset + Count * ScrollOffset, 
+				ListOffset + ListCount * ScrollOffset, 
 				TempData,
 				"Launch level"@TempData, 
 				GoSelect,
 				ListItemClass
 			);
 			GListItem(Temp).SetData(TempData, "");
-			Count++;
+			ListCount++;
 		}
 	}
 }
