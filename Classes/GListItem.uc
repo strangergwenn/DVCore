@@ -5,7 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GB_Map extends GToggleButton
+class GListItem extends GToggleButton
 	placeable;
 
 
@@ -13,8 +13,8 @@ class GB_Map extends GToggleButton
 	Public attributes
 ----------------------------------------------------------*/
 
-var (Button) string						LevelName;
-var (Button) string						LevelPictureName;
+var (Button) string						Data;
+var (Button) string						PictureData;
 
 
 /*----------------------------------------------------------
@@ -26,10 +26,10 @@ var (Button) string						LevelPictureName;
  * @param Path					Level path
  * @param PicPath				Texture path
  */
-simulated function SetLevel(string Path, string PicPath)
+simulated function SetData(string Path, string PicPath)
 {
-	LevelName = Path;
-	LevelPictureName = PicPath;
+	Data = Path;
+	PictureData = PicPath;
 }
 
 

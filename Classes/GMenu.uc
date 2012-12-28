@@ -66,7 +66,7 @@ simulated function SetLabel(string Text)
  */
 simulated function SetOrigin(GMenu Org)
 {
-	if (Origin == None)
+	if (Origin == None || Index > 1000)
 	{
 		Origin = Org;
 	}
@@ -106,7 +106,7 @@ simulated function Tab(bool bIsGoingUp)
 }
 
 /**
- * @brief Called on tab key
+ * @brief Called on scroll
  * @param bIsGoingUp			Is the player going up ?
  */
 simulated function Scroll(bool bIsGoingUp)
@@ -114,7 +114,7 @@ simulated function Scroll(bool bIsGoingUp)
 }
 
 /**
- * @brief Called on tab key
+ * @brief Called on enter key
  */
 simulated function Enter()
 {
@@ -363,7 +363,7 @@ simulated event Tick(float DeltaTime)
 defaultproperties
 {
 	// Menu data
-	Index=10
+	Index=9000
 	MenuName="Menu"
 	MenuComment="Change menu"
 	
