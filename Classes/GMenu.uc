@@ -310,14 +310,16 @@ simulated function GMenu GetMenuByName(string SearchName)
  * @brief Add a menu link on the menu
  * @param Pos				Offset from menu origin
  * @param Target			Target menu
+ * @param SpawnClass		Optional class to use
  * @return added item
  */
-simulated function GButton AddMenuLink(vector Pos, GMenu Target)
+simulated function GButton AddMenuLink(vector Pos, GMenu Target,
+	optional class<GButton> SpawnClass=ButtonClass)
 {
 	local GButton Temp;
 	if (Target != None)
 	{
-		Temp = AddButton(Pos, Target.MenuName, Target.MenuComment, GoChangeMenu);
+		Temp = AddButton(Pos, Target.MenuName, Target.MenuComment, GoChangeMenu, SpawnClass);
 		Temp.SetTarget(Target);
 	}
 	return Temp;
@@ -329,6 +331,7 @@ simulated function GButton AddMenuLink(vector Pos, GMenu Target)
  * @param Text				Button name
  * @param Comment			Button help
  * @param CB				Method to call on button press
+ * @param SpawnClass		Optional class to use
  * @return added item
  */
 simulated function GButton AddButton(vector Pos, string Text, string Comment, delegate<GButton.PressCB> CB,
@@ -347,6 +350,7 @@ simulated function GButton AddButton(vector Pos, string Text, string Comment, de
  * @brief Add a label on the menu
  * @param Pos				Offset from menu origin
  * @param Text				Label name
+ * @param SpawnClass		Optional class to use
  * @return added item
  */
 simulated function GLabel AddLabel(vector Pos, string Text, 
@@ -363,6 +367,7 @@ simulated function GLabel AddLabel(vector Pos, string Text,
 /**
  * @brief Add a text field on the menu
  * @param Pos				Offset from menu origin
+ * @param SpawnClass		Optional class to use
  * @return added item
  */
 simulated function GTextField AddTextField(vector Pos, 
@@ -397,7 +402,7 @@ simulated function PostBeginPlay()
 	);
 	
 	// Helper label and custom UI
-	Label = Spawn(LabelClass, self, , Location);
+	Label = Spawn(LabelClass, self, , Location + (Vect(-300,0,430) >> Rotation));
 	Label.SetRotation(Rotation);
 	Label.Set(MenuName @"-" @MenuComment, "");
 	Items.AddItem(Label);
@@ -429,8 +434,8 @@ simulated function SpawnUI()
 	PreviousMenu = GetRelatedMenu(true);
 	NextMenu = GetRelatedMenu(false);
 	
-	AddMenuLink(Vect(-220,0,0), PreviousMenu);
-	AddMenuLink(Vect(220,0,0), NextMenu);
+	AddMenuLink(Vect(-300,0,0), PreviousMenu);
+	AddMenuLink(Vect(300,0,0), NextMenu);
 }
 
 /**

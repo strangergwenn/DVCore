@@ -163,7 +163,8 @@ function EmptyList()
 	local byte i;
 	for (i = 0; i < Items.Length; i++)
 	{
-		Items[I].Destroy();
+		if (Items[i].IsA(ListItemClass.Name))
+			Items[i].Destroy();
 	}
 	ListCount = 0;
 }
