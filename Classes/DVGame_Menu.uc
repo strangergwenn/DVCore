@@ -31,6 +31,6 @@ event PostLogin (PlayerController NewPlayer)
 
 defaultproperties
 {
-	HUDType=class'GHUD'
+	HUDType=class'GH_Menu'
 	PlayerControllerClass=class'DVPlayerController'
 }

@@ -14,8 +14,8 @@ class GTextField extends GToggleButton
 ----------------------------------------------------------*/
 
 var bool							bEditing;
-
 var bool							bClearNext;
+var bool							bIsPassword;
 
 
 /*----------------------------------------------------------
@@ -23,12 +23,20 @@ var bool							bClearNext;
 ----------------------------------------------------------*/
 
 /**
- * @brief Get the text content
+ * @brief Set the text content
  * @param Data				Text to set
  **/
 simulated function SetText(string Data)
 {
 	Text = Data;
+}
+/**
+ * @brief Set the password attribute
+ * @param bPassword			True is data masked
+ **/
+simulated function SetPassword(bool bPassword)
+{
+	bIsPassword = bPassword;
 }
 
 /**
@@ -75,7 +83,6 @@ simulated function KeyPressed(string Key)
 	
 	if (Key != "" && bEnabled && bIsActive)
 	{
-		`log("GTF > KeyPressed" @Key);
 		if (Key == "BackSpace")
 		{
 			bClearNext = true;
@@ -104,6 +111,31 @@ simulated function PostBeginPlay()
 {
 	super.PostBeginPlay();
 	Set("...", "Text field");
+}
+
+/**
+ * @brief Rendering method
+ */
+function OnRender(Canvas C)
+{
+	local byte i;
+	local string DisplayText;
+	DisplayText = Text;
+	C.SetOrigin(TextOffsetX, TextOffsetY);
+	C.SetPos(0, 0);
+	C.SetDrawColorStruct(TextColor);
+	
+	if (bIsPassword)
+	{
+		DisplayText = "";
+		for (i = 0; i < Len(Text); i++)
+		{
+			DisplayText $= "*";
+		}
+	}
+	
+	C.DrawText(DisplayText,, TextScale, TextScale);
+	CanvasTexture.bNeedsUpdate = true;
 }
 
 

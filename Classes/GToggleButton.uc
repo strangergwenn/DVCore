@@ -48,9 +48,10 @@ simulated function Set(string T, string C)
  */
 simulated function SetState(bool bNewState)
 {
-	if (bEnabled)
+	if (bEnabled && bIsActive != bNewState)
 	{
 		bIsActive = bNewState;
+		`log("GTB > SetState" @bNewState);
 		if (bNewState && Effect != None && WorldInfo.NetMode != NM_DedicatedServer)
 		{
 			WorldInfo.MyEmitterPool.SpawnEmitter(
@@ -59,9 +60,9 @@ simulated function SetState(bool bNewState)
 				EffectRot + Rotation
 			);
 		}
+		Move((bNewState ? -ClickMove : ClickMove) >> Rotation);
+		TextMaterial.SetVectorParameterValue('Color', (bNewState ? OnLight : OffLight));
 	}
-	MoveSmooth((bNewState ? -ClickMove : ClickMove) >> Rotation);
-	TextMaterial.SetVectorParameterValue('Color', (bNewState ? OnLight : OffLight));
 }
 
 /**
@@ -140,8 +141,9 @@ defaultproperties
 {
 	// Behaviour
 	bIsActive=false
+	ClickMove=(X=0,Y=0,Z=0)
 	EffectLoc=(X=70,Y=0,Z=35)
 	OffLight=(R=5.0,G=0.3,B=0.0,A=1.0)
-	OnLight=(R=0.0,G=0.3,B=5.0,A=1.0)
+	OnLight=(R=0.3,G=5.0,B=0.0,A=1.0)
 	Effect=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
 }

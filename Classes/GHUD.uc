@@ -199,6 +199,21 @@ function CharPressed(string Unicode)
 }
 
 /**
+ * @brief Force the focus on an item
+ * @param Focus					Item forced to focus on
+ */
+function ForceFocus(GButton Focus)
+{
+	if (FocusActor != None)
+	{
+		FocusActor.LostFocus();
+	}
+	FocusActor = Focus;
+	Focus.Press(false);
+	Focus.Release(false);
+}
+
+/**
  * @brief Register the last key
  * @param Key					Key used
  * @param Evt					Event type

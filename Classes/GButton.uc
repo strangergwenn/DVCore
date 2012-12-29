@@ -39,7 +39,6 @@ var delegate<PressCB>				PressEvent;
  */
 delegate PressCB(Actor Caller)
 {
-	`log(Caller @"was clicked");
 }
 
 /**
@@ -86,7 +85,6 @@ simulated function OverOut()
  */
 simulated function Press(bool bIsRightClick)
 {
-	`log("GB > Press" @bIsRightClick @Text);
 	bClicking = true;
 	ClearTimer('PressTimeout');
 	SetTimer(ClickTimeout, false, 'PressTimeout');
@@ -100,9 +98,6 @@ simulated function Release(bool bIsRightClick)
 {
 	if (bEnabled)
 	{
-		`log("GB > Release" @bIsRightClick @Text);
-		
-		// Toggle mode
 		if (bClicking)
 		{
 			bClicking = false;

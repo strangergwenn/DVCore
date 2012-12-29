@@ -950,21 +950,42 @@ unreliable client event ClientPlaySound(SoundCue ASound)
 /*--- Get the music track to play here ---*/
 reliable server simulated function SoundCue GetTrackIntro()
 {
-	return DVGame(WorldInfo.Game).GetTrackIntro();
+	if (WorldInfo.Game != None)
+	{
+		return DVGame(WorldInfo.Game).GetTrackIntro();
+	}
+	else
+	{
+		return None;
+	}
 }
 
 
 /*--- Get the music track to play here ---*/
 reliable server simulated function SoundCue GetTrackLoop()
 {
-	return DVGame(WorldInfo.Game).GetTrackLoop();
+	if (WorldInfo.Game != None)
+	{
+		return DVGame(WorldInfo.Game).GetTrackLoop();
+	}
+	else
+	{
+		return None;
+	}
 }
 
 
 /*--- Get the music track to play here ---*/
 reliable server simulated function float GetIntroLength()
 {
-	return DVGame(WorldInfo.Game).GetIntroLength();
+	if (WorldInfo.Game != None)
+	{
+		return DVGame(WorldInfo.Game).GetIntroLength();
+	}
+	else
+	{
+		return 0.0;
+	}
 }
 
 

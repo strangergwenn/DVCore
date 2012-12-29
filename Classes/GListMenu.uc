@@ -20,6 +20,10 @@ var (Menu) const int					ListMinSize;
 var (Menu) const vector					ListOffset;
 var (Menu) const vector					ScrollOffset;
 
+var (Menu) const string					BackText;
+var (Menu) const string					BackComment;
+var (Menu) const string					LaunchText;
+var (Menu) const string					LaunchComment;
 var (Menu) const array<string>			IgnoreList;
 
 var (Menu) const class<GListItem>		ListItemClass;
@@ -78,6 +82,19 @@ delegate GoSelect(Actor Caller)
 }
 
 /**
+ * @brief Change collision status
+ * @param bState				New collision state
+ */
+simulated function SetListItemsCollision(bool bState)
+{
+	local Actor Temp;
+	foreach AllActors(ListItemClass, Temp)
+	{
+		Temp.SetCollisionType((bState? COLLIDE_BlockAll : COLLIDE_NoCollision));
+	}
+}
+
+/**
  * @brief Called on scroll
  * @param bIsGoingUp			Is the player going up ?
  */
@@ -87,18 +104,12 @@ simulated function Scroll(bool bIsGoingUp)
 	if (( bIsGoingUp && (ScrollCount < ListCount - ListMinSize))
 	 || (!bIsGoingUp && (ScrollCount > ListMinSize - ListCount)))
 	{
-		foreach AllActors(ListItemClass, Temp)
-		{
-			Temp.SetCollisionType(COLLIDE_NoCollision);
-		}
+		SetListItemsCollision(false);
 		foreach AllActors(ListItemClass, Temp)
 		{
 			Temp.MoveSmooth((bIsGoingUp? -ScrollOffset : ScrollOffset) >> Rotation);
 		}
-		foreach AllActors(ListItemClass, Temp)
-		{
-			Temp.SetCollisionType(COLLIDE_BlockAll);
-		}
+		SetListItemsCollision(true);
 		ScrollCount += (bIsGoingUp ? 1 : -1);
 	}
 }
@@ -121,8 +132,8 @@ simulated function Enter()
  */
 simulated function SpawnUI()
 {
-	AddButton(Vect(-300,0,0), "Back", "Go to the previous menu", GoBack);
-	Launch = AddButton(Vect(300,0,0), "Launch", "Launch the game", GoLaunch);
+	AddButton(Vect(-300,0,0), BackText, BackComment, GoBack);
+	Launch = AddButton(Vect(300,0,0), LaunchText, BackComment, GoLaunch);
 	Launch.Deactivate();
 	UpdateList();
 }
@@ -160,6 +171,11 @@ defaultproperties
 	
 	MenuName="List menu"
 	MenuComment="List some items"
+	BackText="Back"
+	BackComment="Previous menu"
+	LaunchText="Launch"
+	LaunchComment=""
+
 	ListItemClass=class'GListItem'
 	ListOffset=(X=0,Y=-100,Z=100)
 	ScrollOffset=(X=0,Y=0,Z=50)

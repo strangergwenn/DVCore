@@ -39,14 +39,14 @@ simulated function SetData(string Path, string PicPath)
 
 defaultproperties
 {
-	// Mesh
 	Begin Object Name=LabelMesh
-		StaticMesh=StaticMesh'DV_UI.Mesh.SM_Label'
-		Rotation=(Yaw=32768)
+		StaticMesh=StaticMesh'DV_UI.Mesh.SM_SimpleLabel'
+		Scale=0.8
 	End Object
 	
-	// Effects
 	Effect=None
+	TextScale=5.0
 	TextOffsetX=30.0
-	TextOffsetY=30.0
+	TextOffsetY=25.0
+	TextMaterialTemplate=Material'DV_UI.Material.M_EmissiveLabel'
 }

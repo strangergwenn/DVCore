@@ -12,30 +12,6 @@ class GM_Demo extends GMenu
 
 
 /*----------------------------------------------------------
-	Public attributes
-----------------------------------------------------------*/
-
-
-/*----------------------------------------------------------
-	Private attributes
-----------------------------------------------------------*/
-
-
-/*----------------------------------------------------------
-	Button callbacks
-----------------------------------------------------------*/
-
-/**
- * @brief Method definition for press event callbacks
- * @param Reference				Caller actor
- */
-delegate GoVoid(Actor Caller)
-{
-	`log(Caller @"was clicked");
-}
-
-
-/*----------------------------------------------------------
 	Private methods
 ----------------------------------------------------------*/
 
@@ -45,16 +21,7 @@ delegate GoVoid(Actor Caller)
 simulated function SpawnUI()
 {
 	super.SpawnUI();
-	
 	AddMenuLink(Vect(0,0,100), GetMenuByID(2000));
-	
-	Spawn(class'GTextField', self, , Location + (Vect(0,0,300) >> Rotation));
-}
-
-/*----------------------------------------------------------
-	Properties
-----------------------------------------------------------*/
-
-defaultproperties
-{
+	AddMenuLink(Vect(0,0,250), GetMenuByID(3000));
+	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
 }

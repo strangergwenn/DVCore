@@ -248,7 +248,6 @@ defaultproperties
 	OffLight=(R=0.1,G=0.1,B=0.1,A=1.0)
 	
 	// Physics
-	bEdShouldSnap=true
 	bCollideActors=true
 	bCollideWorld=true
 	bBlockActors=true

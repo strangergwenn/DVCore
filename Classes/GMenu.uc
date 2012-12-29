@@ -24,6 +24,7 @@ var (Menu) const vector					ViewOffset;
 var (Menu) const string					MenuName;
 var (Menu) const string					MenuComment;
 
+var (Menu) const class<GTextField>		TextFieldClass;
 var (Menu) const class<GButton>			ButtonClass;
 var (Menu) const class<GLabel>			LabelClass;
 
@@ -39,6 +40,10 @@ var array<GLabel>						Items;
 
 var GMenu								Origin;
 
+var StaticMeshComponent					Mesh;
+
+var DVPlayerController					PC;
+
 
 /*----------------------------------------------------------
 	Public methods
@@ -50,11 +55,11 @@ var GMenu								Origin;
  */
 simulated function SetLabel(string Text)
 {
-	if (Text != "")
+	if (Text != "" && Label != None)
 	{
 		Label.Set(Text, "");
 	}
-	else
+	else if (Label != None)
 	{
 		Label.Set(MenuName @"-" @MenuComment, "");
 	}
@@ -99,10 +104,58 @@ simulated function int IsInArray(string str, array<string> data, optional bool b
 
 /**
  * @brief Called on tab key
- * @param bIsGoingUp			Is the player going up ?
+ * @param bIsGoingUp			Unused
  */
 simulated function Tab(bool bIsGoingUp)
 {
+	// Find all the available buttons
+	local byte i, iNext;
+	local GToggleButton Old;
+	local array<GToggleButton> ToggleItems;
+	for (i = 0; i < Items.Length; i++)
+	{
+		if (Items[i].IsA('GToggleButton'))
+		{
+			ToggleItems.AddItem(GToggleButton(Items[i]));
+		}
+	}
+	
+	// Find the old button
+	if (ToggleItems.Length == 0)
+	{
+		return;
+	}
+	Old = None;
+	for (i = 0; i < ToggleItems.Length; i++)
+	{
+		if (ToggleItems[i].GetState())
+		{
+			Old = ToggleItems[i];
+			break;
+		}
+	}
+	
+	// No one is selected ? toggle default
+	if (Old == None)
+	{
+		`log("GM > Tab > Toggle default" @ToggleItems[0]);
+		GHUD(PC.myHUD).ForceFocus(ToggleItems[0]);
+	}
+	else
+	{
+		iNext = (bIsGoingUp ? i-1 : i+1);
+		if (iNext < 0)
+			iNext = ToggleItems.Length - 1;
+		else if (iNext >= ToggleItems.Length)
+			iNext = 0;
+		
+		if (Old.GetState())
+		{
+			Old.SetState(false);
+		}
+		GHUD(PC.myHUD).ForceFocus(ToggleItems[iNext]);
+		`log("GM > Tab > Toggle item" @ToggleItems[iNext] @i);
+	}
 }
 
 /**
@@ -172,11 +225,13 @@ delegate GoBack(Actor Caller)
  */
 simulated function ChangeMenu(GMenu NewMenu)
 {
-	local PlayerController PC;
 	local ViewTargetTransitionParams TransitionParams;
-	PC = GetALocalPlayerController();
 	`log("GM > ChangeMenu" @NewMenu @self);
 
+	if (PC == None)
+	{
+		PC = DVPlayerController(GetALocalPlayerController());
+	}
 	if (PC != None)
 	{
 		NewMenu.SetOrigin(self);
@@ -294,11 +349,27 @@ simulated function GButton AddButton(vector Pos, string Text, string Comment, de
  * @param Text				Label name
  * @return added item
  */
-simulated function GLabel AddLabel(vector Pos, string Text)
+simulated function GLabel AddLabel(vector Pos, string Text, 
+	optional class<GLabel> SpawnClass=LabelClass)
 {
 	local GLabel Temp;
-	Temp = Spawn(LabelClass, self, , Location + (Pos >> Rotation));
+	Temp = Spawn(SpawnClass, self, , Location + (Pos >> Rotation));
 	Temp.Set(Text, "");
+	Temp.SetRotation(Rotation);
+	Items.AddItem(Temp);
+	return Temp;
+}
+
+/**
+ * @brief Add a text field on the menu
+ * @param Pos				Offset from menu origin
+ * @return added item
+ */
+simulated function GTextField AddTextField(vector Pos, 
+	optional class<GTextField> SpawnClass=TextFieldClass)
+{
+	local GTextField Temp;
+	Temp = Spawn(SpawnClass, self, , Location + (Pos >> Rotation));
 	Temp.SetRotation(Rotation);
 	Items.AddItem(Temp);
 	return Temp;
@@ -312,6 +383,7 @@ simulated function PostBeginPlay()
 	local vector X, Y, Z;
 	local rotator ViewRot;
 	super.PostBeginPlay();
+	Mesh.SetHidden(true);
 	
 	// Viewpoint rotation (spawn a reference actor)
 	ViewRot.Pitch -= 0;
@@ -329,7 +401,23 @@ simulated function PostBeginPlay()
 	Label.SetRotation(Rotation);
 	Label.Set(MenuName @"-" @MenuComment, "");
 	Items.AddItem(Label);
-	SpawnUI();
+	GetPC();
+}
+
+/**
+ * @brief Get a player
+ **/
+simulated function GetPC()
+{
+	PC = DVPlayerController(GetALocalPlayerController());
+	if (PC == None)
+	{
+		SetTimer(0.5, false, 'GetPC');
+	}
+	else
+	{
+		SpawnUI();
+	}
 }
 
 /**
@@ -343,7 +431,6 @@ simulated function SpawnUI()
 	
 	AddMenuLink(Vect(-220,0,0), PreviousMenu);
 	AddMenuLink(Vect(220,0,0), NextMenu);
-	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
 }
 
 /**
@@ -370,6 +457,7 @@ defaultproperties
 	// Behaviour
 	MenuSwitchTime=0.7
 	bEdShouldSnap=true
+	TextFieldClass=class'GTextField'
 	ButtonClass=class'GButton'
 	LabelClass=class'GLabel'
 	ViewOffset=(X=0,Y=500,Z=250)
@@ -390,4 +478,5 @@ defaultproperties
 		StaticMesh=StaticMesh'DV_Spacegear.Mesh.SM_FlagBase'
 	End Object
 	Components.Add(MenuBase)
+	Mesh=MenuBase
 }
