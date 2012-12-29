@@ -5,10 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GM_LocalMaps extends GListMenu
-	placeable
-	ClassGroup(DeepVoid)
-	hidecategories(Collision, Physics, Attachment);
+class GM_LocalMaps extends GListMenu;
 
 
 /*----------------------------------------------------------

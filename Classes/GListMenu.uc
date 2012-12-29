@@ -5,10 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GListMenu extends GMenu
-	placeable
-	ClassGroup(DeepVoid)
-	hidecategories(Collision, Physics, Attachment);
+class GListMenu extends GMenu;
 
 
 /*----------------------------------------------------------

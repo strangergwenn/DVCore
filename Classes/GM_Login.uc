@@ -5,10 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GM_Login extends GMenu
-	placeable
-	ClassGroup(DeepVoid)
-	hidecategories(Collision, Physics, Attachment);
+class GM_Login extends GMenu;
 
 
 /*----------------------------------------------------------
