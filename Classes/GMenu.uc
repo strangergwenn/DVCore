@@ -5,7 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class GMenu extends Actor
+class GMenu extends GLocalizedObject
 	placeable
 	ClassGroup(DeepVoid)
 	hidecategories(Collision, Physics, Attachment);

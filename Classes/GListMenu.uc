@@ -155,6 +155,19 @@ function UpdateList()
 {
 }
 
+/**
+ * @brief Create a data list
+ */
+function EmptyList()
+{
+	local Actor Temp;
+	foreach AllActors(ListItemClass, Temp)
+	{
+		Temp.Destroy();
+	}
+	ListCount = 0;
+}
+
 
 /*----------------------------------------------------------
 	Properties
@@ -174,6 +187,6 @@ defaultproperties
 	LaunchComment=""
 
 	ListItemClass=class'GListItem'
-	ListOffset=(X=0,Y=-100,Z=100)
+	ListOffset=(X=0,Y=-50,Z=100)
 	ScrollOffset=(X=0,Y=0,Z=50)
 }

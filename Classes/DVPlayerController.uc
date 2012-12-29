@@ -155,6 +155,8 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	{
 		if (myHUD.IsA('DVHUD_Menu'))
 			DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
+		else if (myHUD.IsA('GH_Menu'))
+			GH_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
 	}
 	
 	// First data : autoconnection if available
@@ -162,9 +164,9 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	{
 		AutoConnect();
 		if (myHUD.IsA('DVHUD_Menu'))
-		{
 			DVHUD_Menu(myHUD).AutoConnect();
-		}
+		if (myHUD.IsA('GH_Menu'))
+			GH_Menu(myHUD).AutoConnect();
 	}
 	
 	// Upload & get back the stats on main menu, store the player ID in PRI
@@ -173,6 +175,12 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		if (myHUD.IsA('DVHUD_Menu'))
 		{
 			DVHUD_Menu(myHUD).SignalConnected();
+			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
+			MasterServerLink.GetStats();
+		}
+		if (myHUD.IsA('GH_Menu'))
+		{
+			GH_Menu(myHUD).SignalConnected();
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 			MasterServerLink.GetStats();
 		}

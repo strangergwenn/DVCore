@@ -143,7 +143,7 @@ defaultproperties
 	bIsActive=false
 	ClickMove=(X=0,Y=0,Z=0)
 	EffectLoc=(X=70,Y=0,Z=35)
-	OffLight=(R=5.0,G=0.3,B=0.0,A=1.0)
-	OnLight=(R=0.3,G=5.0,B=0.0,A=1.0)
+	OffLight=(R=1.5,G=0.3,B=0.0,A=1.0)
+	OnLight=(R=0.3,G=1.5,B=0.0,A=1.0)
 	Effect=ParticleSystem'DV_CoreEffects.FX.PS_Flash'
 }

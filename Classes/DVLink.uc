@@ -335,8 +335,9 @@ event Opened()
 	// On client : get the server list
 	if (WorldInfo.NetMode != NM_DedicatedServer)
 	{
-		if (DVHUD_Menu(PC.myHUD) != None)
+		if (GH_Menu(PC.myHUD) != None)
 		{
+			SetTimer(3.0, false, 'GetServers');
 			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
 		}
 		SignalController("INIT", true, "");
@@ -412,10 +413,10 @@ event ReceivedLine(string Line)
 	// Server list
 	else if (IsEqual(Command[0], "SERVER") && PC.myHUD != None)
 	{
-		if (DVHUD_Menu(PC.myHUD) != None)
+		if (GH_Menu(PC.myHUD) != None)
 		{
 			//SERVER,ServerName,Level,IP,Game,Players,MaxPlayers,bIsPassword
-			DVHUD_Menu(PC.myHUD).AddServerInfo(
+			GH_Menu(PC.myHUD).AddServerInfo(
 				Command[1],
 				Command[2],
 				Command[3],
@@ -455,7 +456,7 @@ defaultproperties
 	
 	CurrentID="0"
 	TimeoutLength=5.0
-	ServerListUpdateFrequency=5.0
+	ServerListUpdateFrequency=10.0
 	LinkMode=MODE_Text
 	ReceiveMode=RMODE_Event
 	

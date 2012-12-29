@@ -19,8 +19,9 @@ simulated function SpawnUI()
 {
 	super.SpawnUI();
 	AddMenuLink(Vect(0,0,100), GetMenuByID(2000));
+	AddMenuLink(Vect(0,0,175), GetMenuByID(2100));
 	AddMenuLink(Vect(0,0,250), GetMenuByID(3000));
-	AddButton(Vect(400,0,0), "Quit", "Quit the game", GoExit);
+	AddButton(Vect(380,0,0), "Quit", "Quit the game", GoExit);
 }
 
 

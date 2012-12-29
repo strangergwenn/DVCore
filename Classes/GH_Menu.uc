@@ -19,7 +19,8 @@ var (CoreUI) const float				PopupTimer;
 	Private attributes
 ----------------------------------------------------------*/
 
-var GMenu								LoginMenu;
+var GM_Login							LoginMenu;
+var GM_Servers							ServerMenu;
 
 
 /*----------------------------------------------------------
@@ -34,7 +35,8 @@ simulated function PostBeginPlay()
 	local DVPlayerController PC;
 	super.PostBeginPlay();
 	
-	LoginMenu = CurrentMenu.GetMenuById(3000);
+	ServerMenu = GM_Servers(CurrentMenu.GetMenuById(2100));
+	LoginMenu = GM_Login(CurrentMenu.GetMenuById(3000));
 	
 	PC = DVPlayerController(PlayerOwner);
 	PC.FOV(PC.Default.DefaultFOV);
@@ -64,59 +66,44 @@ function ApplyResolutionSetting(string code, string flag)
 }
 
 
-/*--- Launch autoconnection ---*/
+/**
+ * @brief Launch autoconnection
+*/
 simulated function AutoConnect()
 {
-	//HudMovie.SetConnectState(1);
+	LoginMenu.SetConnectState(1);
 }
 
 
-/*--- Called when the connection has been established ---*/
+/**
+ * @brief Called when the connection has been established
+ */
 function SignalConnected()
 {
 	DVPlayerController(PlayerOwner).SignalConnected();
-	//HudMovie.SetConnectState(2);
+	LoginMenu.SetConnectState(2);
 }
 
 
-/*--- Show a command response code ---*/
+/**
+ * @brief Show a command response code
+ */
 function DisplayResponse (bool bSuccess, string Msg, string Command)
 {
-	/*if (HudMovie.StoredLevel < 2)
+	if (LoginMenu.StoredLevel < 2)
 	{
-		//HudMovie.DisplayResponse(bSuccess, Msg, Command);
-		if (//HudMovie.bIsPopupVisible)
-		{
-			CancelHide();
-			SetTimer(PopupTimer, false, 'HidePopup');
-		}
-	}*/
+		LoginMenu.DisplayResponse(bSuccess, Msg, Command);
+	}
 }
 
 
-/*--- Cancel every timer closing the popup ---*/
-function CancelHide()
-{
-	/*if (HudMovie.bIsPopupVisible && HudMovie.StoredLevel < 2)
-	{
-		ClearTimer('HidePopup');
-	}*/
-}
-
-
-/*--- Server data ---*/  
+/**
+ * @brief Server data
+ */  
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
-	//HudMovie.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers, bIsPassword);
-	//HudMovie.UpdateServerList();
-}
-
-
-/*--- Popup suppression ---*/
-function HidePopup()
-{
-	//HudMovie.HidePopup(true);
-	//HudMovie.PopupState = PS_None;
+	ServerMenu.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers, bIsPassword);
+	ServerMenu.UpdateList();
 }
 
 
