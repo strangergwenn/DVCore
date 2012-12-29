@@ -14,7 +14,7 @@ class GListItem extends GToggleButton
 ----------------------------------------------------------*/
 
 var (Button) string						Data;
-var (Button) string						PictureData;
+var (Button) MaterialInterface 			PictureTemplate;
 
 
 /*----------------------------------------------------------
@@ -24,14 +24,27 @@ var (Button) string						PictureData;
 /**
  * @brief Setup the button
  * @param Path					Level path
- * @param PicPath				Texture path
  */
-simulated function SetData(string Path, string PicPath)
+simulated function SetData(string Path)
 {
 	Data = Path;
-	PictureData = PicPath;
 }
 
+/**
+ * @brief Setup the button picture
+ * @param PicPath				Texture path
+ */
+simulated function SetPicture(Texture2D PicPath)
+{
+	local MaterialInstanceConstant Picture;
+	
+	Picture = Mesh.CreateAndSetMaterialInstanceConstant(1);
+	if (Picture != None && PicPath != None)
+	{
+		Picture.SetParent(PictureTemplate);
+		Picture.SetTextureParameterValue('PictureData', PicPath);
+	}
+}
 
 /*----------------------------------------------------------
 	Properties
@@ -40,13 +53,14 @@ simulated function SetData(string Path, string PicPath)
 defaultproperties
 {
 	Begin Object Name=LabelMesh
-		StaticMesh=StaticMesh'DV_UI.Mesh.SM_SimpleLabel'
-		Scale=0.8
+		StaticMesh=StaticMesh'DV_UI.Mesh.SM_PictureLabel'
+		Scale=2.5
 	End Object
 	
 	Effect=None
-	TextScale=5.0
+	TextScale=1.8
 	TextOffsetX=30.0
-	TextOffsetY=25.0
+	TextOffsetY=20.0
+	PictureTemplate=Material'DV_UI.Material.M_Picture'
 	TextMaterialTemplate=Material'DV_UI.Material.M_EmissiveLabel'
 }

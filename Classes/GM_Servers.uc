@@ -16,8 +16,9 @@ var bool 								bIsPasswordProtected;
 
 var string								ServerURL;
 
-var array<string>						ServerList;
 var array<string>						IPList;
+var array<string>						ServerList;
+var array<Texture2D>					PictureList;
 
 
 /*----------------------------------------------------------
@@ -37,7 +38,9 @@ var array<string>						IPList;
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
 	local int idx;
+	local Texture2D MapPicture;
 	idx = IPList.Find(IP);
+	MapPicture = class'DVMapInfo'.static.GetTextureFromLevel(Level);
 	
 	if (MaxPlayers != 0)
 	{
@@ -45,10 +48,12 @@ function AddServerInfo(string ServerName, string Level, string IP, string Game, 
 		{
 			ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
 			IPList.AddItem(IP);
+			PictureList.AddItem(MapPicture);
 		}
 		else
 		{
 			ServerList[idx] = FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword);
+			PictureList[idx] = MapPicture;
 		}
 	}
 }
@@ -100,6 +105,7 @@ delegate GoLaunch(Actor Caller)
 	{
 		if (bIsPasswordProtected)
 		{
+			//TODO
 			ConsoleCommand("open " $ ServerURL $ "?game=");
 		}
 		else
@@ -132,7 +138,8 @@ function UpdateList()
 			GoSelect,
 			ListItemClass
 		);
-		GListItem(Temp).SetData(ServerList[i], "");
+		GListItem(Temp).SetData(ServerList[i]);
+		GListItem(Temp).SetPicture(PictureList[i]);
 		ListCount++;
 	}
 }
@@ -170,5 +177,6 @@ defaultproperties
 	Index=2100
 	MenuName="Servers"
 	MenuComment="Network games"
-	ListItemClass=class'GLI_LargeClean'
+	ListOffset=(X=0,Y=-50,Z=30)
+	ScrollOffset=(X=0,Y=0,Z=90)
 }

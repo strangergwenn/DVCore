@@ -160,10 +160,10 @@ function UpdateList()
  */
 function EmptyList()
 {
-	local Actor Temp;
-	foreach AllActors(ListItemClass, Temp)
+	local byte i;
+	for (i = 0; i < Items.Length; i++)
 	{
-		Temp.Destroy();
+		Items[I].Destroy();
 	}
 	ListCount = 0;
 }
@@ -177,7 +177,7 @@ defaultproperties
 {
 	ListCount=0
 	ScrollCount=0
-	ListMinSize=6
+	ListMinSize=5
 	
 	MenuName="List menu"
 	MenuComment="List some items"

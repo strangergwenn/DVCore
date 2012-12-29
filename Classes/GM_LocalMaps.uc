@@ -37,14 +37,17 @@ function UpdateList()
 	local byte i;
 	local GButton Temp;
 	local string TempData;
+	local Texture2D MapPicture;
 	local array<UDKUIResourceDataProvider> ProviderList;
 
 	class'UDKUIDataStore_MenuItems'.static.GetAllResourceDataProviders(class'UDKUIDataProvider_MapInfo', ProviderList);
-	for (i = 0; i < ProviderList.length; i++)
+	for (i = 0; i < ProviderList.Length; i++)
 	{
 		TempData = UDKUIDataProvider_MapInfo(ProviderList[i]).MapName;
-		if (IsInArray(Caps(TempData), IgnoreList) == -1)
+		if (IsInArray(Caps(TempData), IgnoreList) == -1
+		 && Caps(TempData) == TempData)
 		{
+			MapPicture = class'DVMapInfo'.static.GetTextureFromLevel(TempData);
 			Temp = AddButton(
 				ListOffset + ListCount * ScrollOffset, 
 				TempData,
@@ -52,7 +55,8 @@ function UpdateList()
 				GoSelect,
 				ListItemClass
 			);
-			GListItem(Temp).SetData(TempData, "");
+			GListItem(Temp).SetData(TempData);
+			GListItem(Temp).SetPicture(MapPicture);
 			ListCount++;
 		}
 	}
@@ -68,6 +72,7 @@ defaultproperties
 	Index=2000
 	MenuName="Local games"
 	MenuComment="Try out levels"
-	ListItemClass=class'GListItem'
+	ListOffset=(X=0,Y=-50,Z=30)
+	ScrollOffset=(X=0,Y=0,Z=90)
 	IgnoreList=("LD","FX","AMB","ART","FX","PROPS","LIGHTS","DECALS","ENVIRO","ENVIRONMENT","DEFAULTMAP")
 }

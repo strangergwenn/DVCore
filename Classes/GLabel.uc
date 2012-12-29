@@ -29,6 +29,7 @@ var (Label) const LinearColor 		TextClearColor;
 var (Label) const LinearColor		OnLight;
 var (Label) const LinearColor		OffLight;
 
+var (Label) MaterialInterface 		TextMaterialTemplate;
 var (Label) MaterialInstanceConstant TextMaterial;
 
 var (Label) const SoundCue 			OverSound;
@@ -43,7 +44,6 @@ var bool							bLastOver;
 var bool							bTickEnabled;
 
 var ScriptedTexture					CanvasTexture;
-var MaterialInterface 				TextMaterialTemplate;
 
 var editinline const StaticMeshComponent Mesh;
 
