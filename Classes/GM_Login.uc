@@ -92,8 +92,8 @@ function SetConnectState(optional int Level)
 	// Login if just registered
 	if (bRegistering)
 	{
-		PC.SaveIDs(Username.GetText(), Password.GetText());
-		PC.Connect(Username.GetText(), Password.GetText());
+		DVPlayerController(PC).SaveIDs(Username.GetText(), Password.GetText());
+		DVPlayerController(PC).Connect(Username.GetText(), Password.GetText());
 		Label2.Set(lConnecting, "");
 		bRegistering = false;
 		SetConnectState(1);
@@ -153,15 +153,15 @@ delegate GoConnect(Actor Caller)
 	// Register
 	else if (bRegistering)
 	{
-		PC.Register(UserData, EmailData, Password1Data);
+		DVPlayerController(PC).Register(UserData, EmailData, Password1Data);
 		Label2.Set(lRegistering, "");
 	}
 	
 	// Login
 	else
 	{
-		PC.SaveIDs(UserData, Password1Data);
-		PC.Connect(UserData, Password1Data);
+		DVPlayerController(PC).SaveIDs(UserData, Password1Data);
+		DVPlayerController(PC).Connect(UserData, Password1Data);
 		Label2.Set(lConnecting, "");
 		SetConnectState(1);
 	}

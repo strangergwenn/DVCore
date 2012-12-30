@@ -64,20 +64,21 @@ simulated function Enter()
  */
 simulated function SpawnUI()
 {
+	local DVUserStats LS;
+	LS = DVPlayerController(PC).LocalStats;
 	super.SpawnUI();
-	Label.Destroy();
 	
 	BackgroundMusic = GToggleButton(AddButton(Vect(-300,0,300), "Music",
 		"", GoToggle, class'GB_Clean'));
-	BackgroundMusic.SetState(PC.LocalStats.bBackgroundMusic);
+	BackgroundMusic.SetState(LS.bBackgroundMusic);
 	
 	UseSoundOnHit = GToggleButton(AddButton(Vect(-300,0,250), "Sound on hit",
 		"", GoToggle, class'GB_Clean'));
-	UseSoundOnHit.SetState(PC.LocalStats.bUseSoundOnHit);
+	UseSoundOnHit.SetState(LS.bUseSoundOnHit);
 	
 	FullScreen = GToggleButton(AddButton(Vect(-300,0,200), "Fullscreen",
 		"", GoToggle, class'GB_Clean'));
-	FullScreen.SetState(PC.LocalStats.bFullScreen);
+	FullScreen.SetState(LS.bFullScreen);
 	
 	AddButton(Vect(220,0,0), "Validate", "", GoValidate);
 }
