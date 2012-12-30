@@ -960,7 +960,10 @@ reliable server simulated function SoundCue GetTrackIntro()
 {
 	if (WorldInfo.Game != None)
 	{
-		return DVGame(WorldInfo.Game).GetTrackIntro();
+		if (DVGame(WorldInfo.Game) != None)
+			return DVGame(WorldInfo.Game).GetTrackIntro();
+		else
+			return DVGame_Menu(WorldInfo.Game).GetTrackIntro();
 	}
 	else
 	{

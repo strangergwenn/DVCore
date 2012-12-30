@@ -21,7 +21,7 @@ defaultproperties
 	End Object
 	
 	Effect=None
-	TextScale=4.3
+	TextScale=3.0
 	TextOffsetX=40.0
 	TextOffsetY=30.0
 	TextMaterialTemplate=Material'DV_UI.Material.M_EmissiveLabel'

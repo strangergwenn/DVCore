@@ -43,7 +43,7 @@ defaultproperties
 		Scale=1.0
 	End Object
 	
-	TextScale=5.0
+	TextScale=3.0
 	TextOffsetX=30.0
 	TextOffsetY=30.0
 	ClickMove=(X=0,Y=-20,Z=0)
