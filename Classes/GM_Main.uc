@@ -17,6 +17,13 @@ var (Menu) const Texture2D				MultiPicture;
 
 
 /*----------------------------------------------------------
+	Public attributes
+----------------------------------------------------------*/
+
+var GButton								Connect;
+
+
+/*----------------------------------------------------------
 	Private methods
 ----------------------------------------------------------*/
 
@@ -32,8 +39,19 @@ simulated function SpawnUI()
 	Temp = GListItem(AddMenuLink(Vect(150,0,100), GetMenuByID(2100), class'GLI_Large'));
 	Temp.SetPicture(MultiPicture);
 	
-	AddMenuLink(Vect(150,0,440), GetMenuByID(3000));
+	Connect = AddMenuLink(Vect(150,0,440), GetMenuByID(3000));
 	AddButton(Vect(300,0,440), "Quit", "Quit the game", GoExit);
+}
+
+
+/**
+ * @brief Lock the login button
+ * @param Username				username to display
+ */
+simulated function LockLogin(string Username)
+{
+	Connect.Set(Username, "");
+	Connect.Deactivate();
 }
 
 

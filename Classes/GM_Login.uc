@@ -14,6 +14,8 @@ class GM_Login extends GMenu;
 
 var (Menu) int							StoredLevel;
 
+var (Menu) const float					BackDelay;
+
 var (Menu) const string					BackComment;
 
 
@@ -21,6 +23,7 @@ var (Menu) const string					BackComment;
 	Private attributes
 ----------------------------------------------------------*/
 
+var bool								bLoggingIn;
 var bool								bRegistering;
 
 var GLabel								Label2;
@@ -103,6 +106,20 @@ function SetConnectState(optional int Level)
 		Password2Label.Destroy();
 		EmailLabel.Destroy();
 	}
+	else if (bSuccess && bLoggingIn)
+	{
+		SuccessQuit();
+	}
+}
+
+/**
+ * @brief Exit the menu after login
+ */
+simulated function SuccessQuit()
+{
+	GM_Main(Origin).LockLogin(Username.GetText());
+	SetTimer(BackDelay, false, 'GoBack');
+	bLoggingIn = false;
 }
 
 
@@ -160,6 +177,7 @@ delegate GoConnect(Actor Caller)
 	// Login
 	else
 	{
+		bLoggingIn = true;
 		DVPlayerController(PC).SaveIDs(UserData, Password1Data);
 		DVPlayerController(PC).Connect(UserData, Password1Data);
 		Label2.Set(lConnecting, "");
@@ -208,6 +226,7 @@ simulated function SpawnUI()
 defaultproperties
 {
 	Index=3000
+	BackDelay=2.0
 	LabelClass=class'GL_Clean'
 	MenuName="Connect"
 	MenuComment="Account management"
