@@ -226,7 +226,7 @@ simulated function SpawnUI()
 defaultproperties
 {
 	Index=3000
-	BackDelay=2.0
+	BackDelay=1.0
 	LabelClass=class'GL_Clean'
 	MenuName="Connect"
 	MenuComment="Account management"

@@ -138,7 +138,7 @@ function UpdateList()
 			GoSelect,
 			ListItemClass
 		);
-		GListItem(Temp).SetData(ServerList[i]);
+		GListItem(Temp).SetData(i, ServerList[i]);
 		GListItem(Temp).SetPicture(PictureList[i]);
 		ListCount++;
 	}

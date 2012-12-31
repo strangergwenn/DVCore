@@ -7,6 +7,27 @@
 
 class GM_Stats extends GMenu;
 
+/*----------------------------------------------------------
+	Private attributes
+----------------------------------------------------------*/
+
+var GList							Leaderboard;
+
+
+/*----------------------------------------------------------
+	Public methods
+----------------------------------------------------------*/
+
+/**
+ * @brief Update the stats
+ */
+simulated function UpdateLeaderboard()
+{
+	local array<string>	PlayerList;
+	PlayerList = DVPlayerController(PC).GetBestPlayers(false);
+	Leaderboard.Set(PlayerList);
+}
+
 
 /*----------------------------------------------------------
 	Private methods
@@ -21,6 +42,7 @@ simulated function SpawnUI()
 	local string RankInfo;
 	local DVUserStats LS;
 	local DVUserStats GS;
+	local array<string>	PlayerList;
 	GS = DVPlayerController(PC).GlobalStats;
 	LS = DVPlayerController(PC).LocalStats;
 	
@@ -65,6 +87,9 @@ simulated function SpawnUI()
 	
 	// Stat block 5
 	AddLabel(Vect(250,0,400), lBestPLayers);
+	PlayerList = DVPlayerController(PC).GetBestPlayers(false);
+	Leaderboard = AddList(Vect(270,0,400), PlayerList, class'GL_Small');
+	SetTimer(2.0, true, 'UpdateLeaderboard');
 }
 
 

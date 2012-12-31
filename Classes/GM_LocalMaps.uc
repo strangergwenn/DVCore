@@ -55,7 +55,7 @@ function UpdateList()
 				GoSelect,
 				ListItemClass
 			);
-			GListItem(Temp).SetData(TempData);
+			GListItem(Temp).SetData(i, TempData);
 			GListItem(Temp).SetPicture(MapPicture);
 			ListCount++;
 		}
