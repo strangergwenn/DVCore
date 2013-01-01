@@ -34,13 +34,13 @@ simulated function SpawnUI()
 {
 	Local GListItem Temp;
 	super.SpawnUI();
-	Temp = GListItem(AddMenuLink(Vect(-150,0,100), GetMenuByID(2000), class'GLI_Large'));
+	Temp = GListItem(AddMenuLink(Vect(-150,0,100), GetMenuByID(2000), class'GLIT_Large'));
 	Temp.SetPicture(SoloPicture);
-	Temp = GListItem(AddMenuLink(Vect(150,0,100), GetMenuByID(2100), class'GLI_Large'));
+	Temp = GListItem(AddMenuLink(Vect(150,0,100), GetMenuByID(2100), class'GLIT_Large'));
 	Temp.SetPicture(MultiPicture);
 	
-	Connect = AddMenuLink(Vect(150,0,440), GetMenuByID(3000));
-	AddButton(Vect(300,0,440), "Quit", "Quit the game", GoExit);
+	Connect = AddMenuLink(Vect(50,0,470), GetMenuByID(3000));
+	AddButton(Vect(320,0,470), "Quit", "Quit the game", GoExit);
 }
 
 

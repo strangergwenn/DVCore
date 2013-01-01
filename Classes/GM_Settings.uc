@@ -14,16 +14,30 @@ class GM_Settings extends GMenu;
 
 var (Menu) const string					UsernameText;
 var (Menu) const string					PasswordText;
+var (Menu) const string					Separator;
+
+var (Menu) const array<string>			BindListData;
 
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
+var bool								bIsKeyEditing;
+
+var int									CurrentKeyID;
+
+var string								CurrentKeyData;
+
 var GButton								Validate;
+var GDropList							ResDropList;
+var GToggleButton						CurrentKeyButton;
+
 var GToggleButton						BackgroundMusic;
 var GToggleButton						UseSoundOnHit;
 var GToggleButton						FullScreen;
+
+var array<GToggleButton>				EditKeyButtons;
 
 
 /*----------------------------------------------------------
@@ -31,19 +45,56 @@ var GToggleButton						FullScreen;
 ----------------------------------------------------------*/
 
 /**
- * @brief Toggle button callback for settings
+ * @brief Key setting buttons
  * @param Reference				Caller actor
  */
-delegate GoToggle(Actor Caller)
+delegate GoKey(Actor Caller)
 {
+	CurrentKeyButton = GToggleButton(Caller);
+	if (!bIsKeyEditing)
+	{
+		CurrentKeyData = CurrentKeyButton.Text;
+		CurrentKeyID = (IsInArray(Split(CurrentKeyData, Separator, true), KeyListData, true) + 1);
+		CurrentKeyButton.Set(lWaitingForKey, "");
+		bIsKeyEditing = true;
+	}
+	else
+	{
+		CurrentKeyButton.SetState(false);
+	}
 }
 
 /**
- * @brief Validate button
- * @param Reference				Caller actor
+ * @brief Key press event
+ * @param Key					Key used
+ * @param Evt					Event type
+ * @return true if event is consummed, false to keep it propagating
  */
-delegate GoValidate(Actor Caller)
+function bool KeyPressed(name Key, EInputEvent Evt)
 {
+	if (bIsKeyEditing && Evt == IE_Released)
+	{
+		switch(Key)
+		{
+			// Cancel
+			case 'Escape':
+				CurrentKeyButton.Set(CurrentKeyData, "");
+				bIsKeyEditing = false;
+				break;
+			
+			// Key editing
+			default:
+				CurrentKeyButton.Set(Key $ Separator $ KeyListData[CurrentKeyID], "");
+				CurrentKeyButton.SetState(false);
+				bIsKeyEditing = false;
+				break;
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 /**
@@ -52,6 +103,60 @@ delegate GoValidate(Actor Caller)
 simulated function Enter()
 {
 	GoValidate(None);
+}
+
+/**
+ * @brief Validate button
+ * @param Reference				Caller actor
+ */
+delegate GoValidate(Actor Caller)
+{
+	// Resolution
+	local byte i;
+	local string res, flag;
+	local DVUserStats LS;
+	LS = DVPlayerController(PC).LocalStats;
+	res = Split(ResDropList.GetSelectedContent(), "[", false);
+	
+	// Application
+	flag = (FullScreen.GetState() ? "f" : "w");
+	res = Repl(Repl(res, "[", ""), "]", "");
+	GH_Menu(PC.myHUD).ApplyResolutionSetting(res, flag);
+	
+	// Options
+	LS.SetBoolValue("bBackgroundMusic", BackgroundMusic.GetState());
+	LS.SetBoolValue("bUseSoundOnHit", UseSoundOnHit.GetState());
+	LS.SetBoolValue("bFullScreen", FullScreen.GetState());
+	LS.SetStringValue("Resolution", res);
+	LS.SaveConfig();
+	
+	// Keys
+	for (i = 0; i < KeyListData.Length; i++)
+	{
+		res = Left(EditKeyButtons[i].Text, InStr(EditKeyButtons[i].Text, Separator));
+		DVPlayerInput(PC.PlayerInput).SetKeyBinding(name(res), BindListData[i]);
+	}
+}
+
+/**
+ * @brief Back button
+ * @param Reference				Caller actor
+ */
+delegate GoBack(Actor Caller)
+{
+	`log("GM > GoBack" @self);
+	if (Origin != None && !bIsKeyEditing)
+	{
+		ChangeMenu(Origin);
+	}
+}
+
+/**
+ * @brief Toggle button callback for settings
+ * @param Reference				Caller actor
+ */
+delegate GoToggle(Actor Caller)
+{
 }
 
 
@@ -64,23 +169,39 @@ simulated function Enter()
  */
 simulated function SpawnUI()
 {
+	// Init
+	local byte i;
+	local string Key;
 	local DVUserStats LS;
+	local GToggleButton Temp;
 	LS = DVPlayerController(PC).LocalStats;
 	super.SpawnUI();
 	
-	BackgroundMusic = GToggleButton(AddButton(Vect(-300,0,300), "Music",
-		"", GoToggle, class'GB_Clean'));
+	// Video
+	AddLabel(Vect(-300,0,400), lVideo);
+	BackgroundMusic = GToggleButton(AddButton(Vect(-280,0,370), lIngameMusic, "", GoToggle));
 	BackgroundMusic.SetState(LS.bBackgroundMusic);
-	
-	UseSoundOnHit = GToggleButton(AddButton(Vect(-300,0,250), "Sound on hit",
-		"", GoToggle, class'GB_Clean'));
+	UseSoundOnHit = GToggleButton(AddButton(Vect(-280,0,340), lImpactIndicator, "", GoToggle));
 	UseSoundOnHit.SetState(LS.bUseSoundOnHit);
-	
-	FullScreen = GToggleButton(AddButton(Vect(-300,0,200), "Fullscreen",
-		"", GoToggle, class'GB_Clean'));
+	FullScreen = GToggleButton(AddButton(Vect(-280,0,310), lFullScreen, "", GoToggle));
 	FullScreen.SetState(LS.bFullScreen);
+	ResDropList = AddDropList(Vect(-280,0,280), "Resolution", "", ResListData, class'GDL_Small');
 	
-	AddButton(Vect(220,0,0), "Validate", "", GoValidate);
+	// Key editing
+	for (i = 0; i < KeyListData.Length; i++)
+	{
+		Key = DVPlayerInput(PC.PlayerInput).GetKeyBinding(BindListData[i]);
+		Temp = GToggleButton(AddButton(
+			Vect(300,0,400) - i * Vect(0,0,30), 
+			Key $ Separator $ KeyListData[i],
+			"",
+			GoKey
+		));
+		EditKeyButtons.AddItem(Temp);
+	}
+	
+	// Setting save
+	Validate = AddButton(Vect(320,0,0), "Validate", "", GoValidate, class'GButton');
 }
 
 
@@ -91,7 +212,10 @@ simulated function SpawnUI()
 defaultproperties
 {
 	Index=30
-	LabelClass=class'GL_Clean'
+	Separator="   |   "
+	bIsKeyEditing=false
 	MenuName="Settings"
 	MenuComment="Setup the game"
+	ButtonClass=class'GToggleButton'
+	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk","GBA_Activate")
 }

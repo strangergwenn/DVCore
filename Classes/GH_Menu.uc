@@ -50,7 +50,7 @@ simulated function PostBeginPlay()
  */
 function ApplyResolutionSetting(string code, string flag)
 {
-	`log("DVM > ApplyResolutionSetting" @code @flag);
+	`log("GHM > ApplyResolutionSetting" @code @flag);
 	switch (code)
 	{
 		case ("720p"):
@@ -65,7 +65,6 @@ function ApplyResolutionSetting(string code, string flag)
 	}
 }
 
-
 /**
  * @brief Launch autoconnection
 */
@@ -73,7 +72,6 @@ simulated function AutoConnect()
 {
 	LoginMenu.SetConnectState(1);
 }
-
 
 /**
  * @brief Called when the connection has been established
@@ -83,7 +81,6 @@ function SignalConnected()
 	DVPlayerController(PlayerOwner).SignalConnected();
 	LoginMenu.SetConnectState(2);
 }
-
 
 /**
  * @brief Show a command response code

@@ -88,7 +88,7 @@ simulated function SpawnUI()
 	// Stat block 5
 	AddLabel(Vect(250,0,400), lBestPLayers);
 	PlayerList = DVPlayerController(PC).GetBestPlayers(false);
-	Leaderboard = AddList(Vect(270,0,400), PlayerList, class'GL_Small');
+	Leaderboard = AddList(Vect(270,0,400), PlayerList, class'GLI_Small');
 	SetTimer(2.0, true, 'UpdateLeaderboard');
 }
 
@@ -102,6 +102,5 @@ defaultproperties
 	// Menu data
 	Index=-10
 	MenuName="Stats"
-	LabelClass=class'GL_Clean'
 	MenuComment="Check out your skill"
 }
