@@ -84,7 +84,7 @@ function bool KeyPressed(name Key, EInputEvent Evt)
 			
 			// Key editing
 			default:
-				CurrentKeyButton.Set(Key $ Separator $ KeyListData[CurrentKeyID], "");
+				CurrentKeyButton.Set(Key $ Separator $ KeyListData[CurrentKeyID-1], "");
 				CurrentKeyButton.SetState(false);
 				bIsKeyEditing = false;
 				break;
