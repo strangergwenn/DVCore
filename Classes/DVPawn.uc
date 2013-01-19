@@ -117,11 +117,15 @@ simulated event ReplicatedEvent(name VarName)
 function PostBeginPlay()
 {
 	super.PostBeginPlay();
-	if (WorldInfo.NetMode == NM_DedicatedServer)
-	{
-		ServerLogAction("IPOS");
-		SetTimer(0.5, true, 'LogPosition');
-	}
+	ServerLogAction("IPOS");
+	SetTimer(1.0, true, 'LogPosition');
+}
+
+
+/*--- Position logging ---*/
+simulated function LogPosition()
+{
+	ServerLogAction("POS");
 }
 
 
@@ -159,13 +163,6 @@ simulated function byte GetTeamIndex()
 		return DVPlayerRepInfo(PlayerReplicationInfo).Team.TeamIndex;
 	else
 		return 0;
-}
-
-
-/*--- Position logging ---*/
-simulated function LogPosition()
-{
-	ServerLogAction("POS");
 }
 
 
@@ -787,9 +784,15 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 /*--- Standard log procedure ---*/
 reliable server simulated function ServerLogAction(string event)
 {
-	if (WorldInfo.NetMode == NM_DedicatedServer && bDVLog)
+	if ((WorldInfo.NetMode == NM_DedicatedServer || WorldInfo.NetMode == NM_Standalone) && bDVLog)
 	{
-		`log("DVLOG/" $ event $ "/" $ self $ "/X/" $ Location.Y $ "/Y/" $ Location.X $ "/ENDLOG");
+		`log("DVL/"
+			$event $"/" $self 
+			$"/X/" $Location.Y
+			$"/Y/" $Location.X 
+			$"/Z/" $Location.Z 
+			$"/EDL"
+		);
 	}
 }
 
@@ -816,10 +819,7 @@ simulated State Dying
 		SetTimer(30.0, false);
 		
 		// Logging
-		if (WorldInfo.NetMode == NM_DedicatedServer)
-		{
-			ServerLogAction("DIED");
-		}
+		ServerLogAction("DIED");
 	}
 	
 	event bool EncroachingOn(Actor Other)

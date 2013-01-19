@@ -105,21 +105,24 @@ replication
 
 simulated event ReplicatedEvent(name VarName)
 {	
-	`log("DVW > ReplicatedEvent" @VarName);
+	`log("########### DVW > ReplicatedEvent" @VarName);
 	if (VarName == 'PlayerAddonClass1' && PlayerAddonClass1 != OldPlayerAddonClass1)
 	{
+		`log("########### DVW > ReplicatedEvent PlayerAddonClass1" @PlayerAddonClass1);
 		SetAddon(Addon1,OldPlayerAddonClass1, PlayerAddonClass1);
 		OldPlayerAddonClass1 = PlayerAddonClass1;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass2' && PlayerAddonClass2 != OldPlayerAddonClass2)
 	{
+		`log("########### DVW > ReplicatedEvent PlayerAddonClass2" @PlayerAddonClass2);
 		SetAddon(Addon2,OldPlayerAddonClass2, PlayerAddonClass2);
 		OldPlayerAddonClass2 = PlayerAddonClass2;
 		return;
 	}
 	if (VarName == 'PlayerAddonClass3' && PlayerAddonClass3 != OldPlayerAddonClass3)
 	{
+		`log("########### DVW > ReplicatedEvent PlayerAddonClass3" @PlayerAddonClass3);
 		SetAddon(Addon3,OldPlayerAddonClass3, PlayerAddonClass3);
 		OldPlayerAddonClass3 = PlayerAddonClass3;
 		return;
@@ -176,7 +179,7 @@ simulated function TimeWeaponEquipping()
 	if ((WorldInfo.NetMode == NM_StandAlone || WorldInfo.NetMode == NM_DedicatedServer) 
 	 && ZP != None)
 	{
-		`log("DVW > TimeWeaponEquipping" @AddonClass1 @AddonClass2 @AddonClass3 @self);
+		`log("########### DVW > TimeWeaponEquipping" @AddonClass1 @AddonClass2 @AddonClass3 @self);
 		if (WorldInfo.NetMode == NM_StandAlone)
 		{
 			SetupAddons();
@@ -247,7 +250,7 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	{
 		SetupAddons();
 	}
-	`log("DVW > AttachWeaponTo" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
+	`log("########### DVW > AttachWeaponTo" @self @"with" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3);
 }
 
 
@@ -360,7 +363,7 @@ reliable server simulated function ServerSetAddonClasses(string A1, string A2, s
 		PlayerAddonClass3 = A3;
 		bForceNetUpdate = true;
 	}
-	`log("DVW > ServerSetAddonClasses" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
+	`log("########### DVW > ServerSetAddonClasses" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);
 }
 
 
@@ -388,7 +391,7 @@ simulated function FillAddonList()
 /*--- Manage an add-on request (add or delete) ---*/
 simulated function RequestAddon(byte AddonID)
 {
-	`log("DVW > RequestAddon" @AddonID @self);
+	`log("########### DVW > RequestAddon" @AddonID @self);
 	
 	switch (AddonList[AddonID].default.SocketID)
 	{
@@ -411,7 +414,7 @@ simulated function RequestAddon(byte AddonID)
 /*--- Add-on toggle ---*/
 simulated function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewClass)
 {
-	`log("DVW > SetAddon -" @OldClass @"-" @NewClass @self);
+	`log("########### DVW > SetAddon -" @OldClass @"-" @NewClass @self);
 	
 	if (OldClass != "")
 		RemoveAddon(OldAddon);
@@ -424,7 +427,7 @@ simulated function SetAddon(DVWeaponAddon OldAddon, string OldClass, string NewC
 simulated function SpawnAddon(string AddonClass)
 {
 	local DVWeaponAddon NewAddon;
-	`log("DVW > SpawnAddon" @AddonClass @"-" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);	
+	`log("########### DVW > SpawnAddon" @AddonClass @"-" @PlayerAddonClass1 @PlayerAddonClass2 @PlayerAddonClass3 @self);	
 	
 	if (AddonClass != "")
 	{
@@ -454,7 +457,7 @@ simulated function SpawnAddon(string AddonClass)
 /*--- Add-on deletion ---*/
 simulated function RemoveAddon(DVWeaponAddon OldAddon)
 {
-	`log("DVW > RemoveAddon" @OldAddon @self);	
+	`log("########### DVW > RemoveAddon" @OldAddon @self);	
 	
 	if (OldAddon != None)
 	{
@@ -494,7 +497,7 @@ simulated function DVWeaponAddon GetAddon(string AddonClass)
 			self
 		);
 	}
-	`log("DVW > GetAddon >" @AddonClass @">" @wpAdd @self);
+	`log("########### DVW > GetAddon >" @AddonClass @">" @wpAdd @self);
 	return wpAdd;
 }
 

@@ -102,6 +102,10 @@ simulated function PostBeginPlay()
 	MasterServerLink.InitLink(self);
 }
 
+exec function AAA()
+{
+	PostProcessModifier.Scene_Desaturation = 1.0;
+}
 
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)

@@ -68,10 +68,10 @@ simulated function AttachToWeapon(DVWeapon wp)
 {
 	if (MountSocket() == '' || Mesh == None || SkeletalMeshComponent(wp.Mesh) == None)
 	{
-		`warn("DVWA > AttachToWeapon error" @self);
+		`warn("########### DVWA > AttachToWeapon error" @self @"to" @wp);
 		return;
 	}
-	`log("DVWA > AttachToWeapon" @self);
+	`log("########### DVWA > AttachToWeapon" @self @"to" @wp);
 	
 	// Mesh
 	Weap = wp;
@@ -80,7 +80,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	Mesh.SetShadowParent(wp.Mesh);
 	Mesh.SetLightEnvironment(wp.Mesh.LightEnvironment);
 	SkeletalMeshComponent(wp.Mesh).AttachComponentToSocket(Mesh, MountSocket());
-	`log("DVWA > Spawned and attached" @Mesh @"to" @wp.Mesh @self);
+	`log("########### DVWA > Spawned and attached" @Mesh @"to" @wp.Mesh @self);
 	
 	// Properties override
 	if (SmoothingFactor != 0.0)
@@ -132,7 +132,7 @@ simulated function DetachFromWeapon(DVWeapon wp)
 		
 		if (wp.Mesh != None)
 		{
-			`log("DVWA > Detaching from" @wp.Mesh @self);
+			`log("########### DVWA > Detaching" @self @"from" @wp.Mesh);
 			SkeletalMeshComponent(wp.Mesh).DetachComponent(Mesh);
 		}
 	}
@@ -160,7 +160,7 @@ simulated function DetachFromWeapon(DVWeapon wp)
 		wp.FireInterval[0] *= FireRateBonus;
 	
 	// Ending
-	`log("DVWA > Removed add-on" @self);
+	`log("########### DVWA > Removed add-on" @self);
 	Destroy();
 }
 

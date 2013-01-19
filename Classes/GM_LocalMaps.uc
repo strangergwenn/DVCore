@@ -72,7 +72,7 @@ defaultproperties
 	Index=2000
 	MenuName="Local games"
 	MenuComment="Try out levels"
-	ListOffset=(X=0,Y=-50,Z=30)
+	ListOffset=(X=120,Y=-50,Z=30)
 	ScrollOffset=(X=0,Y=0,Z=90)
 	IgnoreList=("LD","FX","AMB","ART","FX","PROPS","LIGHTS","DECALS","ENVIRO","ENVIRONMENT","DEFAULTMAP")
 }
