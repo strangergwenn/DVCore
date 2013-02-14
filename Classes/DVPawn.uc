@@ -898,7 +898,7 @@ defaultproperties
 	End Object
 	Mesh=SkeletalMeshComponent0
 	Components.Add(SkeletalMeshComponent0)
-	
+
 	// Cylinder
 	Begin Object Name=CollisionCylinder
 		CollisionRadius=40.0
