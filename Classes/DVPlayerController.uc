@@ -1017,7 +1017,7 @@ state PlayerWalking
 			return;
 		}
 		
-		if (DoubleClickMove == DCLICK_Forward && Pawn.Health > DVPawn(Pawn).SprintDamage)
+		if (DoubleClickMove == DCLICK_Forward && Pawn.Health > DVPawn(Pawn).SprintDamage && !DVPawn(Pawn).bRunning)
 		{
 			bRun = 1;
 			DVPawn(Pawn).SetRunning(true);

@@ -351,7 +351,15 @@ simulated function Tick(float DeltaTime)
 {	
 	// Weapon adjustment
 	if (Weapon != None)
+	{
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
+	}
+
+	// Run stop
+	if ((Health <= SprintDamage || Velocity == Vect(0,0,0)) && bRunning)
+	{
+		SetRunning(false);
+	}
 }
 
 
@@ -435,19 +443,21 @@ simulated function float GetJumpingFactor()
 /*--- Running ? ---*/
 reliable client simulated function SetRunning(bool status)
 {
-	Mesh.GlobalAnimRateScale = ((status) ? WalkingPct : 1.0);
-	bRunning = status;
-	
-	if (status)
+	if (status && Health > SprintDamage)
 	{
+		bRunning = true;
+		Mesh.GlobalAnimRateScale = WalkingPct;
 		TakeRunningDamage();
+		ClearTimer('TakeRunningDamage');
 		SetTimer(SprintDamagePeriod, true, 'TakeRunningDamage');
 	}
-	else
+	if (!status)
 	{
+		bRunning = false;
+		Mesh.GlobalAnimRateScale = 1.0;
 		ClearTimer('TakeRunningDamage');
+		DVPlayerController(Controller).bRun = 0;
 	}
-	
 	bForceNetUpdate = true;
 }
 
@@ -457,7 +467,7 @@ reliable client simulated function TakeRunningDamage()
 {
 	HurtSprint();
 	ServerHurtSprint();
-	if (Health < SprintDamage)
+	if (Health <= SprintDamage)
 	{
 		SetRunning(false);
 	}
