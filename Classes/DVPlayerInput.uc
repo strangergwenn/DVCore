@@ -71,6 +71,15 @@ function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float
 			DVHUD_Menu(myHUD).HudMovie.HidePopup();
 	}
 	
+	// Ingame tab key
+	if (DVHUD(myHUD) != None)
+	{
+		if (KeyName == 'Tab' && !DVHUD(myHUD).HudMovie.bChatting)
+		{
+			DVHUD(myHUD).HudMovie.CloseChat();
+		}
+	}
+
 	// New menu
 	else if (GHUD(myHUD) != None)
 	{

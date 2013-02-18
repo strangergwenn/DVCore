@@ -99,22 +99,7 @@ auto state Pickup
 	
 	function bool ValidTouch(Pawn Other)
 	{
-		local DVPlayerController PC;
-		
-		if (Other == None)
-		{
-			return false;
-		}
-		else if (Other.Controller == None)
-		{
-			SetTimer( 0.2, false, nameof(RecheckValidTouch) );
-			return false;
-		}
-		else
-		{
-			PC = DVPlayerController(Other.Controller);
-			return (PC.GetAmmoCount() != PC.GetAmmoMax());
-		}
+		return true;
 	}
 	
 	event BeginState(name PreviousStateName)

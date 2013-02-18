@@ -51,6 +51,7 @@ var (DVPawn) const string			ModuleName;
 
 var (DVPawn) localized string		lPickedUp;
 var (DVPawn) localized string		lBullets;
+var (DVPawn) localized string		lHealth;
 
 
 /*----------------------------------------------------------
@@ -247,6 +248,9 @@ simulated function AddHealth(int amount)
 {
 	Health += amount;
 	Health = Clamp (Health, 0, HealthMax);
+
+	if (Controller != None)
+		DVPlayerController(Controller).ShowGenericMessage(lPickedUp @ amount @ lHealth);
 }
 
 

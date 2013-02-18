@@ -178,9 +178,7 @@ simulated function SendChatMessage()
 		
 		ChatTextMC.SetString("text", "...");
 	}
-	bChatting = false;
-	PC.IgnoreMoveInput(false);
-	ChatMC.SetBool("focused", true);
+	CloseChat();
 }
 
 
@@ -586,6 +584,13 @@ function OnResume(GFxClikWidget.EventData evtd)
 	bInMenu = false;
 }
 
+/*--- Chat end ---*/
+function CloseChat()
+{
+	bChatting = false;
+	PC.IgnoreMoveInput(false);
+	ChatMC.SetBool("focused", true);
+}
 
 /*--- Change team ---*/
 function OnSwitchTeam(GFxClikWidget.EventData evtd)
