@@ -62,7 +62,7 @@ event PostRender()
 	}
 	
 	// Debug
-	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED PRE ALPHA - CL 1156", 400, 10);
+	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1164", 400, 10);
 	
 	// End
 	ToggleRespawnMenu();

@@ -6,7 +6,7 @@
  **/
 
 class DVPlayerController extends UDKPlayerController;
-
+//	DLLBind(MasterServerBridge);
 
 /*----------------------------------------------------------
 	Public attributes
@@ -67,6 +67,20 @@ var bool							bMusicStarted;
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
+
+/*----------------------------------------------------------
+	DLL Bind
+----------------------------------------------------------*/
+/*
+dllimport final function CallDLL1(out string s);
+dllimport final function vector CallDLL2(float x, float y, float z);
+dllimport final function bool CallDLL3(string s, int i[2], out float f, out vector v);
+
+exec function TestMe(){
+	local string text;
+	CallDLL1(text);
+	`log(text);
+}*/
 
 /*----------------------------------------------------------
 	Replication

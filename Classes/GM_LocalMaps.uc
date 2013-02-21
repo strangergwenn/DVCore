@@ -20,7 +20,7 @@ delegate GoLaunch(Actor Caller)
 {
 	if (CurrentData != "")
 	{
-		ConsoleCommand("open" @CurrentData);
+		ConsoleCommand("open" @CurrentData $ "?game=");
 	}
 }
 

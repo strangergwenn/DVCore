@@ -235,11 +235,14 @@ simulated function SwitchToWeapon(class<DVWeapon> WpClass)
 /*--- Add ammo ---*/
 simulated function AddWeaponAmmo(int amount)
 {
+	local int realAmount;
+	realAmount = 0;
+
 	if (Weapon != None)
-		Weapon.AddAmmo(amount);
+		realAmount = Weapon.AddAmmo(amount);
 	
 	if (Controller != None)
-		DVPlayerController(Controller).ShowGenericMessage(lPickedUp @ amount @ lBullets);
+		DVPlayerController(Controller).ShowGenericMessage(lPickedUp @ realAmount @ lBullets);
 }
 
 
