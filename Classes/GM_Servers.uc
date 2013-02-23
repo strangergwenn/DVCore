@@ -14,11 +14,43 @@ class GM_Servers extends GListMenu;
 
 var bool 								bIsPasswordProtected;
 
+var GButton 							Spectate;
+
 var string								ServerURL;
 
 var array<string>						IPList;
 var array<string>						ServerList;
 var array<Texture2D>					PictureList;
+
+
+/*----------------------------------------------------------
+	Core
+----------------------------------------------------------*/
+
+/**
+ * @brief UI setup
+ */
+simulated function SpawnUI()
+{
+	Super.SpawnUI();
+	Spectate = AddButton(Vect(0,0,0), lMSpectateText, lMSpectateComment, GoSpectate);
+	Spectate.Deactivate();
+}
+
+
+/**
+ * @brief Tick event (thread)
+ * @param DeltaTime			Time since last tick
+ */
+simulated event Tick(float DeltaTime)
+{
+	super.Tick(DeltaTime);
+	if (CurrentData == "" && Launch != None)
+	{
+		Launch.Deactivate();
+		Spectate.Deactivate();
+	}
+}
 
 
 /*----------------------------------------------------------
@@ -79,6 +111,7 @@ delegate GoSelect(Actor Caller)
 	if (GToggleButton(Caller).GetState())
 	{
 		Launch.Activate();
+		Spectate.Activate();
 		ServerString = GListItem(Caller).Data;
 		ServerURL = IPList[ServerList.Find(ServerString)];
 		bIsPasswordProtected = (InStr(ServerString, lServerProtected) != -1);
@@ -86,14 +119,11 @@ delegate GoSelect(Actor Caller)
 	else
 	{
 		Launch.Deactivate();
+		Spectate.Deactivate();
 		CurrentData = "";
 	}
 }
 
-
-/*----------------------------------------------------------
-	Button callbacks
-----------------------------------------------------------*/
 
 /**
  * @brief Launch button
@@ -114,6 +144,18 @@ delegate GoLaunch(Actor Caller)
 		}
 	}
 }
+
+
+/**
+ * @brief Spectate button
+ * @param Reference				Caller actor
+ */
+delegate GoSpectate(Actor Caller)
+{
+	ServerURL $= "?SpectatorOnly=1";
+	GoLaunch(Caller);
+}
+
 
 
 /*----------------------------------------------------------

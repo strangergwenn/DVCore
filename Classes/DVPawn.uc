@@ -502,6 +502,7 @@ reliable server simulated function ServerHurtSprint()
 /*--- Addon status update ---*/
 reliable client simulated function bool GetAddonStatus()
 {
+	if (PlayerReplicationInfo == None) return false;
 	return DVPlayerRepInfo(PlayerReplicationInfo).bUseAddon;
 }
 

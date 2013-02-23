@@ -98,6 +98,18 @@ function bool KeyPressed(name Key, EInputEvent Evt)
 }
 
 /**
+ * @brief Called on tab key
+ * @param bIsGoingUp			Unused
+ */
+simulated function Tab(bool bIsGoingUp)
+{
+	if (!bIsKeyEditing)
+	{
+		Super.Tab(bIsGoingUp);
+	}
+}
+
+/**
  * @brief Called on enter key
  */
 simulated function Enter()
@@ -201,7 +213,7 @@ simulated function SpawnUI()
 	}
 	
 	// Setting save
-	Validate = AddButton(Vect(320,0,0), "Validate", "", GoValidate, class'GButton');
+	Validate = AddButton(Vect(320,0,0), "Apply", "Apply", GoValidate, class'GButton');
 }
 
 

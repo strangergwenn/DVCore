@@ -25,7 +25,7 @@ var bool  							bHoldDuck;
 simulated exec function Duck()
 {
 	// Chatting
-	if (IsChatLocked())
+	if (IsChatLocked() || Pawn == None)
 		return;
 	
 	if (bRun == 0 && Pawn.Health > DVPawn(Pawn).SprintDamage)
@@ -39,8 +39,11 @@ simulated exec function Duck()
 /** @brief Stop running (yeah, running) */
 simulated exec function UnDuck()
 {
-	bRun = 0;
-	DVPawn(Pawn).SetRunning(false);
+	if (Pawn != None)
+	{
+		bRun = 0;
+		DVPawn(Pawn).SetRunning(false);
+	}
 }
 
 

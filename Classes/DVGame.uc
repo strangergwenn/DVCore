@@ -449,7 +449,7 @@ defaultproperties
 	EndGameTick=0.5
 	HeartbeatTick=10.0
 	WeaponListLength=8
-	MaxPlayersAllowed=16
+	MaxPlayersAllowed=24
 	
 	// Classes
 	HUDType=class'DVHUD'

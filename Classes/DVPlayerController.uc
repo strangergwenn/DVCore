@@ -59,6 +59,8 @@ var int								FrameCount;
 
 var byte							WeaponListLength;
 
+var vector							CurrentAimWorld;
+
 var bool							bLocked;
 var bool							bShouldStop;
 var bool							bConfiguring;
@@ -351,11 +353,10 @@ exec function Activate()
 exec function StartFire(optional byte FireModeNum = 0)
 {
 	// Chatting
-	if (IsChatLocked())
+	if (IsChatLocked() || bShouldStop)
+	{
 		return;
-	
-	if (IsCameraLocked() || bShouldStop)
-		return;
+	}
 	else
 	{
 		super.StartFire(FireModeNum);
@@ -407,6 +408,10 @@ event PlayerTick(float DeltaTime)
 		// Should we lock input ?
 		Target = None;
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
+		if (Target != None)
+		{
+			CurrentAimWorld = HitLocation;
+		}
 		bShouldStop = (Target != None);
 	}
 	super.PlayerTick(DeltaTime);
@@ -416,6 +421,38 @@ event PlayerTick(float DeltaTime)
 /*--- Nope ---*/
 function bool SetPause(bool bPause, optional delegate<CanUnpause> CanUnpauseDelegate=CanUnpause)
 {}
+
+
+/*----------------------------------------------------------
+	Spectating
+----------------------------------------------------------*/
+
+exec function Spectate()
+{
+	Pawn.SetHidden(True);
+	Pawn.Destroy();
+	GoToState('Spectating');
+}
+
+exec function UnPause()
+{
+	DVHUD(MyHUD).Close();
+}
+
+state Spectating
+{
+	event BeginState(Name PreviousStateName)
+	{
+		`log("DVPC > Spectating");
+		if (Pawn != None)
+		{
+			SetLocation(Pawn.Location);
+			UnPossess();
+		}
+		bCollideWorld = true;
+		DVHUD(MyHUD).Close();
+	}
+}
 
 
 /*----------------------------------------------------------
@@ -539,7 +576,7 @@ function UpdateRotation(float DeltaTime)
 /*--- Camera lock ---*/
 simulated function ProcessViewRotation(float DeltaTime, out Rotator out_ViewRotation, rotator DeltaRot)
 {
-	if (Pawn != None && !IsCameraLocked())
+	if ((Pawn != None || IsInState('Spectating')) && !IsCameraLocked())
 		super.ProcessViewRotation(DeltaTime, out_ViewRotation, DeltaRot );
 }
 
@@ -1079,6 +1116,7 @@ defaultproperties
 	LocalLeaderBoardOffset=4
 	DesiredFOV=85.000000
 	DefaultFOV=85.000000
+	SpectatorCameraSpeed=1500
 
 	HitSound=SoundCue'DV_Sound.UI.A_Click'
 	InputClass=class'DVPlayerInput'

@@ -557,6 +557,14 @@ reliable client simulated function OpenWeaponConfig()
 }
 
 
+/*--- Weapon data ---*/
+reliable client simulated function CloseRespawnMenu()
+{
+	SetGameUnPaused();
+	Scene.GotoAndPlayI(1);
+}
+
+
 /*--- Pause start ---*/
 function TogglePause()
 {

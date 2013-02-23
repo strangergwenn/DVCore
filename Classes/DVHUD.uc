@@ -81,19 +81,24 @@ simulated function PostBeginPlay()
 	local DVPlayerController PC;
 	super.PostBeginPlay();
 	PC = DVPlayerController(PlayerOwner);
-	
+
 	// Movie
 	HudMovie = new HUDClass;
 	HudMovie.SetTimingMode(TM_Real);
 	HudMovie.Init(class'Engine'.static.GetEngine().GamePlayers[HudMovie.LocalPlayerOwnerIndex]);
 	HudMovie.Start();
 	HudMovie.Advance(0);
-	
+
 	// HUD register
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
 	OpenWeaponMenu();
-	SetTimer(2.0, true, 'OpenWeaponMenu');
+	if (!PC.IsInState('Spectating'))
+	{
+		SetTimer(2.0, true, 'OpenWeaponMenu');
+	}
+	else
+		Close();
 }
 
 
@@ -180,15 +185,27 @@ function ToggleRespawnMenu()
 {
 	local DVPawn P;
 	P = DVPawn(PlayerOwner.Pawn);
+	if (P == None) return;
 	
-	if (P == None && !bRespawnOpened)
+	if (!P.Controller.IsInState('Spectating'))
 	{
-		HudMovie.OpenRespawnMenu(true);
-		SetTimer(1.0, true, 'OpenWeaponMenu');
-		bRespawnOpened = true;
+		if (P == None && !bRespawnOpened)
+		{
+			HudMovie.OpenRespawnMenu(true);
+			SetTimer(1.0, true, 'OpenWeaponMenu');
+			bRespawnOpened = true;
+		}
+		if (P != None && bRespawnOpened)
+			bRespawnOpened = false;
 	}
-	if (P != None && bRespawnOpened)
-		bRespawnOpened = false;
+}
+
+/*--- Unpause game ---*/
+function Close()
+{
+	HudMovie.SetGameUnPaused();
+	DisarmWeaponMenu();
+	HudMovie.Close();
 }
 
 
@@ -204,7 +221,8 @@ function DisplayConsoleMessages()
 		text $= ConsoleMessages[i].Text;
 		text $= "\n";
 	}
-	HUDMovie.UpdateChat(text);
+	if (HUDMovie != None)
+		HUDMovie.UpdateChat(text);
 }
 
 
