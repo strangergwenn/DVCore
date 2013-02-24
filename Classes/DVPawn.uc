@@ -262,11 +262,21 @@ simulated function vector GetZoomViewLocation()
 {
 	local DVWeapon wp;
 	wp = DVWeapon(Weapon);
-	
 	if (wp != None)
 		return wp.GetZoomViewLocation();
 	else
 		return Location;
+}
+
+/*--- Zoomed view rotation : socket ---*/
+simulated function rotator GetZoomViewRotation()
+{
+	local DVWeapon wp;
+	wp = DVWeapon(Weapon);
+	if (wp != None)
+		return wp.GetZoomViewRotation();
+	else
+		return Controller.Rotation;
 }
 
 
@@ -319,7 +329,7 @@ simulated function bool CalcCamera(float fDeltaTime, out vector out_CamLoc, out 
 	{
 		out_FOV = DVWeapon(Weapon).ZoomedFOV;
 		out_CamLoc = GetZoomViewLocation();
-		out_CamRot = Controller.Rotation;
+		out_CamRot = GetZoomViewRotation();
 		SetGroundSpeed(ZoomedGroundSpeed);
 	}
 	
@@ -357,7 +367,7 @@ reliable server function SetGroundSpeed(float NewSpeed)
 simulated function Tick(float DeltaTime)
 {	
 	// Weapon adjustment
-	if (Weapon != None)
+	if (Weapon != None && !DVWeapon(Weapon).IsZoomed())
 	{
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
 	}
@@ -378,19 +388,12 @@ simulated function rotator GetSmoothedRotation()
 	local vector CurLoc;
 	local float SmoothingFactor;
 	
-	// Perfect smooth condition
-	if (DVWeapon(Weapon).IsZoomed() && DVWeapon(Weapon).HasLensEffect())
-	{
-		SmoothingFactor = 1.0;
-	}
-	else
-	{
-		SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
-	}
-	
 	// Bone rotation (measure)
+	SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
 	if (Mesh == None)
+	{
 		return rotator(vect(0, 0, 0));
+	}
 	BaseAim = GetBaseAimRotation();
 	SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
 	Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, CurLoc, CurRot);

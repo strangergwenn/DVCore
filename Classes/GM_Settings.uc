@@ -197,7 +197,7 @@ simulated function SpawnUI()
 	UseSoundOnHit.SetState(LS.bUseSoundOnHit);
 	FullScreen = GToggleButton(AddButton(Vect(-280,0,310), lFullScreen, "", GoToggle));
 	FullScreen.SetState(LS.bFullScreen);
-	ResDropList = AddDropList(Vect(-280,0,280), "Resolution", "", ResListData, class'GDL_Small');
+	ResDropList = AddDropList(Vect(-280,0,280), "Resolution", "Resolution", ResListData, class'GDL_Small');
 	
 	// Key editing
 	for (i = 0; i < KeyListData.Length; i++)
@@ -213,7 +213,7 @@ simulated function SpawnUI()
 	}
 	
 	// Setting save
-	Validate = AddButton(Vect(320,0,0), "Apply", "Apply", GoValidate, class'GButton');
+	Validate = AddButton(Vect(320,0,0), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
 }
 
 
@@ -226,8 +226,6 @@ defaultproperties
 	Index=30
 	Separator="   |   "
 	bIsKeyEditing=false
-	MenuName="Settings"
-	MenuComment="Setup the game"
 	ButtonClass=class'GToggleButton'
 	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk","GBA_Activate")
 }

@@ -203,13 +203,13 @@ simulated function Enter()
  */
 simulated function SpawnUI()
 {
-	AddButton(Vect(-320,0,0), lPBack, BackComment, GoBack);
+	AddButton(Vect(-320,0,0), lPBack, lPBack, GoBack);
 	Connect = AddButton(Vect(320,0,0), lPConnectButton, lPConnect, GoConnect);
 	NewPlayer = AddButton(Vect(0,0,0), lPNewPlayer, LPNewAccount, GoRegister);
 	
 	bRegistering = false;
 	Label.Destroy();
-	Label2 = AddLabel(Vect(-320,0,470), MenuComment, class'GLabel');
+	Label2 = AddLabel(Vect(-320,0,470), lGMenuComment, class'GLabel');
 	
 	AddLabel(Vect(-100,0,300), lPPlayer);
 	AddLabel(Vect(-100,0,250), lPPassword);
@@ -227,7 +227,4 @@ defaultproperties
 {
 	Index=3000
 	BackDelay=1.0
-	MenuName="Connect"
-	MenuComment="Account management"
-	BackComment="Previous menu"
 }

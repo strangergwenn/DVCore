@@ -101,6 +101,4 @@ defaultproperties
 {
 	// Menu data
 	Index=-10
-	MenuName="Stats"
-	MenuComment="Check out your skill"
 }

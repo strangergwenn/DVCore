@@ -622,7 +622,7 @@ function OnExit(GFxClikWidget.EventData evtd)
 defaultproperties
 {
 	bFirstFrame=true
-	WarningThreshold=20
+	WarningThreshold=15
 	MovieInfo=SwfMovie'DV_CoreUI.HUD'
 	
 	WidgetBindings(3)={(WidgetName="SwitchTeam",WidgetClass=class'GFxClikWidget')}

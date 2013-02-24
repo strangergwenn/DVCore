@@ -1118,6 +1118,6 @@ defaultproperties
 	DefaultFOV=85.000000
 	SpectatorCameraSpeed=1500
 
-	HitSound=SoundCue'DV_Sound.UI.A_Click'
+	HitSound=SoundCue'A_Vehicle_Manta.SoundCues.A_Vehicle_Manta_Shot'
 	InputClass=class'DVPlayerInput'
 }

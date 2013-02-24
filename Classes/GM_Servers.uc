@@ -217,8 +217,6 @@ function string FormatServerInfo(string ServerName, string Level, string Game, i
 defaultproperties
 {
 	Index=2100
-	MenuName="Servers"
-	MenuComment="Network games"
 	ListOffset=(X=120,Y=-50,Z=30)
 	ScrollOffset=(X=0,Y=0,Z=90)
 }

@@ -542,6 +542,21 @@ simulated function vector GetZoomViewLocation()
 	}
 }
 
+/*--- Zoom rotation ---*/
+simulated function rotator GetZoomViewRotation()
+{
+	local vector loc;
+	local rotator rot;
+
+	if (Mesh != None)
+	{
+		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(EffectSockets[0], loc, rot))
+			`log("DVW > GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
+		rot.Roll += 16384;
+	}
+	return rot;
+}
+
 
 /*--- Zoom state ---*/
 simulated function bool IsZoomed()
@@ -669,8 +684,7 @@ simulated function FireAmmunition()
 	// Firing
 	PlayFiringSound();
 	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
-	if (!(HasLensEffect() && bZoomed))
-		P.GunRecoilNode.bPlayRecoil = true;
+	P.GunRecoilNode.bPlayRecoil = true;
 	Super.FireAmmunition();
 }
 

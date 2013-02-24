@@ -63,8 +63,6 @@ defaultproperties
 {
 	// Menu data
 	Index=0
-	MenuName="Home"
-	MenuComment="Main menu"
 	SoloPicture=Texture2D'DV_UI.Textures.LEVEL_00'
 	MultiPicture=Texture2D'DV_UI.Textures.LEVEL_02'
 }
