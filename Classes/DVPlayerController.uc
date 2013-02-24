@@ -118,10 +118,6 @@ simulated function PostBeginPlay()
 	MasterServerLink.InitLink(self);
 }
 
-exec function AAA()
-{
-	PostProcessModifier.Scene_Desaturation = 1.0;
-}
 
 /*--- Pawn possession : is spawned and OK ---*/
 event Possess(Pawn aPawn, bool bVehicleTransition)
@@ -316,7 +312,7 @@ exec function ShowCommandMenu()
 exec function Use()
 {
 	// Chatting
-	if (IsChatLocked())
+	if (IsChatLocked() || bConfiguring)
 		return;
 	
 	if (Pawn != None && DVWeapon(Pawn.Weapon) != None)
@@ -330,7 +326,7 @@ exec function Use()
 exec function Activate()
 {
 	// Init
-	if (IsChatLocked())
+	if (IsChatLocked() || bConfiguring)
 		return;
 	`log("DVPC > Activate" @TargetObject);
 	
@@ -353,7 +349,7 @@ exec function Activate()
 exec function StartFire(optional byte FireModeNum = 0)
 {
 	// Chatting
-	if (IsChatLocked() || bShouldStop)
+	if (IsChatLocked() || bShouldStop || bConfiguring)
 	{
 		return;
 	}

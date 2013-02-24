@@ -249,11 +249,16 @@ simulated function AddWeaponAmmo(int amount)
 /*--- Healing ---*/
 simulated function AddHealth(int amount)
 {
+	local DVPlayerController PC;
+	PC = DVPlayerController(Controller);
 	Health += amount;
 	Health = Clamp (Health, 0, HealthMax);
 
-	if (Controller != None)
-		DVPlayerController(Controller).ShowGenericMessage(lPickedUp @ amount @ lHealth);
+	if (PC != None)
+	{
+		DVHUD(PC.myHUD).HideHit();
+		PC.ShowGenericMessage(lPickedUp @ amount @ lHealth);
+	}
 }
 
 

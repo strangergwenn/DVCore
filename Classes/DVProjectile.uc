@@ -16,6 +16,8 @@ class DVProjectile extends UDKProjectile
 var bool 						bSuppressExplosionFX;
 var bool						bAdvanceExplosionEffect;
 
+var float						FlightTime;
+var float						CurveScaling;
 var float 						DurationOfDecal;
 var float 						MaxEffectDistance;
 var float 						GlobalCheckRadiusTweak;
@@ -65,6 +67,7 @@ simulated function PostBeginPlay()
 		ProjEffects.bUpdateComponentInTick = true;
 		AttachComponent(ProjEffects);
 	}
+	FlightTime = 0.0;
 }
 
 simulated event SetInitialState()
@@ -251,10 +254,20 @@ simulated static function float GetRange()
 	States
 ----------------------------------------------------------*/
 
+
+simulated function Tick(float DeltaTime)
+{
+	`log("DVP > " $ FlightTime @Velocity.Z);
+	FlightTime += DeltaTime;
+	Velocity.Z = - Square(100 * FlightTime) * CurveScaling;
+}
+
+
 state WaitingForVelocity
 {
 	simulated function Tick(float DeltaTime)
 	{
+		Super.Tick(DeltaTime);
 		if (!IsZero(Velocity))
 		{
 			Acceleration = AccelRate * Normal(Velocity);
@@ -270,12 +283,14 @@ state WaitingForVelocity
 
 defaultproperties
 {
+	CurveScaling=1.0
 	DamageRadius=+0.0
 	DurationOfDecal=24.0
-	TerminalVelocity=3500.0
+	TerminalVelocity=5000.0
 	CustomGravityScaling=1.0
 	MaxEffectDistance=+10000.0
 	
+	Physics=PHYS_Falling
 	bShuttingDown=false
 	bCollideComplex=true
 	bBlockedByInstigator=false

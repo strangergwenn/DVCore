@@ -347,6 +347,10 @@ simulated function SaveStatus()
 {
 	AddonClass1 = PlayerAddonClass1;
 	AddonClass2 = PlayerAddonClass2;
+	if (AddonClass2 == "")
+	{
+		AddonClass2 = ""$AddonList[8];
+	}
 	AddonClass3 = PlayerAddonClass3;
 	SaveConfig();
 	`log("DVW > SaveStatus" @AddonClass1 @AddonClass2 @AddonClass3 @self);
@@ -552,7 +556,7 @@ simulated function rotator GetZoomViewRotation()
 	{
 		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndrotation(EffectSockets[0], loc, rot))
 			`log("DVW > GetSocketWorldLocationAndrotation GetZoomViewLocation failed ");
-		rot.Roll += 16384;
+		rot.Roll += 16384; // Same axis as the FX
 	}
 	return rot;
 }
