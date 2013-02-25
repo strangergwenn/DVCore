@@ -98,8 +98,9 @@ var array< class<DVWeaponAddon> > AddonList;
 
 replication
 {
-	if ( bNetDirty )
-		MaxAmmo, bZoomed, bWeaponEmpty, PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
+	if (bNetDirty)
+		MaxAmmo, bZoomed, bWeaponEmpty,
+		PlayerAddonClass1, PlayerAddonClass2, PlayerAddonClass3;
 }
 
 
@@ -281,6 +282,12 @@ simulated function DetachFrom(SkeletalMeshComponent MeshCpnt)
 	RemoveAddon(Addon3);
 }
 
+/*--- Max ammo ---*/
+reliable server simulated function SetMaxAmmo(int max)
+{
+	MaxAmmo = max;
+	AmmoCount = max;
+}
 
 /*--- Ammo ---*/
 simulated function int AddAmmo(int amount)
@@ -319,6 +326,11 @@ simulated function CauseMuzzleFlash()
 	}
 	SetTimer(MuzzleFlashDuration,false, 'MuzzleFlashTimer');
 
+}
+
+/*--- Muzzle flash ---*/
+simulated function PlayFlashEffects()
+{
 }
 
 /*--- Flash callback ---*/
@@ -608,20 +620,14 @@ simulated function bool HasLensEffect()
 /*--- Trace start ---*/
 simulated function vector InstantFireStartTrace()
 {
-	return GetEffectLocation();
+	return GetZoomViewLocation();
 }
 
 
 /*--- Trace end ---*/
 simulated function vector InstantFireEndTrace(vector StartTrace)
 {
-	local rotator rot;
-	local vector loc;
-	
-	if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[0], loc, rot))
-		`log("DVW > GetSocketWorldLocationAndrotation InstantFireEndTrace failed ");
-	
-	return StartTrace + vector(rot) * GetTraceRange();
+	return StartTrace + vector(GetZoomViewRotation()) * GetTraceRange();
 }
 
 
@@ -687,9 +693,8 @@ simulated function FireAmmunition()
 	
 	// Firing
 	PlayFiringSound();
-	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
-	P.GunRecoilNode.bPlayRecoil = true;
 	Super.FireAmmunition();
+	bForceNetUpdate = true;
 }
 
 
@@ -732,6 +737,7 @@ simulated function PlayFiringEffects(vector HitLocation)
 			MuzzleFlashPSC.ActivateSystem();
 		}
 		CauseMuzzleFlash();
+		SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	}
 }
 

@@ -106,8 +106,7 @@ simulated function AttachToWeapon(DVWeapon wp)
 	// Bonus
 	if (AmmoBonus != 0.0)
 	{
-		wp.MaxAmmo *= AmmoBonus;
-		wp.AddAmmo(wp.MaxAmmo);
+		DVPlayerController(DVPawn(wp.Owner).Controller).SetMaxAmmo(wp.MaxAmmo * AmmoBonus);
 	}
 	if (DamageBonus != 0.0)
 		wp.InstantHitDamage[0] *= DamageBonus;

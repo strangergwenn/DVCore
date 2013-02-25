@@ -91,18 +91,18 @@ simulated function SetPickupMesh()
 
 auto state Pickup
 {
-	function SpawnCopyFor(Pawn P)
+	simulated function SpawnCopyFor(Pawn P)
 	{
 		PlaySound(PickupSound, false, true);
 		FlagLight.SetEnabled(false);
 	}
 	
-	function bool ValidTouch(Pawn Other)
+	simulated function bool ValidTouch(Pawn Other)
 	{
 		return true;
 	}
 	
-	event BeginState(name PreviousStateName)
+	simulated event BeginState(name PreviousStateName)
 	{
 		TriggerEventClass(class'SeqEvent_PickupStatusChange', None, 0);
 		FlagLight.SetEnabled(true);

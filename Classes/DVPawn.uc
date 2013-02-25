@@ -382,6 +382,7 @@ simulated function Tick(float DeltaTime)
 	{
 		SetRunning(false);
 	}
+	bIsWalking = bRunning;
 }
 
 
@@ -402,7 +403,7 @@ simulated function rotator GetSmoothedRotation()
 	BaseAim = GetBaseAimRotation();
 	SmoothingFactor = DVWeapon(Weapon).SmoothingFactor;
 	Mesh.GetSocketWorldLocationAndRotation(WeaponSocket, CurLoc, CurRot);
-	
+
 	// Smoothing calculation
 	SmoothRot.Pitch = (BaseAim.Roll - CurRot.Roll) * SmoothingFactor;
 	SmoothRot.Yaw = (BaseAim.Yaw - CurRot.Yaw) ;
@@ -599,6 +600,7 @@ simulated function WeaponFired(Weapon InWeapon, bool bViaReplication, optional v
 		{
 			DVWeapon(Weapon).PlayImpactEffects(HitLocation);
 		}
+		GunRecoilNode.bPlayRecoil = true;
 	}
 }
 

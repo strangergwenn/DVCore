@@ -259,7 +259,10 @@ simulated function Tick(float DeltaTime)
 {
 	`log("DVP > " $ FlightTime @Velocity.Z);
 	FlightTime += DeltaTime;
-	Velocity.Z = - Square(100 * FlightTime) * CurveScaling;
+	if (CurveScaling != 0)
+	{
+		Velocity.Z = - Square(100 * FlightTime) * CurveScaling;
+	}
 }
 
 

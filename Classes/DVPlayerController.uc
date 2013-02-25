@@ -624,6 +624,13 @@ simulated function int GetAmmoMax()
 	return ((wp != None) ? wp.GetAmmoMax() : 0);
 }
 
+/*--- Max ammo ---*/
+reliable server simulated function SetMaxAmmo(int max)
+{
+	local DVWeapon wp;
+	wp = DVWeapon(Pawn.Weapon);
+	wp.SetMaxAmmo(max);
+}
 
 /*--- Team index management ---*/
 simulated function byte GetTeamIndex()
