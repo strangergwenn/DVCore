@@ -257,7 +257,6 @@ simulated static function float GetRange()
 
 simulated function Tick(float DeltaTime)
 {
-	`log("DVP > " $ FlightTime @Velocity.Z);
 	FlightTime += DeltaTime;
 	if (CurveScaling != 0)
 	{

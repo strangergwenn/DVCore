@@ -21,6 +21,7 @@ var (CoreUI) const float				PopupTimer;
 
 var GM_Login							LoginMenu;
 var GM_Servers							ServerMenu;
+var GM_Stats							StatsMenu;
 
 
 /*----------------------------------------------------------
@@ -36,7 +37,8 @@ simulated function PostBeginPlay()
 	super.PostBeginPlay();
 	
 	ServerMenu = GM_Servers(CurrentMenu.GetMenuById(2100));
-	LoginMenu = GM_Login(CurrentMenu.GetMenuById(3000));
+	LoginMenu = GM_Login(CurrentMenu.GetMenuById(9999));
+	StatsMenu = GM_Stats(CurrentMenu.GetMenuById(-10));
 	
 	PC = DVPlayerController(PlayerOwner);
 	PC.FOV(PC.Default.DefaultFOV);
@@ -79,10 +81,11 @@ simulated function AutoConnect()
 /**
  * @brief Called when the connection has been established
  */
-function SignalConnected()
+function SignalConnected(string usr)
 {
 	DVPlayerController(PlayerOwner).SignalConnected();
 	LoginMenu.SetConnectState(2);
+	LoginMenu.AutoSuccessQuit(usr);
 }
 
 /**
@@ -96,6 +99,13 @@ function DisplayResponse (bool bSuccess, string Msg, string Command)
 	}
 }
 
+/**
+ * @brief User data
+ */
+function AddUserInfo()
+{
+	StatsMenu.UpdateLeaderBoard();
+}
 
 /**
  * @brief Server data

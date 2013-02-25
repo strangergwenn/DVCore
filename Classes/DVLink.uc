@@ -31,8 +31,10 @@ var (DVLink) localized string 		lNOK;
 
 var bool							bIsOpened;
 var bool							bIsConnected;
+var bool							bSending;
 
 var string							LastCommandSent;
+var array<string>					CommandBuffer;
 
 var DVPlayerController				PC;
 
@@ -46,6 +48,7 @@ simulated function InitLink(DVPlayerController LinkedController)
 {
 	`log("DVLINK > InitLink");
 	PC = LinkedController;
+	bSending = false;
 	resolve(MasterServerIP);
 }
 
@@ -116,7 +119,6 @@ reliable client simulated function GetServers(optional string GameName, optional
 {
 	local array<string> Params;
 	
-	`log("DVLINK > GetServers");
 	if (GameName != "")
 		Params.AddItem(GameName);
 	if (MapName != "")
@@ -133,7 +135,6 @@ reliable client simulated function GetLeaderboard(int PlayerCount, string ID)
 {
 	local array<string> Params;
 	
-	`log("DVLINK > GetLeaderboard");
 	PC.CleanBestPlayer();
 	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
@@ -248,18 +249,44 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 			Command $= ParamsString;
 		}
 		
-		`log("DVLINK >>" $ Command $"<<");
 		AbortTimeout();
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
-		SendText(Command $"\n");
+		WriteText(Command);
 	}
 }
 
+
+/*--- Command writing ---*/
+simulated function WriteText(string data)
+{
+	if (bSending)
+	{
+		CommandBuffer.AddItem(data);
+	}
+	else
+	{
+		bSending = true;
+		SendText(data $"\n");
+		`log("DVLINK >>" $ data $"<<");
+	}
+}
+
+/*--- TImer version */
+simulated function WriteTextOnBuffer()
+{
+	if (CommandBuffer.Length > 0 && !bSending)
+	{
+		CommandBuffer.RemoveItem(CommandBuffer[0]);
+		if (CommandBuffer[0] != "")
+			WriteText(CommandBuffer[0]);
+	}
+}
 
 /*--- Command reception ---*/
 simulated function array<string> GetServerCommand(string Input)
 {
 	local array<string> OutputArray;
+	bSending = false;
 	ParseStringIntoArray(Input, OutputArray, ",", false);
 	return OutputArray;
 }
@@ -269,6 +296,7 @@ simulated function array<string> GetServerCommand(string Input)
 simulated function SignalTimeout()
 {
 	`log("DVLINK > Command timeout...");
+	bSending = false;
 	SignalController("NET", false, "Serveur indisponible");
 }
 
@@ -276,8 +304,8 @@ simulated function SignalTimeout()
 /*--- Server OK processing ---*/
 simulated function ProcessACK(string Param)
 {
-	// Data
 	`log("DVLINK > ProcessACK" @LastCommandSent);
+	bSending = false;
 	SignalController(LastCommandSent, true, lOK);
 	AbortTimeout();
 }
@@ -306,7 +334,6 @@ event Resolved(IpAddr Addr)
 	
 	Addr.Port = MasterServerPort;
 	AbortTimeout();
-	SetTimer(TimeoutLength, false, 'SignalTimeout');
 	
 	`log("DVLINK > Bound to port" @BindPort());
 	if (!Open(Addr))
@@ -337,8 +364,8 @@ event Opened()
 	{
 		if (GH_Menu(PC.myHUD) != None)
 		{
-			SetTimer(3.0, false, 'GetServers');
 			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+			SetTimer(0.2, true, 'WriteTextOnBuffer');
 		}
 		SignalController("INIT", true, "");
 	}
@@ -456,7 +483,7 @@ defaultproperties
 	
 	CurrentID="0"
 	TimeoutLength=5.0
-	ServerListUpdateFrequency=10.0
+	ServerListUpdateFrequency=5.0
 	LinkMode=MODE_Text
 	ReceiveMode=RMODE_Event
 	

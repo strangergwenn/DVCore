@@ -181,8 +181,6 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		AutoConnect();
 		if (myHUD.IsA('DVHUD_Menu'))
 			DVHUD_Menu(myHUD).AutoConnect();
-		if (myHUD.IsA('GH_Menu'))
-			GH_Menu(myHUD).AutoConnect();
 	}
 	
 	// Upload & get back the stats on main menu, store the player ID in PRI
@@ -196,7 +194,7 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		}
 		if (myHUD.IsA('GH_Menu'))
 		{
-			GH_Menu(myHUD).SignalConnected();
+			GH_Menu(myHUD).SignalConnected(LocalStats.UserName);
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 			MasterServerLink.GetStats();
 		}
@@ -263,6 +261,7 @@ reliable client event TcpGetStats(array<string> Data)
 		{
 			GlobalStats.SetArrayIntValue("WeaponScores", int(Data[i + 1]), i);
 		}
+		GH_Menu(myHUD).AddUserInfo();
 	}
 }
 

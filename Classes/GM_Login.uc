@@ -112,15 +112,26 @@ function SetConnectState(optional int Level)
 	}
 }
 
-/**
- * @brief Exit the menu after login
- */
-simulated function SuccessQuit()
-{
-	GM_Main(Origin).LockLogin(Username.GetText());
-	SetTimer(BackDelay, false, 'GoBack');
-	bLoggingIn = false;
-}
+ /**
+  * @brief Exit the menu after auto-login
+  */
+ simulated function AutoSuccessQuit(string usr)
+ {
+	 UserName.SetText(usr);
+	 SuccessQuit();
+ }
+
+ /**
+  * @brief Exit the menu after login
+  */
+ simulated function SuccessQuit()
+ {
+ 	GM_Main(GetMenuById(0)).LockLogin(Username.GetText());
+ 	SetTimer(BackDelay, false, 'GoBack');
+ 	bLoggingIn = false;
+ 	Connect.Deactivate();
+ 	NewPlayer.Deactivate();
+ }
 
 
 /*----------------------------------------------------------
@@ -193,6 +204,19 @@ simulated function Enter()
 	GoConnect(None);
 }
 
+/**
+ * @brief Back button
+ * @param Reference				Caller actor
+ */
+delegate GoBack(Actor Caller)
+{
+	`log("GM > GoBack" @self);
+	if (Origin != None)
+	{
+		ChangeMenu(GetMenuByID(0));
+	}
+}
+
 
 /*----------------------------------------------------------
 	Private methods
@@ -216,6 +240,7 @@ simulated function SpawnUI()
 	Username = AddTextField(Vect(105,0,300));
 	Password = AddTextField(Vect(105,0,250));
 	Password.SetPassword(true);
+	GH_Menu(PC.myHUD).AutoConnect();
 }
 
 
@@ -225,6 +250,6 @@ simulated function SpawnUI()
 
 defaultproperties
 {
-	Index=3000
+	Index=9999
 	BackDelay=1.0
 }
