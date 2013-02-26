@@ -18,6 +18,10 @@ var (DVPawn) const name				EyeSocket;
 var (DVPawn) const name				WeaponSocket;
 var (DVPawn) const name				WeaponSocket2;
 
+var (DVPawn) const float 			RecoilRiseTime;
+var (DVPawn) const float 			RecoilLowTime;
+var (DVPawn) const float 			RecoilOvershoot;
+
 var (DVPawn) const float 			DefaultFOV;
 var (DVPawn) const float 			HeadBobbingFactor;
 var (DVPawn) const float 			StandardEyeHeight;
@@ -66,6 +70,7 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
+var bool							bRising;
 var bool							bRunning;
 var bool 							bWasHS;
 var bool							bZoomed;
@@ -76,6 +81,9 @@ var string			 				KillerName;
 var string							UserName;
 
 var float							FeignDeathStartTime;
+
+var float 							CurrentRecoilTime;
+var float 							CurrentRecoilOffset;
 
 
 /*----------------------------------------------------------
@@ -367,14 +375,67 @@ reliable server function SetGroundSpeed(float NewSpeed)
 	}
 }
 
-
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
-{	
+{
+	local float Pitch;
+	local rotator RecoilOffset;
+
 	// Weapon adjustment
 	if (Weapon != None && !DVWeapon(Weapon).IsZoomed())
 	{
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
+	}
+
+	// Recoil calculation
+	if (CurrentRecoilTime >= 0.0)
+	{
+		if (CurrentRecoilTime < RecoilRiseTime)
+		{
+			bRising = true;
+			Pitch = FInterpEaseInOut(
+					0,
+					DVWeapon(Weapon).RecoilAngle * RecoilOvershoot,
+					CurrentRecoilTime / RecoilRiseTime,
+					1.0
+			);
+			RecoilOffset.Pitch = Pitch - CurrentRecoilOffset;
+		}
+		else if (CurrentRecoilTime < (RecoilRiseTime + RecoilLowTime))
+		{
+			if (bRising && CurrentRecoilOffset > DVWeapon(Weapon).RecoilAngle * (RecoilOvershoot - 1.0))
+			{
+				CurrentRecoilOffset = 0.0;
+				bRising = false;
+			}
+			Pitch = FInterpEaseInOut(
+					0,
+					DVWeapon(Weapon).RecoilAngle * (RecoilOvershoot - 1.0),
+					(CurrentRecoilTime - RecoilRiseTime) / RecoilLowTime,
+					1.0
+			);
+			RecoilOffset.Pitch = abs(Pitch - CurrentRecoilOffset);
+		}
+		else
+		{
+			RecoilOffset.Pitch = 0;
+			CurrentRecoilTime = -1.0;
+		}
+
+		// Apply recoil
+		if (Controller != None && RecoilOffset.Pitch != 0)
+		{
+			if (CurrentRecoilTime < RecoilRiseTime)
+			{
+				Controller.SetRotation(Controller.Rotation + RecoilOffset);
+			}
+			else if (CurrentRecoilTime < (RecoilRiseTime + RecoilLowTime))
+			{
+				Controller.SetRotation(Controller.Rotation - RecoilOffset);
+			}
+			CurrentRecoilOffset = RecoilOffset.Pitch;
+		}
+		CurrentRecoilTime += DeltaTime;
 	}
 
 	// Run stop
@@ -576,7 +637,9 @@ simulated function StartFire(byte FireModeNum)
 	if (FireModeNum == 1)
 		StartZoom();
 	else
+	{
 		super.StartFire(FireModeNum);
+	}
 }
 
 
@@ -600,7 +663,9 @@ simulated function WeaponFired(Weapon InWeapon, bool bViaReplication, optional v
 		{
 			DVWeapon(Weapon).PlayImpactEffects(HitLocation);
 		}
-		GunRecoilNode.bPlayRecoil = true;
+		CurrentRecoilTime = 0.0;
+		CurrentRecoilOffset = 0.0;
+		//GunRecoilNode.bPlayRecoil = true;
 	}
 }
 
@@ -949,6 +1014,11 @@ defaultproperties
 	HitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit'
 	LargeHitPSCTemplate=ParticleSystem'DV_CoreEffects.FX.PS_BloodHit_Large'
 	
+	// Recoil
+	RecoilRiseTime=0.1
+	RecoilLowTime=0.3
+	RecoilOvershoot=1.2
+
 	// Gameplay
 	bDVLog=false
 	bWasHS=false

@@ -21,6 +21,11 @@ var (DVWeapon) const MaterialImpactEffect 	ImpactEffect;
 var (DVWeapon) const ParticleSystem			MuzzleFlashPSCTemplate;
 var (DVWeapon) const class<UDKExplosionLight> MuzzleFlashLightClass;
 
+var (DVWeapon) float 						MinSpread;
+var (DVWeapon) float 						MaxSpread;
+var (DVWeapon) float 						SpreadTime;
+var (DVWeapon) float 						RecoilAngle;
+
 var (DVWeapon) vector						ZoomOffset;
 
 var (DVWeapon) bool							bHasLens;
@@ -31,7 +36,6 @@ var (DVWeapon) bool							bCannonMount;
 var (DVWeapon) float						MuzzleFlashDuration;
 var (DVWeapon) float						SmoothingFactor;
 var (DVWeapon) float 						ZoomSensitivity;
-var (DVWeapon) float						RecoilAngle;
 var (DVWeapon) float 						ZoomedFOV;
 
 var (DVWeapon) int							MaxAmmo;
@@ -77,6 +81,8 @@ var bool						bWeaponEmpty;
 var bool						bZoomed;
 
 var int							FrameCount;
+
+var float 						CurrentSpreadTime;
 
 var repnotify string			PlayerAddonClass1;
 var repnotify string			PlayerAddonClass2;
@@ -146,9 +152,11 @@ simulated function Tick(float DeltaTime)
 {
 	// Init
 	local vector Impact, SL, Unused;
+	local float SpreadAlpha;
 	local rotator SR;
 	FrameCount += 1;
 	
+	// targetting
 	if (FrameCount % TickDivisor == 0 && Owner != None)
 	{
 		// Trace
@@ -167,6 +175,11 @@ simulated function Tick(float DeltaTime)
 			}
 		}
 	}
+
+	// Spread
+	SpreadAlpha = FClamp(CurrentSpreadTime / SpreadTime, 0.0, 1.0);
+	Spread[0] = Lerp(MaxSpread, MinSpread, SpreadAlpha);
+	CurrentSpreadTime += DeltaTime;
 }
 
 
@@ -617,6 +630,13 @@ simulated function bool HasLensEffect()
 	Firing methods
 ----------------------------------------------------------*/
 
+/*--- Precision bonus setting ---*/
+simulated function SetSpreadBonus(float PrecisionBonus)
+{
+	MinSpread = MinSpread / PrecisionBonus;
+	MaxSpread = MaxSpread / PrecisionBonus;
+}
+
 /*--- Trace start ---*/
 simulated function vector InstantFireStartTrace()
 {
@@ -627,7 +647,7 @@ simulated function vector InstantFireStartTrace()
 /*--- Trace end ---*/
 simulated function vector InstantFireEndTrace(vector StartTrace)
 {
-	return StartTrace + vector(GetZoomViewRotation()) * GetTraceRange();
+	return StartTrace + vector(AddSpread(GetZoomViewRotation())) * GetTraceRange();
 }
 
 
@@ -639,6 +659,7 @@ simulated function InstantFire()
 	local ImpactInfo RealImpact;
 	local int i;
 
+	CurrentSpreadTime = 0.0;
 	StartTrace = InstantFireStartTrace();
 	EndTrace = InstantFireEndTrace(StartTrace);
 	RealImpact = CalcWeaponFire(StartTrace, EndTrace, ImpactList);
@@ -679,6 +700,10 @@ simulated function FireAmmunition()
 		bWeaponEmpty = true;
 		return;
 	}
+
+	// Local fire
+	PlayFiringSound();
+	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	
 	// Addons
 	if (Addon1 != None)
@@ -693,7 +718,6 @@ simulated function FireAmmunition()
 	
 	// Firing
 	Super.FireAmmunition();
-	bForceNetUpdate = true;
 }
 
 
@@ -748,10 +772,6 @@ simulated function PlayImpactEffects(vector HitLocation)
 	local TraceHitInfo HitInfo;
 	local Actor HitActor;
 	local DVPawn P;
-
-	// Local fire
-	PlayFiringSound();
-	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	
 	// Effects
 	HitNormal = Normal(Owner.Location - HitLocation);
@@ -895,6 +915,12 @@ defaultproperties
 	FiringStatesArray(1)=WeaponFiring
 	WeaponFireTypes(0)=EWFT_InstantHit
 	WeaponFireTypes(1)=EWFT_Custom
+
+	// Recoil
+	MinSpread=0.0
+	MaxSpread=0.025
+	SpreadTime=2.0
+	RecoilAngle=100
 	
 	// Shots
 	InstantHitMomentum(0)=0.0

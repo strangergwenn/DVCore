@@ -115,7 +115,9 @@ simulated function AttachToWeapon(DVWeapon wp)
 	if (KineticBonus != 0.0)
 		wp.InstantHitMomentum[0] *= KineticBonus;
 	if (PrecisionBonus != 0.0)
-		wp.Spread[0] /= PrecisionBonus;
+	{
+		wp.SetSpreadBonus(PrecisionBonus);
+	}
 }
 
 

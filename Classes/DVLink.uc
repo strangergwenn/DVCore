@@ -118,7 +118,8 @@ reliable server simulated function Heartbeat(string MapName, string GameName, in
 reliable client simulated function GetServers(optional string GameName, optional string MapName)
 {
 	local array<string> Params;
-	
+
+	`log("DVLINK > GetServers");
 	if (GameName != "")
 		Params.AddItem(GameName);
 	if (MapName != "")
@@ -447,7 +448,7 @@ event ReceivedLine(string Line)
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
 	
 	// Server list
-	else if (IsEqual(Command[0], "SERVER") && PC.myHUD != None)
+	else if (IsEqual(Command[0], "SERVER") && PC != None)
 	{
 		if (GH_Menu(PC.myHUD) != None)
 		{
