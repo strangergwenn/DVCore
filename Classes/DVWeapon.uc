@@ -692,7 +692,6 @@ simulated function FireAmmunition()
 	P.ServerLogAction("SHOOT");
 	
 	// Firing
-	PlayFiringSound();
 	Super.FireAmmunition();
 	bForceNetUpdate = true;
 }
@@ -737,7 +736,6 @@ simulated function PlayFiringEffects(vector HitLocation)
 			MuzzleFlashPSC.ActivateSystem();
 		}
 		CauseMuzzleFlash();
-		SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	}
 }
 
@@ -750,6 +748,10 @@ simulated function PlayImpactEffects(vector HitLocation)
 	local TraceHitInfo HitInfo;
 	local Actor HitActor;
 	local DVPawn P;
+
+	// Local fire
+	PlayFiringSound();
+	SkeletalMeshComponent(Mesh).PlayAnim(WeaponFireAnim);
 	
 	// Effects
 	HitNormal = Normal(Owner.Location - HitLocation);

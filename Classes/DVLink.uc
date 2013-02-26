@@ -138,8 +138,8 @@ reliable client simulated function GetLeaderboard(int PlayerCount, string ID)
 	PC.CleanBestPlayer();
 	Params.AddItem(""$PlayerCount);
 	SendServerCommand("TOP_PLAYERS", Params, false);
-	Params.AddItem(""$ID);
-	SendServerCommand("LOC_PLAYERS", Params, false);
+	//Params.AddItem(""$ID);
+	//SendServerCommand("LOC_PLAYERS", Params, false);
 }
 
 
@@ -241,7 +241,6 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 	// Good to go
 	else
 	{
-		LastCommandSent = Command;
 		if (Params.Length > 0)
 		{
 			JoinArray(Params, ParamsString, ",");
@@ -259,6 +258,8 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 /*--- Command writing ---*/
 simulated function WriteText(string data)
 {
+	local array<string> OutputArray;
+
 	if (bSending)
 	{
 		CommandBuffer.AddItem(data);
@@ -267,18 +268,23 @@ simulated function WriteText(string data)
 	{
 		bSending = true;
 		SendText(data $"\n");
-		`log("DVLINK >>" $ data $"<<");
+		ParseStringIntoArray(data, OutputArray, ",", false);
+		LastCommandSent = OutputArray[0];
 	}
 }
 
 /*--- TImer version */
 simulated function WriteTextOnBuffer()
 {
+	local string data;
 	if (CommandBuffer.Length > 0 && !bSending)
 	{
-		CommandBuffer.RemoveItem(CommandBuffer[0]);
-		if (CommandBuffer[0] != "")
-			WriteText(CommandBuffer[0]);
+		data = CommandBuffer[0];
+		CommandBuffer.RemoveItem(data);
+		if (data != "")
+		{
+			WriteText(data);
+		}
 	}
 }
 
@@ -286,7 +292,6 @@ simulated function WriteTextOnBuffer()
 simulated function array<string> GetServerCommand(string Input)
 {
 	local array<string> OutputArray;
-	bSending = false;
 	ParseStringIntoArray(Input, OutputArray, ",", false);
 	return OutputArray;
 }
@@ -296,8 +301,8 @@ simulated function array<string> GetServerCommand(string Input)
 simulated function SignalTimeout()
 {
 	`log("DVLINK > Command timeout...");
-	bSending = false;
 	SignalController("NET", false, "Serveur indisponible");
+	bSending = false;
 }
 
 
@@ -305,9 +310,9 @@ simulated function SignalTimeout()
 simulated function ProcessACK(string Param)
 {
 	`log("DVLINK > ProcessACK" @LastCommandSent);
-	bSending = false;
 	SignalController(LastCommandSent, true, lOK);
 	AbortTimeout();
+	bSending = false;
 }
 
 
@@ -364,7 +369,6 @@ event Opened()
 	{
 		if (GH_Menu(PC.myHUD) != None)
 		{
-			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
 			SetTimer(0.2, true, 'WriteTextOnBuffer');
 		}
 		SignalController("INIT", true, "");
@@ -424,15 +428,20 @@ event ReceivedLine(string Line)
 		{
 			bIsConnected = true;
 			CurrentID = Left(Command[1], 20);
+			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
 			`log("DVLINK > Connection validated for ID" @CurrentID);
 		}
 		
 		// Default case
 		ProcessACK(Command[1]);
+		return;
 	}
+
+	// Next commands can override others
+	bSending = false;
 		
 	// Leaderboards
-	else if (IsEqual(Command[0], "TOP_PLAYER"))
+	if (IsEqual(Command[0], "TOP_PLAYER"))
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
 	else if (IsEqual(Command[0], "LOC_PLAYER"))
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);

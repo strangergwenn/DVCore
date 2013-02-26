@@ -75,6 +75,14 @@ function ApplyResolutionSetting(string code, string flag)
 */
 simulated function AutoConnect()
 {
+	DVPlayerController(PlayerOwner).AutoConnect();
+}
+
+/**
+ * @brief Launch autoconnection
+*/
+simulated function AutoConnectLaunched()
+{
 	LoginMenu.SetConnectState(1);
 }
 

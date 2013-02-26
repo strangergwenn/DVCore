@@ -147,6 +147,7 @@ simulated function AutoConnect()
 	 && MasterServerLink != None)
 	{
 		MasterServerLink.ConnectToMaster(LocalStats.UserName, LocalStats.Password);
+		GH_Menu(myHUD).AutoConnectLaunched();
 	}
 }
 
@@ -178,7 +179,6 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	// First data : autoconnection if available
 	if (Command == "INIT" && bIsOK)
 	{
-		AutoConnect();
 		if (myHUD.IsA('DVHUD_Menu'))
 			DVHUD_Menu(myHUD).AutoConnect();
 	}
@@ -192,11 +192,11 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 			MasterServerLink.GetStats();
 		}
-		if (myHUD.IsA('GH_Menu'))
+		else if (myHUD.IsA('GH_Menu'))
 		{
 			GH_Menu(myHUD).SignalConnected(LocalStats.UserName);
-			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 			MasterServerLink.GetStats();
+			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
 		}
 		else if (PlayerReplicationInfo != None)
 		{
@@ -261,7 +261,6 @@ reliable client event TcpGetStats(array<string> Data)
 		{
 			GlobalStats.SetArrayIntValue("WeaponScores", int(Data[i + 1]), i);
 		}
-		GH_Menu(myHUD).AddUserInfo();
 	}
 }
 
@@ -288,6 +287,14 @@ reliable client event AddBestPlayer(string PlayerName, int Rank, int PlayerPoint
 	{
 		LeaderBoardStructure.AddItem(string(Rank) $"." @PlayerName $ " : " $ PlayerPoints $ " points");
 	}
+	ClearTimer('UpdateMenuWithScores');
+	SetTimer(1.0, false, 'UpdateMenuWithScores');
+}
+
+/*--- Launch the menu update ---*/
+reliable client simulated function UpdateMenuWithScores()
+{
+	GH_Menu(myHUD).AddUserInfo();
 }
 
 

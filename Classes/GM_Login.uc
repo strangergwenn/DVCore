@@ -62,6 +62,7 @@ function SetConnectState(optional int Level)
 			Message = lConnecting;
 			Connect.Deactivate();
 			NewPlayer.Deactivate();
+		 	GM_Main(GetMenuById(0)).LockLogin(lConnecting);
 			break; 
 		case (2):
 			Message = lConnected;
