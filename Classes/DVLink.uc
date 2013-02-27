@@ -268,6 +268,7 @@ simulated function WriteText(string data)
 	else
 	{
 		bSending = true;
+		`log("DVLINK > send" @data);
 		SendText(data $"\n");
 		ParseStringIntoArray(data, OutputArray, ",", false);
 		LastCommandSent = OutputArray[0];
@@ -310,7 +311,6 @@ simulated function SignalTimeout()
 /*--- Server OK processing ---*/
 simulated function ProcessACK(string Param)
 {
-	`log("DVLINK > ProcessACK" @LastCommandSent);
 	SignalController(LastCommandSent, true, lOK);
 	AbortTimeout();
 	bSending = false;
@@ -417,11 +417,23 @@ event ReceivedLine(string Line)
 	Command = GetServerCommand(Line);
 	`log("DVLINK > MS command >" $ Line);
 	
-	// Error
+	// Error management
 	if (IsEqual(Command[0], "NOK"))
+	{
 		SignalController(LastCommandSent, false, lNOK);
+		bSending = false;
+		return;
+	}
 	
-	// Standard ACK
+	// Error management
+	else if (IsEqual(Command[0], "DOWN"))
+	{
+		Close();
+		bSending = false;
+		return;
+	}
+
+	// Standard ACK for successful commands
 	else if (IsEqual(Command[0], "OK"))
 	{
 		// Connection speficic case
@@ -429,7 +441,10 @@ event ReceivedLine(string Line)
 		{
 			bIsConnected = true;
 			CurrentID = Left(Command[1], 20);
-			SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+			if (IsEqual(LastCommandSent, "CONNECT"))
+			{
+				SetTimer(ServerListUpdateFrequency, true, 'GetServers');
+			}
 			`log("DVLINK > Connection validated for ID" @CurrentID);
 		}
 		
@@ -437,15 +452,18 @@ event ReceivedLine(string Line)
 		ProcessACK(Command[1]);
 		return;
 	}
-
-	// Next commands can override others
-	bSending = false;
 		
 	// Leaderboards
 	if (IsEqual(Command[0], "TOP_PLAYER"))
+	{
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), true);
+		return;
+	}
 	else if (IsEqual(Command[0], "LOC_PLAYER"))
+	{
 		PC.AddBestPlayer(Command[2], int(Command[6]), int(Command[7]), false);
+		return;
+	}
 	
 	// Server list
 	else if (IsEqual(Command[0], "SERVER") && PC != None)
@@ -463,14 +481,16 @@ event ReceivedLine(string Line)
 				Left(Command[7],1) != "0"
 			);
 		}
+		return;
 	}
-	
+
 	// Player statistics
-	else if (  InStr(Command[0], "GET_GSTATS") != -1
+	if (  InStr(Command[0], "GET_GSTATS") != -1
 			|| InStr(Command[0], "GET_LSTATS") != -1
 			|| InStr(Command[0], "GET_WSTATS") != -1
 	){
 		PC.TcpGetStats(Command);
+		bSending = false;
 	}
 }
 

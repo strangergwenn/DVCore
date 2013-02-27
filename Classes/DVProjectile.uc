@@ -123,7 +123,7 @@ simulated function SpawnExplosionEffects(vector HitLocation, vector HitNormal)
 			DetachComponent(ProjectileLight);
 			ProjectileLight = None;
 		}
-		
+
 		// Explosion effect
 		if (ProjExplosionTemplate != None && EffectIsRelevant(Location, false, MaxEffectDistance))
 		{
@@ -156,7 +156,7 @@ simulated function Shutdown()
 {
 	local MeshComponent MeshPart;
 	local vector HitLocation, HitNormal;
-	
+
 	// Init
 	bShuttingDown = true;
 	SetPhysics(PHYS_None);
@@ -291,7 +291,7 @@ defaultproperties
 	TerminalVelocity=5000.0
 	CustomGravityScaling=1.0
 	MaxEffectDistance=+10000.0
-	
+
 	Physics=PHYS_Falling
 	bShuttingDown=false
 	bCollideComplex=true

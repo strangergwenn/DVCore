@@ -28,6 +28,17 @@ var GButton								Connect;
 ----------------------------------------------------------*/
 
 /**
+ * @brief Exit the game
+ * @param Caller			Caller actor
+ */
+delegate GoExit(Actor Caller)
+{
+	`log("GM > GoExit" @self);
+	DVPlayerController(PC).MasterServerLink.Close();
+	ConsoleCommand("quit");
+}
+
+/**
  * @brief Spawn event
  */
 simulated function SpawnUI()

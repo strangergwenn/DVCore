@@ -1017,7 +1017,7 @@ defaultproperties
 	// Recoil
 	RecoilRiseTime=0.1
 	RecoilLowTime=0.3
-	RecoilOvershoot=1.2
+	RecoilOvershoot=1.5
 
 	// Gameplay
 	bDVLog=false

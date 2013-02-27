@@ -60,6 +60,7 @@ var int								FrameCount;
 var byte							WeaponListLength;
 
 var vector							CurrentAimWorld;
+var vector							CurrentAimLocation;
 
 var bool							bLocked;
 var bool							bShouldStop;
@@ -388,6 +389,17 @@ exec function Talk()
 /*--- Nope ---*/
 exec function TeamTalk()
 {}
+
+
+/*--- Client-to-fucking-server pattern ---*/
+unreliable client function ClientSetAim(vector Target)
+{
+	ServerSetAim(Target);
+}
+unreliable server function ServerSetAim(vector Target)
+{
+	CurrentAimLocation = Target;
+}
 
 
 /*--- Tick tick tick ---*/

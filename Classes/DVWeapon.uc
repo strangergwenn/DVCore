@@ -39,7 +39,6 @@ var (DVWeapon) float 						ZoomSensitivity;
 var (DVWeapon) float 						ZoomedFOV;
 
 var (DVWeapon) int							MaxAmmo;
-var (DVWeapon) int							TickDivisor;
 
 var (DVWeapon) const name					WeaponFireAnim;
 var (DVWeapon) const array<name> 			EffectSockets;
@@ -151,13 +150,14 @@ simulated event ReplicatedEvent(name VarName)
 simulated function Tick(float DeltaTime)
 {
 	// Init
+	local DVPlayerController PC;
 	local vector Impact, SL, Unused;
 	local float SpreadAlpha;
 	local rotator SR;
 	FrameCount += 1;
 	
 	// targetting
-	if (FrameCount % TickDivisor == 0 && Owner != None)
+	if (Owner != None)
 	{
 		// Trace
 		SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation('Mount1', SL, SR);
@@ -165,13 +165,16 @@ simulated function Tick(float DeltaTime)
 		{
 			if (DVPawn(Owner).Controller != None)
 			{
-				DVPlayerController(DVPawn(Owner).Controller).TargetObject = Trace(
+				PC = DVPlayerController(DVPawn(Owner).Controller);
+				PC.TargetObject = None;
+				PC.TargetObject = Trace(
 					Impact,
 					Unused,
 					SL + vector(SR) * 10000.0,
 					SL,
 					true,,, TRACEFLAG_Bullet
 				);
+				PC.ClientSetAim(SL + vector(SR) * 10000.0);
 			}
 		}
 	}
@@ -661,18 +664,18 @@ simulated function InstantFire()
 
 	CurrentSpreadTime = 0.0;
 	StartTrace = InstantFireStartTrace();
-	EndTrace = InstantFireEndTrace(StartTrace);
+	EndTrace = DVPlayerController(DVPawn(Owner).Controller).CurrentAimLocation;
 	RealImpact = CalcWeaponFire(StartTrace, EndTrace, ImpactList);
-
-	for (i = 0; i < ImpactList.length; i++)
-	{
-		ProcessInstantHit(CurrentFireMode, ImpactList[i]);
-	}
 	
 	if (Role == ROLE_Authority)
 	{
 		SetFlashLocation(RealImpact.HitLocation);
 		DVPlayerController(DVPawn(Owner).Controller).ServerRegisterShot();
+	}
+
+	for (i = 0; i < ImpactList.length; i++)
+	{
+		ProcessInstantHit(CurrentFireMode, ImpactList[i]);
 	}
 }
 
@@ -935,7 +938,6 @@ defaultproperties
 
 	// User settings
 	WeaponModuleName="DeepVoid"
-	TickDivisor=5
 	ZoomedFOV=60
 	ZoomSocket=Mount2
 	ZoomSensitivity=0.3
