@@ -249,6 +249,7 @@ reliable client event TcpGetStats(array<string> Data)
 		GlobalStats.SetIntValue("Kills", 		int(Data[1]));
 		GlobalStats.SetIntValue("Deaths", 		int(Data[2]));
 		GlobalStats.SetIntValue("TeamKills", 	int(Data[3]));
+		GlobalStats.SetIntValue("Rank", 		int(Data[4]));
 		GlobalStats.SetIntValue("Points", 		int(Data[5]));
 		GlobalStats.SetIntValue("ShotsFired", 	int(Data[6]));
 		GlobalStats.SetIntValue("Headshots", 	int(Data[7]));

@@ -190,6 +190,15 @@ simulated function UpdateChat(string text)
 }
 
 
+/*--- Chat end ---*/
+function CloseChat()
+{
+	bChatting = false;
+	PC.IgnoreMoveInput(false);
+	ChatMC.SetBool("focused", true);
+}
+
+
 /*--- Should we using the sniper effect ---*/
 simulated function SetSniperState(bool bZooming)
 {
@@ -590,14 +599,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 	SetGameUnPaused();
 	PC.LockCamera(false);
 	bInMenu = false;
-}
-
-/*--- Chat end ---*/
-function CloseChat()
-{
-	bChatting = false;
-	PC.IgnoreMoveInput(false);
-	ChatMC.SetBool("focused", true);
+	CloseChat();
 }
 
 /*--- Change team ---*/
