@@ -171,30 +171,16 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 	}
 	else if (myHUD != None)
 	{
-		if (myHUD.IsA('DVHUD_Menu'))
-			DVHUD_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
-		else if (myHUD.IsA('GH_Menu'))
+		if (myHUD.IsA('GH_Menu'))
 			GH_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
 	}
 	
-	// First data : autoconnection if available
-	if (Command == "INIT" && bIsOK)
-	{
-		if (myHUD.IsA('DVHUD_Menu'))
-			DVHUD_Menu(myHUD).AutoConnect();
-	}
-	
 	// Upload & get back the stats on main menu, store the player ID in PRI
-	else if (Command == "CONNECT" && bIsOK && myHUD != None)
+	if (Command == "CONNECT" && bIsOK && myHUD != None)
 	{
-		if (myHUD.IsA('DVHUD_Menu'))
+		if (myHUD.IsA('GH_Menu'))
 		{
-			DVHUD_Menu(myHUD).SignalConnected();
-			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
-			MasterServerLink.GetStats();
-		}
-		else if (myHUD.IsA('GH_Menu'))
-		{
+			`log("DVPC > Logged in, asking for stats");
 			GH_Menu(myHUD).SignalConnected(LocalStats.UserName);
 			MasterServerLink.GetStats();
 			MasterServerLink.GetLeaderboard(LeaderBoardLength, MasterServerLink.CurrentID);
@@ -357,7 +343,10 @@ exec function Activate()
 exec function StartFire(optional byte FireModeNum = 0)
 {
 	// Chatting
-	if (IsChatLocked() || bShouldStop || bConfiguring)
+	if (IsCameraLocked()
+	 || IsChatLocked()
+	 || bShouldStop
+	 || bConfiguring)
 	{
 		return;
 	}

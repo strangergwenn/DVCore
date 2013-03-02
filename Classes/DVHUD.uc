@@ -92,13 +92,16 @@ simulated function PostBeginPlay()
 	// HUD register
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
+
 	OpenWeaponMenu();
 	if (!PC.IsInState('Spectating'))
 	{
 		SetTimer(2.0, true, 'OpenWeaponMenu');
 	}
 	else
+	{
 		Close();
+	}
 }
 
 

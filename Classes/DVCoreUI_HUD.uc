@@ -97,6 +97,7 @@ simulated function InitParts()
 		ScoreListRed.SetVisible(false);
 		WarningMC.SetVisible(false);
 		SniperMC.SetVisible(false);
+		ChatTextMC.SetVisible(false);
 		ChatMC.SetText("");
 	}
 	CurrentWeaponClass = None;
@@ -155,6 +156,7 @@ simulated function StartTalking()
 	if (!bChatting)
 	{
 		PlayUISound(ClickSound);
+		ChatTextMC.SetVisible(true);
 		ChatTextMC.SetBool("focused", true);
 		ChatTextMC.SetString("text", "");
 		bChatting = true;
@@ -195,6 +197,7 @@ function CloseChat()
 {
 	bChatting = false;
 	PC.IgnoreMoveInput(false);
+	ChatTextMC.SetVisible(false);
 	ChatMC.SetBool("focused", true);
 }
 

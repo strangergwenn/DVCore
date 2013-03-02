@@ -61,19 +61,6 @@ exec function Jump()
 /** @brief Key pressed delegate */
 function bool KeyInput(int ControllerId, name KeyName, EInputEvent IEvent, float AmountDepressed, optional bool bGamepad)
 {
-	// Main menu keys
-	if (IEvent == IE_Pressed && DVHUD_Menu(myHUD) != None)
-	{
-		DVHUD_Menu(myHUD).HudMovie.SetKeyPressed(string(KeyName));
-		DVHUD_Menu(myHUD).CancelHide();
-		
-		// Popup navigation
-		if (KeyName == 'Enter')
-			DVHUD_Menu(myHUD).HudMovie.ForceValidate();
-		else if (KeyName == 'Escape')
-			DVHUD_Menu(myHUD).HudMovie.HidePopup();
-	}
-	
 	// Ingame tab key
 	if (DVHUD(myHUD) != None)
 	{
