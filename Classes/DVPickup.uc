@@ -26,6 +26,16 @@ var (DVPickup) const SoundCue			PickupSound;
 var DynamicLightEnvironmentComponent 	LightEnvironment;
 var PointLightComponent 				FlagLight;
 
+/*----------------------------------------------------------
+	Replication
+----------------------------------------------------------*/
+
+replication
+{
+	if (bNetDirty)
+		FlagLight;
+}
+
 
 /*----------------------------------------------------------
 	Methods

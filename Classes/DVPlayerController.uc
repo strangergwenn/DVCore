@@ -5,8 +5,8 @@
  *  @author Gwennaël ARBONA
  **/
 
-class DVPlayerController extends UDKPlayerController;
-//	DLLBind(MasterServerBridge);
+class DVPlayerController extends UDKPlayerController
+	DLLBind(MasterServerBridge);
 
 /*----------------------------------------------------------
 	Public attributes
@@ -74,16 +74,15 @@ var array<string>					LeaderBoardStructure2;
 /*----------------------------------------------------------
 	DLL Bind
 ----------------------------------------------------------*/
-/*
-dllimport final function CallDLL1(out string s);
-dllimport final function vector CallDLL2(float x, float y, float z);
-dllimport final function bool CallDLL3(string s, int i[2], out float f, out vector v);
 
-exec function TestMe(){
+dllimport final function MS_Connect(out string s);
+
+exec function TestMe()
+{
 	local string text;
-	CallDLL1(text);
-	`log(text);
-}*/
+	text = "I am still alive";
+	MS_Connect(text);
+}
 
 /*----------------------------------------------------------
 	Replication
