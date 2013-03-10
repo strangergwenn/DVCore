@@ -94,7 +94,7 @@ simulated function PostBeginPlay()
 	PC.LocalStats.EmptyStats();
 
 	OpenWeaponMenu();
-	if (!PC.IsInState('Spectating'))
+	if (!PC.PlayerReplicationInfo.bOnlySpectator)
 	{
 		SetTimer(2.0, true, 'OpenWeaponMenu');
 	}
@@ -188,19 +188,18 @@ function ToggleRespawnMenu()
 {
 	local DVPawn P;
 	P = DVPawn(PlayerOwner.Pawn);
-	if (P == None) return;
-	
-	if (!P.Controller.IsInState('Spectating'))
+
+	if (P == None && !bRespawnOpened)
 	{
-		if (P == None && !bRespawnOpened)
+		if (!P.Controller.PlayerReplicationInfo.bOnlySpectator)
 		{
 			HudMovie.OpenRespawnMenu(true);
 			SetTimer(1.0, true, 'OpenWeaponMenu');
 			bRespawnOpened = true;
 		}
-		if (P != None && bRespawnOpened)
-			bRespawnOpened = false;
 	}
+	else if (P != None && bRespawnOpened)
+		bRespawnOpened = false;
 }
 
 /*--- Unpause game ---*/

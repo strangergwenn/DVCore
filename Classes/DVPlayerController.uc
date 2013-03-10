@@ -75,14 +75,38 @@ var array<string>					LeaderBoardStructure2;
 	DLL Bind
 ----------------------------------------------------------*/
 
-dllimport final function MS_Connect(out string s);
+dllimport final function int MS_Init(string host, int port);
+dllimport final function MS_Shutdown();
 
-exec function TestMe()
+dllimport final function int MS_Send(string data);
+dllimport final function string MS_Receive();
+
+dllimport final function string SSL_GetStringHash(string data);
+dllimport final function string SSL_GetFileHash(string filename);
+
+exec function TSI()
+{
+	local int i;
+	i = MS_Init("master.deepvoid.eu", 9999);
+	if (i == 0)
+	{
+		`log("Master server startup FAILED");
+	}
+}
+
+exec function TSTX(string data)
 {
 	local string text;
-	text = "I am still alive";
-	MS_Connect(text);
+	MS_Send(data);
+	text = MS_Receive();
+	`log("DBG DLLBIND MS > Received '" $text $"'");
 }
+
+exec function TSE()
+{
+	MS_Shutdown();
+}
+
 
 /*----------------------------------------------------------
 	Replication

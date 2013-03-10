@@ -694,13 +694,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	local vector ApplyImpulse, ShotDir;
 	local DVPlayerController Attacker;
 	local Actor SplatteredActor;
-	
-	// Local blood
-	if (Role == ROLE_Authority && InstigatedBy != None && Controller != None)
-	{
-		FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
-	}
-	
+
 	// Jumping multiplication & kill marker settings
 	if (InstigatedBy != None)
 	{
@@ -745,6 +739,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 		if (!SplatteredActor.IsA('Pawn'))
 			SpawnBloodDecal(BloodImpact, BloodNormal);
 	}
+	FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
 	
 	// Physics
 	shotDir = Normal(Momentum);
