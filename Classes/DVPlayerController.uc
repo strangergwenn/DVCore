@@ -5,8 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class DVPlayerController extends UDKPlayerController
-	DLLBind(MasterServerBridge);
+class DVPlayerController extends UDKPlayerController;
 
 /*----------------------------------------------------------
 	Public attributes
@@ -72,43 +71,6 @@ var array<string>					LeaderBoardStructure2;
 
 
 /*----------------------------------------------------------
-	DLL Bind
-----------------------------------------------------------*/
-
-dllimport final function int MS_Init(string host, int port);
-dllimport final function MS_Shutdown();
-
-dllimport final function int MS_Send(string data);
-dllimport final function string MS_Receive();
-
-dllimport final function string SSL_GetStringHash(string data);
-dllimport final function string SSL_GetFileHash(string filename);
-
-exec function TSI()
-{
-	local int i;
-	i = MS_Init("master.deepvoid.eu", 9999);
-	if (i == 0)
-	{
-		`log("Master server startup FAILED");
-	}
-}
-
-exec function TSTX(string data)
-{
-	local string text;
-	MS_Send(data);
-	text = MS_Receive();
-	`log("DBG DLLBIND MS > Received '" $text $"'");
-}
-
-exec function TSE()
-{
-	MS_Shutdown();
-}
-
-
-/*----------------------------------------------------------
 	Replication
 ----------------------------------------------------------*/
 
@@ -117,6 +79,7 @@ replication
 	if ( bNetDirty )
 		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength, MaxScore;
 }
+
 
 /*----------------------------------------------------------
 	Events and net behaviour
@@ -187,6 +150,7 @@ function SignalConnected()
 /*--- Master server callback ---*/
 reliable client event TcpCallback(string Command, bool bIsOK, string Msg, optional int data[8])
 {
+	`log("DVLINK > TcpCallback" @Command);
 	// Init, on-screen ACK for menu
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
