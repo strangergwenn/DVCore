@@ -719,6 +719,13 @@ simulated function FireAmmunition()
 	PC.RegisterShot();
 	P.ServerLogAction("SHOOT");
 	
+	// Hit info
+	if (PC.TargetObject != None)
+	{
+		if (PC.TargetObject.IsA('DVPawn'))
+			PC.PlayHitSound();
+	}
+
 	// Firing
 	Super.FireAmmunition();
 }

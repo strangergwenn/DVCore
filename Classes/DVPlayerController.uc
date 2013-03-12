@@ -20,6 +20,8 @@ var (DVPC) const int 				LeaderBoardLength;
 var (DVPC) const int 				LocalLeaderBoardOffset;
 var (DVPC) const int				ObjectCheckDistance;
 
+var(DVPC) Actor						TargetObject;
+
 
 /*----------------------------------------------------------
 	Localized attributes
@@ -44,7 +46,6 @@ var DVUserStats						LocalStats;
 var DVUserStats						GlobalStats;
 
 var DVConfigBench					Bench;
-var Actor							TargetObject;
 
 var class<DVWeapon> 		 		WeaponList[8];
 var class<DVWeapon> 				UserChoiceWeapon;
@@ -150,7 +151,6 @@ function SignalConnected()
 /*--- Master server callback ---*/
 reliable client event TcpCallback(string Command, bool bIsOK, string Msg, optional int data[8])
 {
-	`log("DVLINK > TcpCallback" @Command);
 	// Init, on-screen ACK for menu
 	if (WorldInfo.NetMode == NM_DedicatedServer)
 	{
@@ -461,28 +461,20 @@ function ConfigureWeapons(DVConfigBench TheBench)
 }
 
 
-/*--- Signal shot received ---*/
-reliable client simulated function ClientSignalHit(Controller InstigatedBy, bool bWasHeadshot)
+/*--- Signal headshot received ---*/
+reliable client simulated function ClientSignalHeadshot(Controller InstigatedBy)
 {
-	ServerSignalHit(InstigatedBy, bWasHeadshot);
-	if (bWasHeadshot)
-	{
-		LocalStats.SetIntValue("HeadShots" , LocalStats.HeadShots + 1);
-	}
+	ServerSignalHeadshot(InstigatedBy);
+	LocalStats.SetIntValue("HeadShots" , LocalStats.HeadShots + 1);
 }
-reliable server simulated function ServerSignalHit(Controller InstigatedBy, bool bWasHeadshot)
+reliable server simulated function ServerSignalHeadshot(Controller InstigatedBy)
 {
-	DVPlayerController(InstigatedBy).NotifyHit(bWasHeadshot);
 	GlobalStats.SetIntValue("HeadShots" , GlobalStats.HeadShots + 1);
 }
 
 
 /*--- Successful hit notification ---*/
-reliable server simulated function NotifyHit(bool bWasHeadshot)
-{
-	PlayHitSound(bWasHeadshot);
-}
-unreliable client simulated function PlayHitSound(bool bWasHeadshot)
+unreliable client simulated function PlayHitSound()
 {
 	if(LocalStats.bUseSoundOnHit)
 	{

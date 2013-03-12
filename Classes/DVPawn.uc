@@ -726,9 +726,9 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 
 	// Logging
 	ServerLogAction("HIT");
-	if (InstigatedBy != None)
+	if (InstigatedBy != None && bWasHs)
 	{
-		DVPlayerController(Controller).ClientSignalHit(InstigatedBy, bWasHS);
+		DVPlayerController(Controller).ClientSignalHeadshot(InstigatedBy);
 	}
 	
 	// Blood impact
