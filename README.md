@@ -19,6 +19,6 @@ DVCore is *not* a ready-to-use FPS library. It's a part of a complex FPS game, p
 Contact, people, etc
 --------
 
-DEEPVOID - http://deepvoid.eu
+DEEPVOID - <http://deepvoid.eu>  
 DeepVoid is developped by Gwennaël ARBONA and the DeepVoid team. Check us out !  
-In case of bugs, questions, requests, ideas, please use the message system on GitHub.
+In case of bugs, questions, requests, ideas, please use the message system on GitHub.  
