@@ -81,12 +81,12 @@ simulated function InitLink(DVPlayerController LinkedController)
 	{
 		AbortTimeout();
 		bIsOpened = true;
+		SetTimer(0.2, true, 'WriteTextOnBuffer');
 		`log("DVLINK > Successfully opened master server");
 
 		// On client : get the server list
 		if (WorldInfo.NetMode != NM_DedicatedServer)
 		{
-			SetTimer(0.2, true, 'WriteTextOnBuffer');
 			SignalController("INIT", true, "");
 		}
 
@@ -404,27 +404,14 @@ simulated function Close()
 }
 
 
-/*--- Text mode : we need to clean this shit up ---*/
-event ReceivedText(string Text)
-{
-	local array<string> InputArray;
-	local int i;
-	
-	ParseStringIntoArray(Text, InputArray, "\n", false);
-	for (i = 0; i < InputArray.Length; i++)
-	{
-		if (Len(InputArray[i]) > 0)
-			ReceivedLine(InputArray[i]);
-	}
-}
-
-
 /*--- Main event callback : get all server commands and answers ---*/
 event ReceivedLine(string Line)
 {
 	// Init
 	local array<string> Command;
 	Command = GetServerCommand(Line);
+	if (Command.Length == 0)
+		return;
 	`log("DVLINK > MS command >" $ Command[0]);
 	
 	// Error management
@@ -458,6 +445,11 @@ event ReceivedLine(string Line)
 			`log("DVLINK > Connection validated");
 		}
 		
+		if (IsEqual(LastCommandSent, "GET_SERVERS"))
+		{
+			GH_Menu(PC.myHUD).DisplayServerInfo();
+		}
+
 		// Default case
 		ProcessACK(Command[1]);
 		return;

@@ -74,19 +74,16 @@ function AddServerInfo(string ServerName, string Level, string IP, string Game, 
 	idx = IPList.Find(IP);
 	MapPicture = class'DVMapInfo'.static.GetTextureFromLevel(Level);
 	
-	if (MaxPlayers != 0)
+	if (idx < 0)
 	{
-		if (idx < 0)
-		{
-			ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
-			IPList.AddItem(IP);
-			PictureList.AddItem(MapPicture);
-		}
-		else
-		{
-			ServerList[idx] = FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword);
-			PictureList[idx] = MapPicture;
-		}
+		ServerList.AddItem(FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword));
+		IPList.AddItem(IP);
+		PictureList.AddItem(MapPicture);
+	}
+	else
+	{
+		ServerList[idx] = FormatServerInfo(ServerName, Level, Game, Players, MaxPlayers, bIsPassword);
+		PictureList[idx] = MapPicture;
 	}
 }
 

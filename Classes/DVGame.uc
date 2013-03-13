@@ -368,6 +368,7 @@ function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
 /*--- Heartbeat ---*/
 function SendServerData()
 {
+	`log("SendServerData");
 	ServerLink.Heartbeat(
 		WorldInfo.GetMapName(),
 		GetRightMost(string(self.class.name)),

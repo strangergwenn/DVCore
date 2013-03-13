@@ -121,6 +121,10 @@ function AddUserInfo()
 function AddServerInfo(string ServerName, string Level, string IP, string Game, int Players, int MaxPlayers, bool bIsPassword)
 {
 	ServerMenu.AddServerInfo(ServerName, Level, IP, Game, Players, MaxPlayers, bIsPassword);
+}
+
+function DisplayServerInfo()
+{
 	ServerMenu.UpdateList();
 }
 

@@ -195,6 +195,13 @@ reliable client simulated function Connect(string user, string passwd)
 }
 
 
+/*--- Connection ---*/
+exec function Close()
+{
+	MasterServerLink.Close();
+}
+
+
 /*--- Return a copy of the user statistics ---*/
 reliable server simulated function DVUserStats GetClientStats()
 {
