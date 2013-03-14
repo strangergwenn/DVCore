@@ -108,7 +108,10 @@ simulated function Tick(float DeltaTime)
 	while (MS_Check() > 0)
 	{
 		text = MS_Receive();
-		ReceivedLine(text);
+		if (Len(text) > 0)
+		{
+			ReceivedLine(text);
+		}
 	}
 	super.Tick(DeltaTime);
 }
@@ -142,7 +145,7 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 
 
 /*--- Register at the master server : game server version
-	REG_SERVER,ServerName,Email,bUsePassword
+	DEC_SERVER,ServerName,Email,bUsePassword
 ---*/
 reliable server simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
 {
@@ -150,7 +153,7 @@ reliable server simulated function RegisterServer(string ServerName, string Emai
 	Params.AddItem(ServerName);
 	Params.AddItem(Email);
 	Params.AddItem(bUsePassword ? "1":"0");
-	SendServerCommand("REG_SERVER", Params, false);
+	SendServerCommand("DEC_SERVER", Params, false);
 }
 
 
@@ -434,7 +437,7 @@ event ReceivedLine(string Line)
 	else if (IsEqual(Command[0], "OK"))
 	{
 		// Connection speficic case
-		if ((IsEqual(LastCommandSent, "CONNECT") || IsEqual(LastCommandSent, "REG_SERVER")) && Command[1] != "0")
+		if ((IsEqual(LastCommandSent, "CONNECT") || IsEqual(LastCommandSent, "DEC_SERVER")) && Command[1] != "0")
 		{
 			bIsConnected = true;
 			CurrentID = Left(Command[1], 20);
