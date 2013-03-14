@@ -103,14 +103,23 @@ simulated function InitLink(DVPlayerController LinkedController)
 /*--- Wait for data ---*/
 simulated function Tick(float DeltaTime)
 {
+	local byte i;
 	local string text;
+	local array<string> commands;
 
 	while (MS_Check() > 0)
 	{
 		text = MS_Receive();
 		if (Len(text) > 0)
 		{
-			ReceivedLine(text);
+			ParseStringIntoArray(text, commands, "\n", false);
+			for (i = 0; i < commands.Length; i++)
+			{
+				if (Len(commands[i]) > 0)
+				{
+					ReceivedLine(commands[i]);
+				}
+			}
 		}
 	}
 	super.Tick(DeltaTime);
@@ -313,8 +322,6 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 			Command $= ParamsString;
 		}
 		
-		AbortTimeout();
-		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		WriteText(Command);
 	}
 }
@@ -332,6 +339,7 @@ simulated function WriteText(string data)
 	else
 	{
 		bSending = true;
+		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		MS_Send(data $"\n");
 		ParseStringIntoArray(data, OutputArray, ",", false);
 		LastCommandSent = OutputArray[0];
