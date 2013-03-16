@@ -108,7 +108,7 @@ delegate GoSelect(Actor Caller)
 	if (GToggleButton(Caller).GetState())
 	{
 		Launch.Activate();
-		Spectate.Activate();
+		//Spectate.Activate();
 		ServerString = GListItem(Caller).Data;
 		ServerURL = IPList[ServerList.Find(ServerString)];
 		bIsPasswordProtected = (InStr(ServerString, lServerProtected) != -1);

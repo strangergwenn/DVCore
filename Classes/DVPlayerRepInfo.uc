@@ -17,12 +17,10 @@ var int								KillCount;
 
 var bool							bUseAddon;
 
-var repnotify string				CurrentId;
-
 replication
 {
 	if (bNetDirty)
-		CurrentId, DeathCount, KillCount, bUseAddon;
+		DeathCount, KillCount, bUseAddon;
 }
 
 
@@ -45,21 +43,8 @@ simulated event ReplicatedEvent(name VarName)
 			}
 		}
 	}
-	
-	if ( VarName == 'CurrentId' )
-	{
-		`log("Updated client ID" @CurrentId);
-	}
 
 	super.ReplicatedEvent(VarName);
-}
-
-
-/*--- Client ID ---*/
-reliable server simulated function SetClientId (string newId)
-{
-	CurrentId = newId;
-	`log("Updated client ID" @CurrentId);
 }
 
 

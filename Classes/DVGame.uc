@@ -156,16 +156,22 @@ function GameEnded(byte WinnerIndex)
 {
 	local DVPlayerController PC;
 	local bool bIsWinner;
+
+	ServerUploadGame();
+	ClearTimer('ScoreUpdated');
 	
-	ForEach AllActors(class'DVPlayerController', PC)
+	foreach AllActors(class'DVPlayerController', PC)
 	{
 		bIsWinner = CheckForWin(PC, WinnerIndex);
 		PC.SignalEndGame(bIsWinner);
 	}
-	
-	ServerUploadGame();
-	
-	ClearTimer('ScoreUpdated');
+}
+
+
+/*--- Launch the restart timer ---*/
+function PrepareRestart()
+{
+	ClearTimer('RestartGame');
 	SetTimer(RestartTimer, false, 'RestartGame');
 }
 
@@ -368,7 +374,6 @@ function bool ChangeTeam(Controller Other, int num, bool bNewTeam)
 /*--- Heartbeat ---*/
 function SendServerData()
 {
-	`log("SendServerData");
 	ServerLink.Heartbeat(
 		WorldInfo.GetMapName(),
 		GetRightMost(string(self.class.name)),
@@ -392,6 +397,7 @@ reliable server simulated function ServerUploadGame()
 	foreach AllActors(class'DVPlayerController', P)
 	{
 		GStats = P.GetClientStats();
+		`log("DVPC > Secured uploading sent for "$P @"aka" @P.GetCurrentID());
 		ServerLink.SaveGame(
 			GStats.Kills,
 			GStats.Deaths,
@@ -402,8 +408,6 @@ reliable server simulated function ServerUploadGame()
 			GStats.WeaponScores,
 			P.GetCurrentID()
 		);
-		`log("DEBUG SUG SF=" $ GStats.ShotsFired);
-		`log("DVPC > Secured uploading sent for "$P);
 	}
 }
 

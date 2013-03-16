@@ -21,11 +21,15 @@ var (DVHUD) const float					GameplayMessageTime;
 var (DVHUD) const float					HitWarningLength;
 var (DVHUD) const float					MenuDelay;
 
+var (DVHUD) const float					MaxNameDistance;
+var (DVHUD) const float					MinNameAngle;
+
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
+var vector2D 							ViewportSize;
 var DVCoreUI_HUD   						HudMovie;
 var bool								bRespawnOpened;
 
@@ -63,8 +67,9 @@ event PostRender()
 	
 	// Debug
 	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1164", 400, 10);
-	
+
 	// End
+	LabelAllIfViewed(class'DVPawn', MinNameAngle, MaxNameDistance * (myOwner.Zoomed() ? 2.0:1.0));
 	ToggleRespawnMenu();
 	super.PostRender();
 }
@@ -73,6 +78,47 @@ event PostRender()
 /*----------------------------------------------------------
 	Methods
 ----------------------------------------------------------*/
+
+/*--- Target painting ---*/
+simulated function LabelAllIfViewed(class<Actor> TargetClass, float MinAngle, float MaxDistance)
+{
+	local Actor Temp;
+	local float Distance;
+	local float DotResult;
+	local DVPlayerController myOwner;
+	local vector ScreenPos, Unused1, Unused2;
+
+	myOwner = DVPlayerController(PlayerOwner);
+	foreach AllActors(TargetClass, Temp)
+	{
+		ScreenPos = Canvas.Project(Temp.Location);
+		Distance = VSize(Temp.Location - myOwner.Pawn.Location);
+		if (Trace(Unused1, Unused2, Temp.Location, myOwner.Pawn.Location) == None)
+		{
+			DotResult = (Temp.Location - myOwner.Pawn.Location) dot vector(myOwner.Rotation);
+			if (DotResult / Distance > MinAngle && Distance < MaxDistance)
+			{
+				PaintActor(Temp, ScreenPos.X, ScreenPos.Y);
+			}
+		}
+	}
+}
+
+
+/*--- Target painting method ---*/
+simulated function PaintActor(Actor Target, float X, float Y)
+{
+	local DVPawn Trg;
+	local color TrgColor;
+	Trg = DVPawn(Target);
+
+	if (Trg != None)
+	{
+		TrgColor = (Trg.GetTeamIndex() == 1) ? BlueColor:OrangeColor;
+		PutShadedText(TrgColor, Trg.UserName, X - 10, Y - 50);
+	}
+}
+
 
 /*--- Spawn ---*/ 
 simulated function PostBeginPlay()
@@ -92,6 +138,7 @@ simulated function PostBeginPlay()
 	// HUD register
 	PC.SetName(PC.LocalStats.UserName);
 	PC.LocalStats.EmptyStats();
+	LocalPlayer(PC.Player).ViewportClient.GetViewportSize(ViewportSize);
 
 	OpenWeaponMenu();
 	if (!PC.PlayerReplicationInfo.bOnlySpectator)
@@ -100,7 +147,8 @@ simulated function PostBeginPlay()
 	}
 	else
 	{
-		Close();
+		HideWeaponMenu();
+		SetTimer(1.0, true, 'HideWeaponMenu');
 	}
 }
 
@@ -114,6 +162,12 @@ simulated function OpenWeaponMenu()
 	HudMovie.InitParts();
 	HudMovie.Scene.GotoAndPlayI(0);
 	HudMovie.Scene.GotoAndPlayI(2);
+}
+
+/*-- Open the weapon choice menu --*/
+simulated function HideWeaponMenu()
+{
+	HudMovie.HideWeaponList();
 }
 
 
@@ -191,12 +245,12 @@ function ToggleRespawnMenu()
 
 	if (P == None && !bRespawnOpened)
 	{
-		if (!P.Controller.PlayerReplicationInfo.bOnlySpectator)
-		{
+		//if (!P.Controller.PlayerReplicationInfo.bOnlySpectator)
+		//{
 			HudMovie.OpenRespawnMenu(true);
 			SetTimer(1.0, true, 'OpenWeaponMenu');
 			bRespawnOpened = true;
-		}
+		//}
 	}
 	else if (P != None && bRespawnOpened)
 		bRespawnOpened = false;
@@ -270,6 +324,8 @@ defaultproperties
 	MenuDelay=0.5
 	HitWarningLength=0.2
 	GameplayMessageTime=3.0
+	MaxNameDistance=5000
+	MinNameAngle=0.95
 	
 	OrangeColor=(R=255,G=50,B=20,A=0)
 	BlueColor=(R=20,G=100,B=255,A=0)

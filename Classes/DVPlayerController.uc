@@ -13,15 +13,16 @@ class DVPlayerController extends UDKPlayerController;
 
 var (DVPC) const SoundCue			HitSound;
 
+var (DVPC) Actor					TargetObject;
+
+var (DVPC) bool 					bAmIZoomed;
+
 var (DVPC) const float 				ScoreLength;
 
 var (DVPC) const int 				TickDivisor;
 var (DVPC) const int 				LeaderBoardLength;
 var (DVPC) const int 				LocalLeaderBoardOffset;
 var (DVPC) const int				ObjectCheckDistance;
-
-var(DVPC) Actor						TargetObject;
-
 
 /*----------------------------------------------------------
 	Localized attributes
@@ -67,6 +68,8 @@ var bool							bShouldStop;
 var bool							bConfiguring;
 var bool							bMusicStarted;
 
+var string							CurrentId;
+
 var array<string>					LeaderBoardStructure;
 var array<string>					LeaderBoardStructure2;
 
@@ -103,7 +106,8 @@ simulated function PostBeginPlay()
 	
 	// Connexion
 	MasterServerLink = spawn(class'DVLink');
-	MasterServerLink.InitLink(self);
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+		MasterServerLink.InitLink(self);
 }
 
 
@@ -162,6 +166,12 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 			GH_Menu(myHUD).DisplayResponse(bIsOK, Msg, Command);
 	}
 	
+	// Autoconnect
+	if (Command == "INIT" && bIsOK)
+	{
+		AutoConnect();
+	}
+
 	// Upload & get back the stats on main menu, store the player ID in PRI
 	if (Command == "CONNECT" && bIsOK && myHUD != None)
 	{
@@ -174,10 +184,27 @@ reliable client event TcpCallback(string Command, bool bIsOK, string Msg, option
 		}
 		else if (PlayerReplicationInfo != None)
 		{
-			DVPlayerRepInfo(PlayerReplicationInfo).SetClientId(MasterServerLink.CurrentID);
+			SetClientId(MasterServerLink.CurrentID);
 			`log("DVPC > Logged in with ID" @MasterServerLink.CurrentID);
 		}
 	}
+}
+
+
+/*--- Client ID ---*/
+reliable client simulated function SetClientId (string newId)
+{
+	CurrentId = newId;
+	`log("DVPC > Set client ID" @CurrentId);
+	ServerSetClientId(newId);
+}
+
+
+/*--- Client ID ---*/
+reliable server simulated function ServerSetClientId (string newId)
+{
+	CurrentId = newId;
+	`log("DVPC > Updated client ID" @CurrentId);
 }
 
 
@@ -195,10 +222,22 @@ reliable client simulated function Connect(string user, string passwd)
 }
 
 
-/*--- Connection ---*/
+/*--- Connection DEBUG ---*/
 exec function Close()
 {
 	MasterServerLink.Close();
+}
+
+
+/*--- Connection DEBUG ---*/
+exec function Enough()
+{
+	ServerEnough();
+}
+
+reliable server function ServerEnough()
+{
+	DVGame(WorldInfo.Game).GameEnded(1);
 }
 
 
@@ -450,6 +489,9 @@ state Spectating
 		bCollideWorld = true;
 		DVHUD(MyHUD).Close();
 	}
+
+	exec function StartFire(optional byte FireModeNum)
+	{}
 }
 
 
@@ -530,10 +572,21 @@ simulated event GetPlayerViewPoint(out vector out_Location, out Rotator out_Rota
 
 
 /*--- Camera management  ---*/
+simulated function bool Zoomed()
+{
+	if (Pawn == None)
+		return false;
+	if (DVWeapon(Pawn.Weapon) == None)
+		return false;
+	else
+		return DVWeapon(Pawn.Weapon).IsZoomed();
+}
+
+
+/*--- Camera management  ---*/
 function UpdateRotation(float DeltaTime)
 {
 	local Rotator	DeltaRot, newRotation, ViewRotation;
-	local bool bAmIZoomed;
 	local float ZoomSensitivity;
 	
 	// Zoom management
@@ -828,10 +881,7 @@ reliable client simulated function SaveIDs(string User, string Pass)
 /*--- Get the player ID ---*/
 reliable server simulated function string GetCurrentID()
 {
-	if (PlayerReplicationInfo != None)
-		return DVPlayerRepInfo(PlayerReplicationInfo).CurrentId;
-	else 
-		return "TELL_GWENN_ABOUT_THIS";
+	return CurrentId;
 }
 
 
@@ -1064,12 +1114,13 @@ state PlayerWalking
 		{
 			return;
 		}
-		
+		/*
+		 * TODO : option to use to activate this for bertrand :)
 		if (DoubleClickMove == DCLICK_Forward && Pawn.Health > DVPawn(Pawn).SprintDamage && !DVPawn(Pawn).bRunning)
 		{
 			bRun = 1;
 			DVPawn(Pawn).SetRunning(true);
-		}
+		}*/
 
 		if (Role == ROLE_Authority)
 		{

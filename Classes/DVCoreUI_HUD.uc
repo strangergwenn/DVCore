@@ -17,6 +17,7 @@ var (HUD) localized string 	lAmmo;
 var (HUD) localized string 	lCannon;
 var (HUD) localized string 	lRail;
 
+var (HUD) localized string 	lYouAreSpectating;
 var (HUD) localized string 	lChangeWeapon;
 var (HUD) localized string 	lValidateConfig;
 var (HUD) localized string 	lChooseWeapon;
@@ -320,6 +321,21 @@ reliable client function FillPlayerList(GFxObject List, array<DVPlayerRepInfo> P
 		List.SetInt("selectedIndex", PC.GetLocalRank() - 1);
 		`log("CoreUI > Highlighting index" @PC.GetLocalRank() - 1);
 	}
+}
+
+/*--- Hide for spectate ---*/
+reliable client function HideWeaponList()
+{
+	local byte i;
+	local GFxObject TempObject;
+
+	for (i = 0 ; i < 8; i++)
+	{
+		TempObject = GetSymbol("Weapon"$i);
+			TempObject.SetVisible(false);
+	}
+
+	SetLabel("WeaponTitle", lYouAreSpectating, false);
 }
 
 

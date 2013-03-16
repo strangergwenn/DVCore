@@ -343,6 +343,7 @@ simulated function WriteText(string data)
 		MS_Send(data $"\n");
 		ParseStringIntoArray(data, OutputArray, ",", false);
 		LastCommandSent = OutputArray[0];
+		`log("DVLINK > CMD >" @data);
 	}
 }
 
@@ -423,7 +424,7 @@ event ReceivedLine(string Line)
 	Command = GetServerCommand(Line);
 	if (Command.Length == 0)
 		return;
-	`log("DVLINK > MS command >" $ Command[0]);
+	`log("DVLINK > CMD < " $ Command[0]);
 	
 	// Error management
 	if (IsEqual(Command[0], "NOK"))
@@ -449,14 +450,21 @@ event ReceivedLine(string Line)
 		{
 			bIsConnected = true;
 			CurrentID = Left(Command[1], 20);
-			if (IsEqual(LastCommandSent, "CONNECT"))
+			if (IsEqual(LastCommandSent, "CONNECT") && GH_Menu(PC.myHUD) != None)
 			{
 				SetTimer(ServerListUpdateFrequency, true, 'GetServers');
 			}
 			`log("DVLINK > Connection validated");
 		}
 		
-		if (IsEqual(LastCommandSent, "GET_SERVERS"))
+		// Save game
+		else if (IsEqual(LastCommandSent, "SAVE_GAME"))
+		{
+			DVGame(WorldInfo.Game).PrepareRestart();
+		}
+
+		// Server list
+		else if (IsEqual(LastCommandSent, "GET_SERVERS"))
 		{
 			GH_Menu(PC.myHUD).DisplayServerInfo();
 		}
