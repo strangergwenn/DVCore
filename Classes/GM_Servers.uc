@@ -128,12 +128,15 @@ delegate GoSelect(Actor Caller)
  */
 delegate GoLaunch(Actor Caller)
 {
+	local GM_Password PwdMenu;
+
 	if (ServerURL != "")
 	{
 		if (bIsPasswordProtected)
 		{
-			//TODO
-			ConsoleCommand("open " $ ServerURL $ "?game=");
+			PwdMenu = GM_Password(GetMenuByID(4500));
+			PwdMenu.SetURL(ServerURL);
+			ChangeMenu(PwdMenu);
 		}
 		else
 		{
