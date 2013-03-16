@@ -93,7 +93,7 @@ simulated function LabelAllIfViewed(class<Actor> TargetClass, float MinAngle, fl
 	{
 		ScreenPos = Canvas.Project(Temp.Location);
 		Distance = VSize(Temp.Location - myOwner.Pawn.Location);
-		if (Trace(Unused1, Unused2, Temp.Location, myOwner.Pawn.Location) == None)
+		if (Trace(Unused1, Unused2, Temp.Location, myOwner.Pawn.Location) == None && Distance != 0)
 		{
 			DotResult = (Temp.Location - myOwner.Pawn.Location) dot vector(myOwner.Rotation);
 			if (DotResult / Distance > MinAngle && Distance < MaxDistance)
