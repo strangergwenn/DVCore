@@ -229,18 +229,6 @@ exec function Close()
 }
 
 
-/*--- Connection DEBUG ---*/
-exec function Enough()
-{
-	ServerEnough();
-}
-
-reliable server function ServerEnough()
-{
-	DVGame(WorldInfo.Game).GameEnded(1);
-}
-
-
 /*--- Return a copy of the user statistics ---*/
 reliable server simulated function DVUserStats GetClientStats()
 {

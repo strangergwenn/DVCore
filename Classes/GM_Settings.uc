@@ -185,9 +185,9 @@ simulated function SpawnUI()
 	local byte i;
 	local string Key;
 	local DVUserStats LS;
+	local GMenu PreviousMenu;
 	local GToggleButton Temp;
 	LS = DVPlayerController(PC).LocalStats;
-	super.SpawnUI();
 	
 	// Video
 	AddLabel(Vect(-300,0,400), lVideo);
@@ -213,7 +213,9 @@ simulated function SpawnUI()
 	}
 	
 	// Setting save
-	Validate = AddButton(Vect(320,0,0), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
+	PreviousMenu = GetRelatedMenu(true);
+	AddMenuLink(Vect(-300,0,50), PreviousMenu, class'GButton');
+	Validate = AddButton(Vect(300,0,50), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
 }
 
 

@@ -83,8 +83,11 @@ simulated function UpdateLeaderboard()
 simulated function SpawnUI()
 {
 	// Init
+	local GMenu NextMenu;
 	local array<string>	PlayerList;
-	super.SpawnUI();
+
+	NextMenu = GetRelatedMenu(false);
+	AddMenuLink(Vect(0,0,50), NextMenu);
 
 	// Stat block 5
 	AddLabel(Vect(250,0,400), lBestPLayers);

@@ -66,7 +66,7 @@ event PostRender()
 	}
 	
 	// Debug
-	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1164", 400, 10);
+	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1287", 400, 10);
 
 	// End
 	LabelAllIfViewed(class'DVPawn', MinNameAngle, MaxNameDistance * (myOwner.Zoomed() ? 2.0:1.0));
@@ -112,7 +112,7 @@ simulated function PaintActor(Actor Target, float X, float Y)
 	local color TrgColor;
 	Trg = DVPawn(Target);
 
-	if (Trg != None)
+	if (Trg != None && Trg.Health > 0)
 	{
 		TrgColor = (Trg.GetTeamIndex() == 1) ? BlueColor:OrangeColor;
 		PutShadedText(TrgColor, Trg.UserName, X - 10, Y - 50);

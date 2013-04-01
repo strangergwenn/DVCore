@@ -228,13 +228,13 @@ delegate GoBack(Actor Caller)
  */
 simulated function SpawnUI()
 {
-	AddButton(Vect(-320,0,0), lPBack, lPBack, GoBack);
-	Connect = AddButton(Vect(320,0,0), lPConnectButton, lPConnect, GoConnect);
-	NewPlayer = AddButton(Vect(0,0,0), lPNewPlayer, LPNewAccount, GoRegister);
+	AddButton(Vect(-200,0,350), lPBack, lPBack, GoBack);
+	Connect = AddButton(Vect(200,0,350), lPConnectButton, lPConnect, GoConnect);
+	NewPlayer = AddButton(Vect(0,0,350), lPNewPlayer, LPNewAccount, GoRegister);
 	
 	bRegistering = false;
 	Label.Destroy();
-	Label2 = AddLabel(Vect(-320,0,470), lGMenuComment, class'GLabel');
+	Label2 = AddLabel(Vect(-0,0,400), lGMenuComment, class'GLabel');
 	
 	AddLabel(Vect(-100,0,300), lPPlayer);
 	AddLabel(Vect(-100,0,250), lPPassword);
