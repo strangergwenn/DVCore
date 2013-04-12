@@ -150,11 +150,11 @@ delegate GoRegister(Actor Caller)
 	Label2.Set(LPNewAccount, "");
 	Connect.Set(LPRegister, LPNewAccount);
 	
-	Password2Label = AddLabel(Vect(-100,0,200), lPPassword);
-	EmailLabel = AddLabel(Vect(-100,0,150), LPEmail);
-	Password2 = AddTextField(Vect(105,0,200));
+	Password2Label = AddLabel(Vect(-100,0,170), lPPassword);
+	EmailLabel = AddLabel(Vect(-100,0,120), LPEmail);
+	Password2 = AddTextField(Vect(105,0,170));
 	Password2.SetPassword(true);
-	Email = AddTextField(Vect(105,0,150));
+	Email = AddTextField(Vect(105,0,120));
 }
 
 /**
@@ -228,18 +228,18 @@ delegate GoBack(Actor Caller)
  */
 simulated function SpawnUI()
 {
-	AddButton(Vect(-200,0,350), lPBack, lPBack, GoBack);
-	Connect = AddButton(Vect(200,0,350), lPConnectButton, lPConnect, GoConnect);
-	NewPlayer = AddButton(Vect(0,0,350), lPNewPlayer, LPNewAccount, GoRegister);
+	AddButton(Vect(-200,0,320), lPBack, lPBack, GoBack);
+	Connect = AddButton(Vect(200,0,320), lPConnectButton, lPConnect, GoConnect);
+	NewPlayer = AddButton(Vect(0,0,320), lPNewPlayer, LPNewAccount, GoRegister);
 	
 	bRegistering = false;
 	Label.Destroy();
-	Label2 = AddLabel(Vect(-0,0,400), lGMenuComment, class'GLabel');
+	Label2 = AddLabel(Vect(-0,0,370), lGMenuComment, class'GLabel');
 	
-	AddLabel(Vect(-100,0,300), lPPlayer);
-	AddLabel(Vect(-100,0,250), lPPassword);
-	Username = AddTextField(Vect(105,0,300));
-	Password = AddTextField(Vect(105,0,250));
+	AddLabel(Vect(-100,0,270), lPPlayer);
+	AddLabel(Vect(-100,0,220), lPPassword);
+	Username = AddTextField(Vect(105,0,270));
+	Password = AddTextField(Vect(105,0,220));
 	Password.SetPassword(true);
 	GH_Menu(PC.myHUD).AutoConnect();
 }

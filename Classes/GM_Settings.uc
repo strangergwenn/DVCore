@@ -214,8 +214,8 @@ simulated function SpawnUI()
 	
 	// Setting save
 	PreviousMenu = GetRelatedMenu(true);
-	AddMenuLink(Vect(-300,0,50), PreviousMenu, class'GButton');
-	Validate = AddButton(Vect(300,0,50), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
+	AddMenuLink(Vect(-300,0,70), PreviousMenu, class'GButton');
+	Validate = AddButton(Vect(300,0,70), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
 }
 
 

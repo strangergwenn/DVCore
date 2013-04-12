@@ -50,7 +50,7 @@ simulated function SpawnUI()
 	Temp = GListItem(AddMenuLink(Vect(150,0,100), GetMenuByID(2100), class'GLIT_Large'));
 	Temp.SetPicture(MultiPicture);
 	
-	Connect = AddMenuLink(Vect(50,0,470), GetMenuByID(9999));
+	Connect = AddMenuLink(Vect(0,0,470), GetMenuByID(9999));
 	AddButton(Vect(320,0,470), "Quit", "Quit the game", GoExit);
 }
 
