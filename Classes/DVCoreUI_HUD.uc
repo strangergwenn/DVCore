@@ -506,9 +506,9 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	
 	// Restart
 	`log("CoreUI > Weapon selected");
-	SetGameUnPaused();
 	PC.HUDRespawn(!bFirstFrame, NewWeapon);
 	DVHUD(PC.myHUD).DisarmWeaponMenu();
+	SetGameUnPaused();
 	bFirstFrame = false;
 	bInMenu = false;
 }

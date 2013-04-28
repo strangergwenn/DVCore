@@ -823,6 +823,7 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 {
 	RegisterDeath();
 	ShowGenericMessage(lKilledBy @ KillerName $ " !");
+	DVHUD(myHUD).HudMovie.OpenRespawnMenu(true);
 }
 
 

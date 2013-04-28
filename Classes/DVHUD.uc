@@ -66,11 +66,10 @@ event PostRender()
 	}
 	
 	// Debug
-	PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1287", 400, 10);
+	//PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1287", 400, 10);
 
 	// End
 	LabelAllIfViewed(class'DVPawn', MinNameAngle, MaxNameDistance * (myOwner.Zoomed() ? 2.0:1.0));
-	ToggleRespawnMenu();
 	super.PostRender();
 }
 
@@ -89,16 +88,19 @@ simulated function LabelAllIfViewed(class<Actor> TargetClass, float MinAngle, fl
 	local vector ScreenPos, Unused1, Unused2;
 
 	myOwner = DVPlayerController(PlayerOwner);
-	foreach AllActors(TargetClass, Temp)
+	if (myOwner.Pawn != None)
 	{
-		ScreenPos = Canvas.Project(Temp.Location);
-		Distance = VSize(Temp.Location - myOwner.Pawn.Location);
-		if (Trace(Unused1, Unused2, Temp.Location, myOwner.Pawn.Location) == None && Distance != 0)
+		foreach AllActors(TargetClass, Temp)
 		{
-			DotResult = (Temp.Location - myOwner.Pawn.Location) dot vector(myOwner.Rotation);
-			if (DotResult / Distance > MinAngle && Distance < MaxDistance)
+			ScreenPos = Canvas.Project(Temp.Location);
+			Distance = VSize(Temp.Location - myOwner.Pawn.Location);
+			if (Trace(Unused1, Unused2, Temp.Location, myOwner.Pawn.Location) == None && Distance != 0)
 			{
-				PaintActor(Temp, ScreenPos.X, ScreenPos.Y);
+				DotResult = (Temp.Location - myOwner.Pawn.Location) dot vector(myOwner.Rotation);
+				if (DotResult / Distance > MinAngle && Distance < MaxDistance)
+				{
+					PaintActor(Temp, ScreenPos.X, ScreenPos.Y);
+				}
 			}
 		}
 	}
@@ -141,11 +143,7 @@ simulated function PostBeginPlay()
 	LocalPlayer(PC.Player).ViewportClient.GetViewportSize(ViewportSize);
 
 	OpenWeaponMenu();
-	if (!PC.PlayerReplicationInfo.bOnlySpectator)
-	{
-		SetTimer(2.0, true, 'OpenWeaponMenu');
-	}
-	else
+	if (PC.PlayerReplicationInfo.bOnlySpectator)
 	{
 		HideWeaponMenu();
 		SetTimer(1.0, true, 'HideWeaponMenu');
@@ -157,16 +155,17 @@ simulated function PostBeginPlay()
 simulated function OpenWeaponMenu()
 {
 	local DVPlayerController PC;
+	`log("OpenWeaponMenu");
 	PC = DVPlayerController(PlayerOwner);
 	HudMovie.PC = PC;
+	HudMovie.Scene.GotoAndPlayI(1);
 	HudMovie.InitParts();
-	HudMovie.Scene.GotoAndPlayI(0);
-	HudMovie.Scene.GotoAndPlayI(2);
 }
 
 /*-- Open the weapon choice menu --*/
 simulated function HideWeaponMenu()
 {
+	`log("HideWeaponMenu");
 	HudMovie.HideWeaponList();
 }
 
@@ -174,6 +173,7 @@ simulated function HideWeaponMenu()
 /*-- Open the weapon choice menu --*/
 simulated function DisarmWeaponMenu()
 {
+	`log("DisarmWeaponMenu");
 	ClearTimer('OpenWeaponMenu');
 }
 
@@ -237,31 +237,11 @@ reliable client simulated function HidePlayerList()
 }
 
 
-/*--- Open weapon choice menu ---*/
-function ToggleRespawnMenu()
-{
-	local DVPawn P;
-	P = DVPawn(PlayerOwner.Pawn);
-
-	if (P == None && !bRespawnOpened)
-	{
-		//if (!P.Controller.PlayerReplicationInfo.bOnlySpectator)
-		//{
-			HudMovie.OpenRespawnMenu(true);
-			SetTimer(1.0, true, 'OpenWeaponMenu');
-			bRespawnOpened = true;
-		//}
-	}
-	else if (P != None && bRespawnOpened)
-		bRespawnOpened = false;
-}
-
 /*--- Unpause game ---*/
-function Close()
+exec function Close()
 {
 	HudMovie.SetGameUnPaused();
 	DisarmWeaponMenu();
-	HudMovie.Close();
 }
 
 
