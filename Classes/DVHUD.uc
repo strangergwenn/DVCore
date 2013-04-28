@@ -169,15 +169,6 @@ simulated function HideWeaponMenu()
 	HudMovie.HideWeaponList();
 }
 
-
-/*-- Open the weapon choice menu --*/
-simulated function DisarmWeaponMenu()
-{
-	`log("DisarmWeaponMenu");
-	ClearTimer('OpenWeaponMenu');
-}
-
-
 /*--- Shot effect ---*/
 simulated function ShowHit()
 {
@@ -238,10 +229,9 @@ reliable client simulated function HidePlayerList()
 
 
 /*--- Unpause game ---*/
-exec function Close()
+simulated function Close()
 {
 	HudMovie.SetGameUnPaused();
-	DisarmWeaponMenu();
 }
 
 

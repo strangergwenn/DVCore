@@ -506,9 +506,9 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	
 	// Restart
 	`log("CoreUI > Weapon selected");
-	PC.HUDRespawn(!bFirstFrame, NewWeapon);
-	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	SetGameUnPaused();
+	PC.SetAlreadyChosen(PC.Pawn.Health > 0);
+	PC.HUDRespawn(!bFirstFrame, NewWeapon);
 	bFirstFrame = false;
 	bInMenu = false;
 }
@@ -537,7 +537,6 @@ function OnValidateConfig(GFxClikWidget.EventData ev)
 {
 	`log("CoreUI > Respawning with weapon configured");
 	PC.Bench.Weapon.SaveStatus();
-	DVHUD(PC.myHUD).DisarmWeaponMenu();
 	PC.LockCamera(false);
 	PC.HUDRespawn(true);
 	SetGameUnPaused();
@@ -608,13 +607,7 @@ function OnResume(GFxClikWidget.EventData evtd)
 	if (bFirstFrame || PC.bConfiguring || !bInMenu)
 		return;
 	
-	// Respawn or just resume
-	if (bWasKilled)
-	{
-		PC.HUDRespawn(true);
-		bWasKilled = false;
-	}
-	DVHUD(PC.myHUD).DisarmWeaponMenu();
+	// Resume
 	SetGameUnPaused();
 	PC.LockCamera(false);
 	bInMenu = false;

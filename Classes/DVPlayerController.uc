@@ -65,6 +65,7 @@ var vector							CurrentAimLocation;
 
 var bool							bLocked;
 var bool							bShouldStop;
+var bool							bAlreadyChoseWeapon;
 var bool							bConfiguring;
 var bool							bMusicStarted;
 
@@ -119,6 +120,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 	ShowTeam();
 	bConfiguring = false;
 	HideScores();
+	DVHUD(myHUD).HudMovie.SetGameUnPaused();
 }
 
 
@@ -736,7 +738,6 @@ reliable server simulated function ServerSetUserChoice(class<DVWeapon> NewWeapon
 reliable client simulated function SetUserChoice(class<DVWeapon> NewWeapon)
 {
 	UserChoiceWeapon = NewWeapon;
-	DVHUD(myHUD).DisarmWeaponMenu();
 }
 
 
@@ -823,12 +824,23 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 {
 	RegisterDeath();
 	ShowGenericMessage(lKilledBy @ KillerName $ " !");
-	DVHUD(myHUD).HudMovie.OpenRespawnMenu(true);
+	if (!bAlreadyChoseWeapon)
+	{
+		DVHUD(myHUD).HudMovie.OpenRespawnMenu(true);
+	}
+	bAlreadyChoseWeapon = false;
+}
+
+
+/*--- Has the player chosen weapons ? ---*/
+reliable client simulated function SetAlreadyChosen(bool bChosen)
+{
+	bAlreadyChoseWeapon = Pawn.Health > 0;
 }
 
 
 /*--- Show the killed message ---*/ 
-unreliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
+reliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
 {
 	RegisterKill(bTeamKill);
 	ShowGenericMessage(lKilled @ KilledName $ " !");
