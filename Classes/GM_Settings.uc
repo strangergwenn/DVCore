@@ -37,6 +37,9 @@ var GToggleButton						BackgroundMusic;
 var GToggleButton						UseSoundOnHit;
 var GToggleButton						FullScreen;
 
+var GToggleButton						Invert;
+var GTextField							Sensitivity;
+
 var array<GToggleButton>				EditKeyButtons;
 
 
@@ -127,6 +130,7 @@ delegate GoValidate(Actor Caller)
 	local byte i;
 	local string res, flag;
 	local DVUserStats LS;
+	PC = DVPlayerController(GetALocalPlayerController());
 	LS = DVPlayerController(PC).LocalStats;
 	res = Split(ResDropList.GetSelectedContent(), "[", false);
 	
@@ -148,6 +152,9 @@ delegate GoValidate(Actor Caller)
 		res = Left(EditKeyButtons[i].Text, InStr(EditKeyButtons[i].Text, Separator));
 		DVPlayerInput(PC.PlayerInput).SetKeyBinding(name(res), BindListData[i]);
 	}
+
+	// Mouse
+	DVPLayerController(PC).SetMouse(float(Sensitivity.GetText()));
 }
 
 /**
@@ -199,6 +206,14 @@ simulated function SpawnUI()
 	FullScreen.SetState(LS.bFullScreen);
 	ResDropList = AddDropList(Vect(-280,0,280), "Resolution", "Resolution", ResListData, class'GDL_Small');
 	
+	// Mouse
+	AddLabel(Vect(-300,0,210), lMouse);
+	AddLabel(Vect(-280,0,180), lSensitivity);
+	Sensitivity = AddTextField(Vect(-80,0,180));
+	Sensitivity.SetText(""$(DVPlayerInput(PC.PlayerInput).MouseSensitivity * 2.5));
+	Invert = GToggleButton(AddButton(Vect(-280,0,150), lInvert, "", GoToggle));
+	Invert.SetState(DVPlayerInput(PC.PlayerInput).bInvertMouse);
+
 	// Key editing
 	for (i = 0; i < KeyListData.Length; i++)
 	{

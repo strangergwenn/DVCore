@@ -313,6 +313,18 @@ reliable client simulated function UpdateMenuWithScores()
 	Player actions
 ----------------------------------------------------------*/
 
+/*--- Set the mouse sensitivity in % ---*/
+exec function SetMouse(float percent)
+{
+	DVPlayerInput(PlayerInput).SetMouseSensitivity(percent /2.5);
+}
+
+/*--- Set the mouse inversion ---*/
+exec function SetMouseInvert(bool state)
+{
+	DVPlayerInput(PlayerInput).SetMouseInvert(state);
+}
+
 /*--- Scores ---*/
 exec function ShowCommandMenu()
 {
