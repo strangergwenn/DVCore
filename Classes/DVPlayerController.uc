@@ -306,27 +306,29 @@ reliable client simulated function UpdateMenuWithScores()
 	Debugging tools
 ----------------------------------------------------------*/
 
-`if( `isdefined( DEBUG ) )
+`if(`isdefined(FINAL_RELEASE))
+	`define	release
+`else
 
-exec function EndThis()
-{
-	ServerEndThis();
-}
+	exec function EndThis()
+	{
+		ServerEndThis();
+	}
 
-reliable server simulated function ServerEndThis()
-{
-	DVGame(WorldInfo.Game).PrepareRestart();
-}
+	reliable server simulated function ServerEndThis()
+	{
+		DVGame(WorldInfo.Game).PrepareRestart();
+	}
 
-exec function Init()
-{
-	MasterServerLink.Init();
-}
+	exec function Init()
+	{
+		MasterServerLink.Init();
+	}
 
-exec function Close()
-{
-	MasterServerLink.Close();
-}
+	exec function Close()
+	{
+		MasterServerLink.Close();
+	}
 
 `endif
 
