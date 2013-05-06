@@ -296,17 +296,26 @@ simulated function rotator GetZoomViewRotation()
 /*--- Which zoom state ? ---*/
 simulated function Vector GetPawnViewLocation()
 {
-	local vector SMS;
-	
 	if (bZoomed)
-		SMS = GetZoomViewLocation();
+	{
+		return GetZoomViewLocation();
+	}
 	else
 	{
-		if (!Mesh.GetSocketWorldLocationAndrotation(EyeSocket, SMS))
-			`log("DVP > GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
-		SMS.Z = 	HeadBobbingFactor 	* SMS.Z + 
-			(1.0 - HeadBobbingFactor) 	* (Location.Z + StandardEyeHeight);
+		return GetEyeLocation();
 	}
+}
+
+
+/*--- Location backend ---*/
+simulated function Vector GetEyeLocation()
+{
+	local vector SMS;
+
+	if (!Mesh.GetSocketWorldLocationAndrotation(EyeSocket, SMS))
+		`log("DVP > GetSocketWorldLocationAndrotation GetPawnViewLocation failed ");
+	SMS.Z = 	HeadBobbingFactor 	* SMS.Z +
+		(1.0 - HeadBobbingFactor) 	* (Location.Z + StandardEyeHeight);
 	
 	return SMS;
 }

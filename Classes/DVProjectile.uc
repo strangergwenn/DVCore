@@ -22,6 +22,7 @@ var float 						DurationOfDecal;
 var float 						MaxEffectDistance;
 var float 						GlobalCheckRadiusTweak;
 var float 						DecalWidth, DecalHeight;
+var float 						InitialZVelocity;
 
 var SoundCue					ExplosionSound;
 
@@ -33,6 +34,17 @@ var MaterialInterface 			ExplosionDecal;
 
 var PointLightComponent 		ProjectileLight;
 var class<PointLightComponent>	ProjectileLightClass;
+
+
+/*----------------------------------------------------------
+	Replication
+----------------------------------------------------------*/
+
+replication
+{
+	if (bNetDirty)
+		InitialZVelocity, FlightTime;
+}
 
 
 /*----------------------------------------------------------
@@ -90,6 +102,7 @@ function Init(vector Direction)
 	SetRotation(rotator(Direction));
 	Velocity = Speed * Direction;
 	Acceleration = AccelRate * Normal(Velocity);
+	InitialZVelocity = Velocity.Z;
 }
 
 
@@ -260,7 +273,7 @@ simulated function Tick(float DeltaTime)
 	FlightTime += DeltaTime;
 	if (CurveScaling != 0)
 	{
-		Velocity.Z = - Square(100 * FlightTime) * CurveScaling;
+		Velocity.Z = InitialZVelocity - Square(100 * FlightTime) * CurveScaling;
 	}
 }
 

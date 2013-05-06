@@ -173,6 +173,11 @@ function GameEnded(byte WinnerIndex)
 /*--- Launch the restart timer ---*/
 function PrepareRestart()
 {
+	// Dedicated server
+	if (WorldInfo.NetMode == NM_DedicatedServer)
+	{
+		ServerLink.Close();
+	}
 	ClearTimer('RestartGame');
 	SetTimer(RestartTimer, false, 'RestartGame');
 }

@@ -86,6 +86,22 @@ replication
 }
 
 
+//DEBUG GWENN
+
+exec function EndThis()
+{
+	ServerEndThis();
+}
+
+reliable server simulated function ServerEndThis()
+{
+	DVGame(WorldInfo.Game).PrepareRestart();
+}
+
+
+//DEBUG GWENN
+
+
 /*----------------------------------------------------------
 	Events and net behaviour
 ----------------------------------------------------------*/
@@ -221,13 +237,6 @@ reliable client simulated function Register(string user, string email, string pa
 reliable client simulated function Connect(string user, string passwd)
 {
 	MasterServerLink.ConnectToMaster(user, passwd);
-}
-
-
-/*--- Connection DEBUG ---*/
-exec function Close()
-{
-	MasterServerLink.Close();
 }
 
 
