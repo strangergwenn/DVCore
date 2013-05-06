@@ -22,6 +22,7 @@ var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
 var (DVGame) const int 					PointsForKill;
 var (DVGame) const float				SpawnProtectTime;//TODO
+var (DVGame) const float				SaveTimeout;
 
 
 /*----------------------------------------------------------
@@ -165,6 +166,7 @@ function GameEnded(byte WinnerIndex)
 		bIsWinner = CheckForWin(PC, WinnerIndex);
 		PC.SignalEndGame(bIsWinner);
 	}
+	SetTimer(SaveTimeout, false, 'PrepareRestart');
 }
 
 
@@ -455,6 +457,7 @@ defaultproperties
 	HeartbeatTick=10.0
 	WeaponListLength=8
 	MaxPlayersAllowed=24
+	SaveTimeout=10.0
 	
 	// Classes
 	HUDType=class'DVHUD'

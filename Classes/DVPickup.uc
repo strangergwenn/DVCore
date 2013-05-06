@@ -26,6 +26,7 @@ var (DVPickup) const SoundCue			PickupSound;
 var DynamicLightEnvironmentComponent 	LightEnvironment;
 var PointLightComponent 				FlagLight;
 
+
 /*----------------------------------------------------------
 	Replication
 ----------------------------------------------------------*/
@@ -143,6 +144,7 @@ defaultproperties
 		bEnabled=true
 		CastShadows=false
 		bRenderLightShafts=false
+		bForceDynamicLight=true
 		LightingChannels=(Dynamic=true,CompositeDynamic=true)
 	End Object
 	FlagLight=DynLightComponent

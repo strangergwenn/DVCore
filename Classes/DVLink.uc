@@ -94,7 +94,7 @@ simulated function InitLink(DVPlayerController LinkedController)
 		else
 		{
 			bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
-			RegisterServer("Dev Server", "admin@deepvoid.eu", bUsePassword);
+			RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", bUsePassword);
 		}
 	}
 }

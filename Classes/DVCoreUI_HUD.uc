@@ -131,6 +131,8 @@ simulated function UpdateInfo(int health, int ammo, int max)
 	// Health warning
 	if (health <= WarningThreshold)
 		WarningMC.SetVisible(true);
+	else
+		WarningMC.SetVisible(false);
 	
 	// Bugfix
 	if (!bListOpened)
