@@ -59,25 +59,33 @@ dllimport final function string SSL_GetFileHash(string filename);
 	Game methods
 ----------------------------------------------------------*/
 
+/*--- DLL Startup ---*/
+simulated function bool Init()
+{
+	local int i;
+	i = MS_Init("master.deepvoid.eu", 9999);
+	if (i == 0)
+	{
+		`log("Master server startup FAILED");
+	}
+	return (i != 0);
+}
+
 /*--- Initialization ---*/
 simulated function InitLink(DVPlayerController LinkedController)
 {
 	// Vars
-	local int i;
+	local bool res;
 	local bool bUsePassword;
 
 	// Init
 	bSending = false;
 	PC = LinkedController;
 	`log("DVLINK > InitLink");
-	i = MS_Init("master.deepvoid.eu", 9999);
-	if (i == 0)
-	{
-		`log("Master server startup FAILED");
-	}
+	res = Init();
 
 	// Successful init
-	else
+	if (res)
 	{
 		AbortTimeout();
 		bIsOpened = true;

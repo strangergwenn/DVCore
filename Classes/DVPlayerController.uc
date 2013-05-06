@@ -86,22 +86,6 @@ replication
 }
 
 
-//DEBUG GWENN
-
-exec function EndThis()
-{
-	ServerEndThis();
-}
-
-reliable server simulated function ServerEndThis()
-{
-	DVGame(WorldInfo.Game).PrepareRestart();
-}
-
-
-//DEBUG GWENN
-
-
 /*----------------------------------------------------------
 	Events and net behaviour
 ----------------------------------------------------------*/
@@ -316,6 +300,35 @@ reliable client simulated function UpdateMenuWithScores()
 {
 	GH_Menu(myHUD).AddUserInfo();
 }
+
+
+/*----------------------------------------------------------
+	Debugging tools
+----------------------------------------------------------*/
+
+`if( `isdefined( DEBUG ) )
+
+exec function EndThis()
+{
+	ServerEndThis();
+}
+
+reliable server simulated function ServerEndThis()
+{
+	DVGame(WorldInfo.Game).PrepareRestart();
+}
+
+exec function Init()
+{
+	MasterServerLink.Init();
+}
+
+exec function Close()
+{
+	MasterServerLink.Close();
+}
+
+`endif
 
 
 /*----------------------------------------------------------
