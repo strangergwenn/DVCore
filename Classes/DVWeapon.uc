@@ -253,6 +253,8 @@ simulated function AttachWeaponTo(SkeletalMeshComponent MeshCpnt, optional Name 
 	// Flash
 	MuzzleFlashPSC = new(Outer) class'ParticleSystemComponent';
 	MuzzleFlashPSC.bAutoActivate = false;
+	MuzzleFlashPSC.bUpdateComponentInTick = true;
+	MuzzleFlashPSC.SetTickGroup(TG_EffectsUpdateWork);
 	MuzzleFlashPSC.SetTemplate(MuzzleFlashPSCTemplate);
 	SkeletalMeshComponent(Mesh).AttachComponentToSocket(MuzzleFlashPSC, EffectSockets[0]);
 	
