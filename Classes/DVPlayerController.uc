@@ -467,15 +467,29 @@ event PlayerTick(float DeltaTime)
 		P = DVPawn(Pawn);
 		P.Mesh.GetSocketWorldLocationAndRotation(P.EyeSocket, StartTrace, TraceDir);
 		EndTrace = DVWeapon(P.Weapon).GetEffectLocation();
+		TraceDir = DVWeapon(P.Weapon).GetEffectRotation();
 		
 		// Should we lock input ?
 		Target = None;
 		Target = Trace(HitLocation, HitNormal, EndTrace, StartTrace);
+		bShouldStop = (Target != None);
+
+		// Additional aiming for special firing
+		Target = Trace(
+			HitLocation,
+			HitNormal,
+			EndTrace + vector(TraceDir) * 10000.0,
+			EndTrace,
+			true,,, TRACEFLAG_Bullet
+		);
 		if (Target != None)
 		{
 			CurrentAimWorld = HitLocation;
 		}
-		bShouldStop = (Target != None);
+		else
+		{
+			CurrentAimWorld = Vect(0,0,0);
+		}
 	}
 	super.PlayerTick(DeltaTime);
 }
@@ -1194,7 +1208,7 @@ defaultproperties
 {
 	bLocked=true
 	
-	TickDivisor=5
+	TickDivisor=1
 	ScoreLength=4.0
 	LeaderBoardLength=10
 	ObjectCheckDistance=300

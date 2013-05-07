@@ -837,6 +837,28 @@ simulated function vector GetEffectLocation()
 }
 
 
+/*--- Effects rotation ---*/
+simulated function rotator GetEffectRotation()
+{
+	local vector SocketLocation;
+	local rotator SocketRotation;
+
+	if (SkeletalMeshComponent(Mesh) != None && EffectSockets[CurrentFireMode] != '')
+	{
+		if (!SkeletalMeshComponent(Mesh).GetSocketWorldLocationAndRotation(EffectSockets[CurrentFireMode], SocketLocation, SocketRotation))
+		{
+			`log("DVW > GetSocketWorldLocationAndrotation GetEffectRotation failed");
+			SocketRotation = Rotation;
+		}
+	}
+	else
+	{
+		SocketRotation = Rotation;
+	}
+ 	return SocketRotation;
+}
+
+
 /* -- Triggers PS effect --*/
 simulated function FireParticleSystem(ParticleSystem ps, vector loc, rotator rot)
 {
