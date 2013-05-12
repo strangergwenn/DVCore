@@ -24,6 +24,7 @@ var (DVPC) const int 				LeaderBoardLength;
 var (DVPC) const int 				LocalLeaderBoardOffset;
 var (DVPC) const int				ObjectCheckDistance;
 
+
 /*----------------------------------------------------------
 	Localized attributes
 ----------------------------------------------------------*/
@@ -106,9 +107,11 @@ simulated function PostBeginPlay()
 	GlobalStats.EmptyStats();
 	
 	// Connexion
-	MasterServerLink = spawn(class'DVLink');
 	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		MasterServerLink = spawn(class'DVLink');
 		MasterServerLink.InitLink(self);
+	}
 }
 
 
@@ -306,31 +309,25 @@ reliable client simulated function UpdateMenuWithScores()
 	Debugging tools
 ----------------------------------------------------------*/
 
-`if(`isdefined(FINAL_RELEASE))
-	`define	release
-`else
+exec function EndThis()
+{
+	ServerEndThis();
+}
 
-	exec function EndThis()
-	{
-		ServerEndThis();
-	}
+reliable server simulated function ServerEndThis()
+{
+	//DVGame(WorldInfo.Game).PrepareRestart();
+}
 
-	reliable server simulated function ServerEndThis()
-	{
-		DVGame(WorldInfo.Game).PrepareRestart();
-	}
+exec function Init()
+{
+	MasterServerLink.Init();
+}
 
-	exec function Init()
-	{
-		MasterServerLink.Init();
-	}
-
-	exec function Close()
-	{
-		MasterServerLink.Close();
-	}
-
-`endif
+exec function Close()
+{
+	MasterServerLink.Close();
+}
 
 
 /*----------------------------------------------------------
