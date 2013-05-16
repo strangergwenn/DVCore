@@ -754,6 +754,7 @@ reliable server simulated function HUDRespawn(bool bShouldKill, optional class<D
 		bShouldKill = true;
 		bConfiguring = false;
 		DVPawn(Pawn).HideMesh(true);
+		DVHUD(myHUD).HudMovie.SetGameUnPaused();
 	}
 	if (NewWeapon == None)
 	{

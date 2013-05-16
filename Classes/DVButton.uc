@@ -20,17 +20,32 @@ var (Button) SoundCue					SoundOnDeActivate;
 
 var (Button) bool						bIsActivated;
 
+var (Button) MaterialInstanceConstant	ButtonMaterial;
+
 
 /*----------------------------------------------------------
 	Private attributes
 ----------------------------------------------------------*/
 
 var StaticMeshComponent					Mesh;
+var MaterialInstanceConstant			CurrentButtonMaterial;
 
 
 /*----------------------------------------------------------
 	Display code
 ----------------------------------------------------------*/
+
+/*--- Startup ---*/
+simulated function PostBeginPlay()
+{
+	super.PostBeginPlay();
+	CurrentButtonMaterial = Mesh.CreateAndSetMaterialInstanceConstant(0);
+	if (CurrentButtonMaterial != None)
+	{
+		CurrentButtonMaterial.SetParent(ButtonMaterial);
+	}
+}
+
 
 /*--- Activate button : ready to use ---*/
 simulated function Activate()
@@ -38,6 +53,7 @@ simulated function Activate()
 	if (!bIsActivated)
 	{
 		`log("DVB > Activate");
+		SetCollisionType(COLLIDE_NoCollision);
 		if (SoundOnActivate != None)
 		{
 			PlaySound(SoundOnActivate);
@@ -51,6 +67,7 @@ simulated function Activate()
 simulated function DeActivate()
 {
 	`log("DVB > DeActivate");
+	SetCollisionType(COLLIDE_BlockAll);
 	if (SoundOnDeActivate != None)
 	{
 		PlaySound(SoundOnDeActivate);
@@ -84,11 +101,15 @@ defaultproperties
 		BlockRigidBody=true
 		BlockNonzeroExtent=true
 		CollideActors=true
-		StaticMesh=StaticMesh'DV_Spacegear.Mesh.SM_TargetManager'
+		StaticMesh=StaticMesh'Grounds.Mesh.ST_GROUNDS_Pl-001'
+		Rotation=(Pitch=32768,Yaw=-16384,Roll=-16384)
+		Translation=(Z=25)
+		Scale=0.2
 	End Object
 	Mesh=MyStaticMeshComponent
  	Components.Add(MyStaticMeshComponent)
 	CollisionComponent=MyStaticMeshComponent
+	ButtonMaterial=MaterialInstanceConstant'DV_Spacegear.Material.MI_TargetManager-Hol'
 	
 	// Physics
 	bEdShouldSnap=true
