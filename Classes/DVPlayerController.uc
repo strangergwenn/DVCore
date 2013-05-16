@@ -871,9 +871,13 @@ reliable client simulated function NotifyNewPlayer(string PlayerName)
 unreliable client simulated function ShowKilledBy(string KillerName)
 {
 	RegisterDeath();
-	ShowGenericMessage(lKilledBy @ KillerName $ " !");
-	if (!bAlreadyChoseWeapon)
+	if (KillerName != "")
 	{
+		ShowGenericMessage(lKilledBy @ KillerName $ " !");
+	}
+	if (!bAlreadyChoseWeapon || UserChoiceWeapon == None)
+	{
+		DVHUD(myHUD).HudMovie.SetGameUnPaused();
 		DVHUD(myHUD).HudMovie.OpenRespawnMenu(true);
 	}
 	bAlreadyChoseWeapon = false;

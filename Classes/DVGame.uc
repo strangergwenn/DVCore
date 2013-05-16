@@ -117,6 +117,7 @@ function AddDefaultInventory(Pawn PlayerPawn)
 		if (Choiced != None)
 		{
 			PlayerPawn.CreateInventory(Choiced);
+			DVPlayerController(PlayerPawn.Controller).UserChoiceWeapon = None;
 		}
 	}
 	
@@ -199,7 +200,7 @@ function ScoreKill(Controller Killer, Controller Other)
 	KillerPRI = DVPlayerRepInfo(Killer.PlayerReplicationInfo);
 	OtherPRI = DVPlayerRepInfo(Other.PlayerReplicationInfo);
 	
-	// Score kill
+	// Score kill : killer is known
 	if (KillerPRI != None)
 	{
 		// Team kill data
@@ -225,6 +226,12 @@ function ScoreKill(Controller Killer, Controller Other)
 		`log("DVG > " $Other $ " KilledBy " $ KillerPRI $ ", isTK=" $ bIsTeamKill);
 	}
 	
+	// Killer is unnkown
+	else
+	{
+		DVPlayerController(Other).ShowKilledBy("");
+	}
+
 	// Death indication to other player
 	if (OtherPRI != None)
 	{
