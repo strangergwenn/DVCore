@@ -416,7 +416,7 @@ simulated function SignalController(string Command, bool bIsOK, optional string 
 /*--- Closed connexion ---*/
 simulated function Close()
 {
-	`log("DVLINK > Closed master server");
+	`log("DVLINK > Closing master server link");
 	bIsConnected = false;
 	bIsOpened = false;
 	SignalController("NET", false);

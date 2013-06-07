@@ -131,6 +131,7 @@ event Possess(Pawn aPawn, bool bVehicleTransition)
 reliable client simulated function ShowTeam()
 {
 	local string TeamName;
+	//SetTimer(2.0, false, 'EndThis');
 	TeamName = (PlayerReplicationInfo.Team != None) ? PlayerReplicationInfo.Team.GetHumanReadableName() : "";
 	ShowGenericMessage(lYouAreInTeam @ TeamName);
 }
@@ -316,7 +317,7 @@ exec function EndThis()
 
 reliable server simulated function ServerEndThis()
 {
-	//DVGame(WorldInfo.Game).PrepareRestart();
+	DVGame(WorldInfo.Game).GameEnded(0);
 }
 
 exec function Init()
@@ -875,12 +876,27 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 	{
 		ShowGenericMessage(lKilledBy @ KillerName $ " !");
 	}
-	if (!bAlreadyChoseWeapon || UserChoiceWeapon == None)
+	if (!bAlreadyChoseWeapon)
 	{
 		DVHUD(myHUD).HudMovie.SetGameUnPaused();
 		DVHUD(myHUD).HudMovie.OpenRespawnMenu(true);
 	}
 	bAlreadyChoseWeapon = false;
+}
+
+
+/*--- Show the killer marker ---*/
+reliable client simulated function SpawnKillMarker(string KillerName, string UserName)
+{
+	if (len(UserName) > 0 && len(KillerName) > 0)
+	{
+		DVPawn(Pawn).KM = Spawn(class'DVKillMarker', self,,, rotator(vect(0,0,0)));
+		if (Role == ROLE_Authority)
+		{
+			DVPawn(Pawn).KM.SetPlayerData(UserName, KillerName, DVPawn(Pawn).TeamLight, false);
+			`log("DVP > PlayDying KM" @UserName @KillerName @self);
+		}
+	}
 }
 
 
@@ -1054,13 +1070,19 @@ reliable client simulated function array<DVPlayerRepInfo> GetPlayerList()
 {
 	local array<DVPlayerRepInfo> PRList;
 	local DVPlayerRepInfo PRI;
+	local byte i;
 	
-	foreach AllActors(class'DVPlayerRepInfo', PRI)
+	foreach DynamicActors(class'DVPlayerRepInfo', PRI)
 	{
 		PRList.AddItem(PRI);
-		`log("DVPC > GetPlayerList" @PRI);
 	}
 	PRList.Sort(SortPlayers);
+
+	for (i = 0; i < PRList.Length; i ++)
+	{
+		`log("DVPC > GetPlayerList " @PRList[i].PlayerName);
+	}
+
 	return PRList;
 }
 

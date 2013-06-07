@@ -195,6 +195,7 @@ simulated function bool CheckForWin(DVPlayerController PC, byte WinnerIndex)
 function ScoreKill(Controller Killer, Controller Other)
 {
 	// Init
+	local DVPlayerController PC;
 	local DVPlayerRepInfo KillerPRI, OtherPRI;
 	local bool bIsTeamKill;
 	KillerPRI = DVPlayerRepInfo(Killer.PlayerReplicationInfo);
@@ -240,6 +241,11 @@ function ScoreKill(Controller Killer, Controller Other)
 			DVPlayerController(Killer).ShowKilled(OtherPRI.PlayerName, bIsTeamKill);
 		}
 		OtherPRI.ScoreDeath();
+	}
+
+	foreach AllActors(class'DVPlayerController', PC)
+	{
+		//PC.SpawnKillMarker(KillerPRI.PlayerName, OtherPRI.PlayerName);
 	}
 }
 
@@ -408,7 +414,7 @@ reliable server simulated function ServerUploadGame()
 		return;
 	
 	// Get all player controllers
-	foreach AllActors(class'DVPlayerController', P)
+	foreach WorldInfo.AllControllers(class'DVPlayerController', P)
 	{
 		GStats = P.GetClientStats();
 		`log("DVPC > Secured uploading sent for "$P @"aka" @P.GetCurrentID());

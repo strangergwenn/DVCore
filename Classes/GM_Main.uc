@@ -34,7 +34,6 @@ var GButton								Connect;
 delegate GoExit(Actor Caller)
 {
 	`log("GM > GoExit" @self);
-	DVPlayerController(PC).MasterServerLink.Close();
 	ConsoleCommand("quit");
 }
 

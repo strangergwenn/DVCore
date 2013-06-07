@@ -105,8 +105,8 @@ function SetPlayerData(string P1, string P2, LinearColor NewLight, bool bWasHS)
 	`log("DVKM > SetPlayerData" @P1 @P2 @self);
 	MarkerText1 = P1;
 	MarkerText2 = P2;
-	MarkerMaterial.SetVectorParameterValue('Color', NewLight);
-	MarkerMaterial2.SetVectorParameterValue('Color', NewLight);
+	//MarkerMaterial.SetVectorParameterValue('Color', NewLight);
+	//MarkerMaterial2.SetVectorParameterValue('Color', NewLight);
 	Mesh2.SetHidden(!bWasHS);
 }
 

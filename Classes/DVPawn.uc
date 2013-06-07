@@ -391,7 +391,11 @@ simulated function Tick(float DeltaTime)
 	local rotator RecoilOffset;
 
 	// Weapon adjustment
-	if (Weapon != None && !DVWeapon(Weapon).IsZoomed())
+	if (Weapon == None)
+	{
+		return;
+	}
+	else if (!DVWeapon(Weapon).IsZoomed())
 	{
 		Weapon.Mesh.SetRotation(Weapon.default.Mesh.Rotation + GetSmoothedRotation());
 	}
@@ -827,17 +831,6 @@ simulated function PlayDying(class<DamageType> DamageType, vector HitLoc)
 	{
 		GotoState('Dying');
 		return;
-	}
-				
-	// Kill marker
-	if (len(UserName) > 0 && len(KillerName) > 0)
-	{
-		KM = Spawn(class'DVKillMarker', self,,,);
-		if (Role == ROLE_Authority)
-		{
-			KM.SetPlayerData(UserName, KillerName, TeamLight, bWasHS);
-			`log("DVP > PlayDying KM" @UserName @KillerName @self);
-		}
 	}
 
 	CheckHitInfo(HitInfo, Mesh, Normal(TearOffMomentum), TakeHitLocation );
