@@ -320,16 +320,6 @@ reliable server simulated function ServerEndThis()
 	DVGame(WorldInfo.Game).GameEnded(0);
 }
 
-exec function Init()
-{
-	MasterServerLink.Init();
-}
-
-exec function Close()
-{
-	MasterServerLink.Close();
-}
-
 
 /*----------------------------------------------------------
 	Player actions

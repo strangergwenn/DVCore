@@ -5,8 +5,7 @@
  *  @author Gwennaël ARBONA
  **/
 
-class DVLink extends Actor
-	DLLBind(MasterServerBridge);
+class DVLink extends TcpLink;
 
 
 /*----------------------------------------------------------
@@ -41,96 +40,16 @@ var DVPlayerController				PC;
 
 
 /*----------------------------------------------------------
-	DLL Bind
-----------------------------------------------------------*/
-
-dllimport final function int MS_Init(string host, int port);
-dllimport final function MS_Shutdown();
-
-dllimport final function int MS_Send(string data);
-dllimport final function int MS_Check();
-dllimport final function string MS_Receive();
-
-dllimport final function string SSL_GetStringHash(string data);
-dllimport final function string SSL_GetFileHash(string filename);
-
-
-/*----------------------------------------------------------
 	Game methods
 ----------------------------------------------------------*/
-
-/*--- DLL Startup ---*/
-simulated function bool Init()
-{
-	local int i;
-	i = MS_Init("master.deepvoid.eu", 9999);
-	if (i == 0)
-	{
-		`log("Master server startup FAILED");
-	}
-	return (i != 0);
-}
 
 /*--- Initialization ---*/
 simulated function InitLink(DVPlayerController LinkedController)
 {
-	// Vars
-	local bool res;
-	local bool bUsePassword;
-
-	// Init
-	bSending = false;
-	PC = LinkedController;
 	`log("DVLINK > InitLink");
-	res = Init();
-
-	// Successful init
-	if (res)
-	{
-		AbortTimeout();
-		bIsOpened = true;
-		SetTimer(0.2, true, 'WriteTextOnBuffer');
-		`log("DVLINK > Successfully opened master server");
-
-		// On client : get the server list
-		if (WorldInfo.NetMode != NM_DedicatedServer)
-		{
-			SignalController("INIT", true, "");
-		}
-
-		// On server : register
-		else
-		{
-			bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
-			RegisterServer(WorldInfo.ComputerName, "admin@deepvoid.eu", bUsePassword);
-		}
-	}
-}
-
-
-/*--- Wait for data ---*/
-simulated function Tick(float DeltaTime)
-{
-	local byte i;
-	local string text;
-	local array<string> commands;
-
-	while (MS_Check() > 0)
-	{
-		text = MS_Receive();
-		if (Len(text) > 0)
-		{
-			ParseStringIntoArray(text, commands, "\n", false);
-			for (i = 0; i < commands.Length; i++)
-			{
-				if (Len(commands[i]) > 0)
-				{
-					ReceivedLine(commands[i]);
-				}
-			}
-		}
-	}
-	super.Tick(DeltaTime);
+	PC = LinkedController;
+	bSending = false;
+	resolve(MasterServerIP);
 }
 
 
@@ -310,7 +229,7 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 	if (!bIsOpened)
 	{
 		`log("DVLINK > Reconnecting");
-		InitLink(PC);
+		resolve(MasterServerIP);
 	}
 	
 	// Not yet connected
@@ -347,11 +266,11 @@ simulated function WriteText(string data)
 	else
 	{
 		bSending = true;
+		`log("DVLINK > CMD >" @data);
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
-		MS_Send(data $"\n");
+		SendText(data $"\n");
 		ParseStringIntoArray(data, OutputArray, ",", false);
 		LastCommandSent = OutputArray[0];
-		`log("DVLINK > CMD >" @data);
 	}
 }
 
@@ -413,14 +332,79 @@ simulated function SignalController(string Command, bool bIsOK, optional string 
 	Events
 ----------------------------------------------------------*/
 
-/*--- Closed connexion ---*/
-simulated function Close()
+/*--- TCP connexion answer ---*/
+event Resolved(IpAddr Addr)
 {
-	`log("DVLINK > Closing master server link");
+	`log("DVLINK > Successfully resolved master server" @IpAddrToString(Addr));
+	
+	Addr.Port = MasterServerPort;
+	AbortTimeout();
+	
+	`log("DVLINK > Bound to port" @BindPort());
+	if (!Open(Addr))
+	{
+		`log("DVLINK > Could not connect to master server...");
+	}
+}
+
+
+/*--- No connexion ! ---*/
+event ResolveFailed()
+{
+	`log("DVLINK > Failed to resolve master server");
+	bIsOpened = false;
+	SignalController("NET", false, "Hors ligne");
+}
+
+
+/*--- Server accepted the connexion ---*/
+event Opened()
+{
+	local bool bUsePassword;
+	bIsOpened = true;
+	`log("DVLINK > Successfully opened master server");
+	
+	// On client : get the server list
+	if (WorldInfo.NetMode != NM_DedicatedServer)
+	{
+		if (GH_Menu(PC.myHUD) != None)
+		{
+			SetTimer(0.2, true, 'WriteTextOnBuffer');
+		}
+		SignalController("INIT", true, "");
+	}
+	
+	// On server : register
+	else
+	{
+		bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
+		RegisterServer(DVGame(WorldInfo.Game).ServerName, DVGame(WorldInfo.Game).ServerEmail, bUsePassword);
+	}
+}
+
+
+/*--- Closed connexion ---*/
+event Closed()
+{
+	`log("DVLINK > Closed master server");
 	bIsConnected = false;
 	bIsOpened = false;
 	SignalController("NET", false);
-	MS_Shutdown();
+}
+
+
+/*--- Text mode : we need to clean this shit up ---*/
+event ReceivedText(string Text)
+{
+	local array<string> InputArray;
+	local int i;
+	
+	ParseStringIntoArray(Text, InputArray, "\n", false);
+	for (i = 0; i < InputArray.Length; i++)
+	{
+		if (Len(InputArray[i]) > 0)
+			ReceivedLine(InputArray[i]);
+	}
 }
 
 
@@ -539,7 +523,13 @@ defaultproperties
 {
 	bIsOpened=false
 	bIsConnected=false
+	
 	CurrentID="0"
 	TimeoutLength=5.0
 	ServerListUpdateFrequency=5.0
+	LinkMode=MODE_Text
+	ReceiveMode=RMODE_Event
+	
+	MasterServerIP="master.deepvoid.eu"
+	MasterServerPort=9999
 }

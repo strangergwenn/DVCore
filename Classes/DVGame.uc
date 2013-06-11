@@ -39,10 +39,34 @@ var float								HeartbeatTick;
 var float								EndGameTick;
 var float								RestartTimer;
 
+var string								ServerName;
+var string								ServerEmail;
+
 
 /*----------------------------------------------------------
 	Events
 ----------------------------------------------------------*/
+
+/*--- Options parsing ---*/
+event InitGame( string Options, out string ErrorMessage )
+{
+	local string InOpt;
+
+	Super.InitGame(Options, ErrorMessage);
+
+	InOpt = ParseOption(Options, "servername");
+	if (InOpt != "")
+	{
+		ServerName = InOpt;
+	}
+
+	InOpt = ParseOption(Options, "serveremail");
+	if (InOpt != "")
+	{
+		ServerEmail = InOpt;
+	}
+}
+
 
 /*--- Standard team creation ---*/
 function PreBeginPlay()
