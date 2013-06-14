@@ -59,11 +59,19 @@ event InitGame( string Options, out string ErrorMessage )
 	{
 		ServerName = InOpt;
 	}
+	else
+	{
+		ServerName = "DeepVoid server";
+	}
 
 	InOpt = ParseOption(Options, "serveremail");
 	if (InOpt != "")
 	{
 		ServerEmail = InOpt;
+	}
+	else
+	{
+		ServerEmail = "no-email-given";
 	}
 }
 

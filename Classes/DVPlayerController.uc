@@ -312,7 +312,7 @@ reliable client simulated function UpdateMenuWithScores()
 
 exec function EndThis()
 {
-	ServerEndThis();
+	//ServerEndThis();
 }
 
 reliable server simulated function ServerEndThis()

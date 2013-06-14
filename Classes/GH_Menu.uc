@@ -54,20 +54,8 @@ function ApplyResolutionSetting(string code, string flag)
 {
 	local DVPlayerController PC;
 	PC = DVPlayerController(PlayerOwner);
-	`log("GHM > ApplyResolutionSetting" @code @flag);
-	
-	switch (code)
-	{
-		case ("720p"):
-			PC.ConsoleCommand("SetRes 1280x720" $flag);
-			break;
-		case ("1080p"):
-			PC.ConsoleCommand("SetRes 1920x1080" $flag);
-			break;
-		case ("max"):
-			PC.ConsoleCommand("SetRes 6000x3500" $flag);
-			break;
-	}
+	`log("GHM > ApplyResolutionSetting" @code $flag);
+	PC.ConsoleCommand("SetRes " $code $flag);
 }
 
 /**
