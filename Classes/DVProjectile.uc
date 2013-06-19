@@ -111,10 +111,7 @@ simulated function ProcessTouch(Actor Other, Vector HitLocation, Vector HitNorma
 {
 	if (DamageRadius > 0)
 	{
-		if (!bShuttingDown)
-		{
-			ProjectileHurtRadius(HitLocation, HitNormal);
-		}
+		ProjectileHurtRadius(HitLocation, HitNormal);
 	}
 	Other.TakeDamage(Damage,InstigatorController,HitLocation,MomentumTransfer * Normal(Velocity), MyDamageType,, self);
 	Shutdown();

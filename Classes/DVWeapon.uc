@@ -932,8 +932,8 @@ defaultproperties
 	Mesh=WeaponMesh
 	
 	// Gameplay
-	InstantHitDamageTypes(0)=class'DamageType'
-	InstantHitDamageTypes(1)=class'DamageType'
+	InstantHitDamageTypes(0)=class'DVDamage'
+	InstantHitDamageTypes(1)=class'DVDamage'
 	FiringStatesArray(0)=WeaponFiring
 	FiringStatesArray(1)=WeaponFiring
 	WeaponFireTypes(0)=EWFT_InstantHit
