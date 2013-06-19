@@ -81,13 +81,14 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 
 
 /*--- Register at the master server : game server version
-	DEC_SERVER,ServerName,Email,bUsePassword
+	DEC_SERVER,ServerName,Email,Password,bUsePassword
 ---*/
-reliable server simulated function RegisterServer(string ServerName, string Email, bool bUsePassword)
+reliable server simulated function RegisterServer(string ServerName, string Email, string Password, bool bUsePassword)
 {
 	local array<string> Params;
 	Params.AddItem(ServerName);
 	Params.AddItem(Email);
+	Params.AddItem(Password);
 	Params.AddItem(bUsePassword ? "1":"0");
 	SendServerCommand("DEC_SERVER", Params, false);
 }
@@ -378,7 +379,11 @@ event Opened()
 	else
 	{
 		bUsePassword = WorldInfo.Game.AccessControl.RequiresPassword();
-		RegisterServer(DVGame(WorldInfo.Game).ServerName, DVGame(WorldInfo.Game).ServerEmail, bUsePassword);
+		RegisterServer(
+				DVGame(WorldInfo.Game).ServerName,
+				DVGame(WorldInfo.Game).ServerEmail,
+				DVGame(WorldInfo.Game).ServerPassword,
+				bUsePassword);
 	}
 }
 

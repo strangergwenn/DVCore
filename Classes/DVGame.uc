@@ -24,6 +24,10 @@ var (DVGame) const int 					PointsForKill;
 var (DVGame) const float				SpawnProtectTime;//TODO
 var (DVGame) const float				SaveTimeout;
 
+var (DVGame) string						ServerName;
+var (DVGame) string						ServerEmail;
+var (DVGame) string						ServerPassword;
+
 
 /*----------------------------------------------------------
 	Private attributes
@@ -38,9 +42,6 @@ var	DVTeamInfo							Teams[2];
 var float								HeartbeatTick;
 var float								EndGameTick;
 var float								RestartTimer;
-
-var string								ServerName;
-var string								ServerEmail;
 
 
 /*----------------------------------------------------------
@@ -72,6 +73,16 @@ event InitGame( string Options, out string ErrorMessage )
 	else
 	{
 		ServerEmail = "no-email-given";
+	}
+
+	InOpt = ParseOption(Options, "serverpassword");
+	if (InOpt != "")
+	{
+		ServerPassword = InOpt;
+	}
+	else
+	{
+		ServerPassword = "";
 	}
 }
 
