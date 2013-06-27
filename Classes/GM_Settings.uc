@@ -206,11 +206,11 @@ simulated function SpawnUI()
 	ResDropList = AddDropList(Vect(-280,0,280), "Resolution", "Resolution", ResListData, class'GDL_Small');
 	
 	// Mouse
-	AddLabel(Vect(100,0,470), lMouse);
-	AddLabel(Vect(120,0,440), lSensitivity);
-	Sensitivity = AddTextField(Vect(320,0,440));
+	AddLabel(Vect(100,0,400), lMouse);
+	AddLabel(Vect(120,0,370), lSensitivity);
+	Sensitivity = AddTextField(Vect(320,0,370));
 	Sensitivity.SetText(""$(DVPlayerInput(PC.PlayerInput).MouseSensitivity * 2.5));
-	Invert = GToggleButton(AddButton(Vect(120,0,410), lInvert, "", GoToggle));
+	Invert = GToggleButton(AddButton(Vect(120,0,340), lInvert, "", GoToggle));
 	Invert.SetState(DVPlayerInput(PC.PlayerInput).bInvertMouse);
 
 	// Key editing
@@ -218,7 +218,7 @@ simulated function SpawnUI()
 	{
 		Key = DVPlayerInput(PC.PlayerInput).GetKeyBinding(BindListData[i]);
 		Temp = GToggleButton(AddButton(
-			Vect(100,0,380) - i * Vect(0,0,30),
+			Vect(100,0,310) - i * Vect(0,0,30),
 			Key $ Separator $ KeyListData[i],
 			"",
 			GoKey
@@ -226,10 +226,10 @@ simulated function SpawnUI()
 		EditKeyButtons.AddItem(Temp);
 	}
 	
-	// Setting save
+	// Setting save and previous
 	PreviousMenu = GetRelatedMenu(true);
-	AddMenuLink(Vect(0,0,70), PreviousMenu, class'GButton');
-	Validate = AddButton(Vect(300,0,70), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
+	AddMenuLink(Vect(-320,0,470), PreviousMenu, class'GButton');
+	Validate = AddButton(Vect(320,0,470), lSaveSettings, lSaveSettings, GoValidate, class'GButton');
 }
 
 
@@ -241,6 +241,7 @@ defaultproperties
 {
 	Index=30
 	Separator="   |   "
+	LabelOffset=(X=320,Y=0,Z=470)
 	bIsKeyEditing=false
 	ButtonClass=class'GToggleButton'
 	BindListData=("GBA_MoveForward","GBA_Backward","GBA_StrafeLeft","GBA_StrafeRight","GBA_Jump","GBA_Duck","GBA_Use","GBA_ShowCommandMenu","GBA_Talk","GBA_Activate")

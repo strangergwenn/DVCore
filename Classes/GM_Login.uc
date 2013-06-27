@@ -212,10 +212,7 @@ simulated function Enter()
 delegate GoBack(Actor Caller)
 {
 	`log("GM > GoBack" @self);
-	if (Origin != None)
-	{
-		ChangeMenu(GetMenuByID(0));
-	}
+	ChangeMenu(GetMenuByID(0));
 }
 
 
@@ -251,6 +248,8 @@ simulated function SpawnUI()
 
 defaultproperties
 {
+	bNoOrigin=true
+	bNoEscapeBack=true
 	Index=9999
 	BackDelay=1.0
 }

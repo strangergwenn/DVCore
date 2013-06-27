@@ -33,8 +33,8 @@ var array<Texture2D>					PictureList;
 simulated function SpawnUI()
 {
 	Super.SpawnUI();
-	Spectate = AddButton(Vect(0,0,0), lMSpectateText, lMSpectateComment, GoSpectate);
-	Spectate.Deactivate();
+	//Spectate = AddButton(Vect(0,0,470), lMSpectateText, lMSpectateComment, GoSpectate);
+	//Spectate.Deactivate();
 }
 
 
@@ -48,7 +48,7 @@ simulated event Tick(float DeltaTime)
 	if (CurrentData == "" && Launch != None)
 	{
 		Launch.Deactivate();
-		Spectate.Deactivate();
+		//Spectate.Deactivate();
 	}
 }
 
@@ -116,7 +116,7 @@ delegate GoSelect(Actor Caller)
 	else
 	{
 		Launch.Deactivate();
-		Spectate.Deactivate();
+		//Spectate.Deactivate();
 		CurrentData = "";
 	}
 }
@@ -217,6 +217,6 @@ function string FormatServerInfo(string ServerName, string Level, string Game, i
 defaultproperties
 {
 	Index=2100
-	ListOffset=(X=120,Y=-50,Z=30)
+	ListOffset=(X=100,Y=-50,Z=-20)
 	ScrollOffset=(X=0,Y=0,Z=90)
 }

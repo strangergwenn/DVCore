@@ -293,7 +293,7 @@ defaultproperties
 	
 	MenuDelay=0.5
 	HitWarningLength=0.2
-	GameplayMessageTime=3.0
+	GameplayMessageTime=4.0
 	MaxNameDistance=5000
 	MinNameAngle=0.95
 	

@@ -87,7 +87,7 @@ simulated function SpawnUI()
 	local array<string>	PlayerList;
 
 	NextMenu = GetRelatedMenu(false);
-	AddMenuLink(Vect(0,0,50), NextMenu);
+	AddMenuLink(Vect(320,0,470), NextMenu);
 
 	// Stat block 5
 	AddLabel(Vect(250,0,400), lBestPLayers);

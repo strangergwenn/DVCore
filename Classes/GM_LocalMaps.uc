@@ -70,7 +70,7 @@ function UpdateList()
 defaultproperties
 {
 	Index=2000
-	ListOffset=(X=120,Y=-50,Z=30)
+	ListOffset=(X=100,Y=-50,Z=-20)
 	ScrollOffset=(X=0,Y=0,Z=90)
 	IgnoreList=("LD","FX","AMB","ART","FX","PROPS","LIGHTS","DECALS","ENVIRO","ENVIRONMENT","DEFAULTMAP")
 }

@@ -87,5 +87,6 @@ simulated function SpawnUI()
 
 defaultproperties
 {
+	bNoOrigin=true
 	Index=4500
 }

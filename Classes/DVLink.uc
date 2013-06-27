@@ -245,11 +245,12 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 	{
 		if (Params.Length > 0)
 		{
+			`log("DVLINK > CMD >" @Command);
 			JoinArray(Params, ParamsString, ",");
 			Command $= ",";
 			Command $= ParamsString;
 		}
-		
+
 		WriteText(Command);
 	}
 }
@@ -267,7 +268,6 @@ simulated function WriteText(string data)
 	else
 	{
 		bSending = true;
-		`log("DVLINK > CMD >" @data);
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		SendText(data $"\n");
 		ParseStringIntoArray(data, OutputArray, ",", false);

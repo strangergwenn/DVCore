@@ -38,6 +38,14 @@ delegate GoExit(Actor Caller)
 }
 
 /**
+ * @brief Back button
+ * @param Reference				Caller actor
+ */
+delegate GoBack(Actor Caller)
+{
+}
+
+/**
  * @brief Spawn event
  */
 simulated function SpawnUI()
@@ -50,7 +58,7 @@ simulated function SpawnUI()
 	Temp.SetPicture(MultiPicture);
 	
 	Connect = AddMenuLink(Vect(0,0,470), GetMenuByID(9999));
-	AddButton(Vect(320,0,470), "Quit", "Quit the game", GoExit);
+	AddButton(Vect(420,0,50), "Quit", "Quit the game", GoExit);
 }
 
 
