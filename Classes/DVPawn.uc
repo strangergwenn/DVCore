@@ -745,7 +745,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	}
 	
 	// Blood impact
-	EndTrace = HitLocation + Momentum * 10.0;
+	EndTrace = HitLocation + Normal(Momentum) * 500.0;
 	SplatteredActor = Trace(BloodImpact, BloodNormal, EndTrace, HitLocation, true,,,TRACEFLAG_Bullet);
 	if (SplatteredActor != None && !bRunning)
 	{

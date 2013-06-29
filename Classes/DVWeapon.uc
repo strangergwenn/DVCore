@@ -798,8 +798,11 @@ simulated function PlayImpactEffects(vector HitLocation)
 		 && (ImpactEffect.ParticleTemplate != None))
 		{
 			HitNormal = normal(FireDir - ( 2 *  HitNormal * (FireDir dot HitNormal) ) ) ;
-			FireParticleSystem((HitActor.IsA('KActor') ? ImpactEffectDyn.ParticleTemplate : ImpactEffect.ParticleTemplate),
-					HitLocation, rotator(HitNormal), HitActor);
+			FireParticleSystem(((HitActor.IsA('KActor') || HitActor.IsA('InterpActor'))?
+					ImpactEffectDyn.ParticleTemplate : ImpactEffect.ParticleTemplate),
+					HitLocation,
+					rotator(HitNormal),
+					HitActor);
 		}
 	}
 }
