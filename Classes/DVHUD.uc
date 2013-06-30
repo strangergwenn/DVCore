@@ -148,6 +148,15 @@ simulated function PostBeginPlay()
 		HideWeaponMenu();
 		SetTimer(1.0, true, 'HideWeaponMenu');
 	}
+
+	// Are we dead and is the respawn menu closed ? WE SHALL FIX THIS
+	if (PC != None && !bRespawnOpened)
+	{
+		if (PC.Pawn == None || PC.Pawn.Health <= 0)
+		{
+			OpenWeaponMenu();
+		}
+	}
 }
 
 
@@ -160,6 +169,7 @@ simulated function OpenWeaponMenu()
 	HudMovie.PC = PC;
 	HudMovie.Scene.GotoAndPlayI(1);
 	HudMovie.InitParts();
+	bRespawnOpened = true;
 }
 
 /*-- Open the weapon choice menu --*/
@@ -167,6 +177,7 @@ simulated function HideWeaponMenu()
 {
 	`log("HideWeaponMenu");
 	HudMovie.HideWeaponList();
+	bRespawnOpened = false;
 }
 
 /*--- Shot effect ---*/
