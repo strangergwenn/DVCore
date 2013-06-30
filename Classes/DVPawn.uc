@@ -707,6 +707,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	local vector ApplyImpulse, ShotDir;
 	local DVPlayerController Attacker;
 	local Actor SplatteredActor;
+	local DVPawn P;
 
 	// Jumping multiplication & kill marker settings
 	if (InstigatedBy != None)
@@ -745,12 +746,15 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 	}
 	
 	// Blood impact
-	EndTrace = HitLocation + Normal(Momentum) * 500.0;
+	EndTrace = HitLocation + Normal(Momentum) * 1000.0;
 	SplatteredActor = Trace(BloodImpact, BloodNormal, EndTrace, HitLocation, true,,,TRACEFLAG_Bullet);
 	if (SplatteredActor != None && !bRunning)
 	{
-		if (!SplatteredActor.IsA('Pawn'))
-			SpawnBloodDecal(BloodImpact, BloodNormal);
+		foreach WorldInfo.AllPawns(class'DVPawn', P)
+		{
+			P.ClientSpawnBloodDecal(BloodImpact, BloodNormal);
+		}
+		bForceNetUpdate = true;
 	}
 	FireParticleSystem(HitPSCTemplate, HitLocation, rotator(Momentum));
 	
@@ -779,7 +783,7 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 
 
 /*--- Spawn a blood decal ---*/
-simulated function SpawnBloodDecal(vector BLocation, vector BRotation)
+reliable client simulated function ClientSpawnBloodDecal(vector BLocation, vector BRotation)
 {
 	// Vars
 	local MaterialInstanceConstant DecalTemplate;
@@ -1024,6 +1028,7 @@ defaultproperties
 	bCanCrouch=false
 	bLimitFallAccel=true
 	bHasGotTeamColors=false
+	bAlwaysEncroachCheck=true
 	
 	// Default
 	UserName=""

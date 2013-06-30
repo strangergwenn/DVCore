@@ -64,13 +64,26 @@ event PostRender()
 				HudMovie.UpdateScore(TI1.GetScore(), TI0.GetScore(), myOwner.GetTargetScore());
 		}
 	}
-	
-	// Debug
-	//PutShadedText(WhiteColor, "WIP - NOTHING IS FINAL - CLOSED DEVELOPPER VERSION - CODE CL 1287", 400, 10);
 
 	// End
 	//LabelAllIfViewed(class'DVPawn', MinNameAngle, MaxNameDistance * (myOwner.Zoomed() ? 2.0:1.0));
 	super.PostRender();
+
+	// Are we dead and is the respawn menu closed ? WE SHALL FIX THIS
+	if (myOwner != None)
+	{
+		if (myOwner.Pawn == None || myOwner.Pawn.Health <= 0)
+		{
+			if (!bRespawnOpened)
+			{
+				OpenWeaponMenu();
+			}
+		}
+		else
+		{
+			bRespawnOpened = false;
+		}
+	}
 }
 
 
@@ -143,20 +156,11 @@ simulated function PostBeginPlay()
 	LocalPlayer(PC.Player).ViewportClient.GetViewportSize(ViewportSize);
 
 	OpenWeaponMenu();
-	if (PC.PlayerReplicationInfo.bOnlySpectator)
+	/*if (PC.PlayerReplicationInfo.bOnlySpectator)
 	{
 		HideWeaponMenu();
 		SetTimer(1.0, true, 'HideWeaponMenu');
-	}
-
-	// Are we dead and is the respawn menu closed ? WE SHALL FIX THIS
-	if (PC != None && !bRespawnOpened)
-	{
-		if (PC.Pawn == None || PC.Pawn.Health <= 0)
-		{
-			OpenWeaponMenu();
-		}
-	}
+	}*/
 }
 
 
@@ -172,12 +176,10 @@ simulated function OpenWeaponMenu()
 	bRespawnOpened = true;
 }
 
-/*-- Open the weapon choice menu --*/
+/*-- Close the weapon choice menu --*/
 simulated function HideWeaponMenu()
 {
 	`log("HideWeaponMenu");
-	HudMovie.HideWeaponList();
-	bRespawnOpened = false;
 }
 
 /*--- Shot effect ---*/
@@ -299,7 +301,6 @@ function PutText(color col, string StringMessage2, float ScreenX, float ScreenY,
 
 defaultproperties
 {
-	bRespawnOpened=true
 	HUDClass=class'DVCoreUI_HUD'
 	
 	MenuDelay=0.5

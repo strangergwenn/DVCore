@@ -509,7 +509,6 @@ function OnWeaponWidgetClick(GFxClikWidget.EventData ev)
 	// Restart
 	`log("CoreUI > Weapon selected");
 	SetGameUnPaused();
-	PC.SetAlreadyChosen(PC.Pawn.Health > 0);
 	PC.HUDRespawn(!bFirstFrame, NewWeapon);
 	bFirstFrame = false;
 	bInMenu = false;
@@ -554,7 +553,7 @@ function OnSwitchWeapon(GFxClikWidget.EventData ev)
 }
 
 
-/*--- Respawn menu ---*/
+/*--- Respawn menu for ON DEMAND menu (not when killed) ---*/
 reliable client simulated function OpenRespawnMenu(optional bool bKilledMenu)
 {
 	// Settings
@@ -583,14 +582,6 @@ reliable client simulated function OpenWeaponConfig()
 	bChatting = false;
 	SetGamePaused();
 	Scene.GotoAndPlayI(3);
-}
-
-
-/*--- Weapon data ---*/
-reliable client simulated function CloseRespawnMenu()
-{
-	SetGameUnPaused();
-	Scene.GotoAndPlayI(1);
 }
 
 
