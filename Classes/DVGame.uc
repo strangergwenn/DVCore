@@ -21,7 +21,6 @@ var (DVGame) const class<DVTeamInfo> 	TeamInfoClass;
 var (DVGame) const int					WeaponListLength;
 var (DVGame) const int 					MaxScore;
 var (DVGame) const int 					PointsForKill;
-var (DVGame) const float				SpawnProtectTime;//TODO
 var (DVGame) const float				SaveTimeout;
 
 var (DVGame) string						ServerName;
