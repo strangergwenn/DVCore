@@ -38,6 +38,9 @@ static function Texture2D GetTextureFromLevel(string LevelName)
 		case "LEVEL_02" :
 			return Texture2D'DV_UI.Textures.LEVEL_02';
 			break;
+		case "LEVEL_03" :
+			return Texture2D'DV_UI.Textures.LEVEL_03';
+			break;
 		default :
 			return Texture2D'DV_UI.Textures.LEVEL_0x';	
 	}
