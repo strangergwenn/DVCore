@@ -137,6 +137,7 @@ delegate GoValidate(Actor Caller)
 	// Application
 	flag = (FullScreen.GetState() ? "f" : "w");
 	GH_Menu(PC.myHUD).ApplyResolutionSetting(res, flag);
+	DVPlayerController(PC).SetMouseInvert(Invert.GetState());
 	
 	// Options
 	LS.SetBoolValue("bBackgroundMusic", BackgroundMusic.GetState());
