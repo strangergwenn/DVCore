@@ -18,16 +18,20 @@ var (DVPawn) const name				EyeSocket;
 var (DVPawn) const name				WeaponSocket;
 var (DVPawn) const name				WeaponSocket2;
 
+var (DVPawn) const int 				AllowedBadDisplacements;
+
 var (DVPawn) const float 			RecoilRiseTime;
 var (DVPawn) const float 			RecoilLowTime;
 var (DVPawn) const float 			RecoilOvershoot;
 
+var (DVPawn) const float			TeamMultiplier;
 var (DVPawn) const float 			DefaultFOV;
 var (DVPawn) const float 			HeadBobbingFactor;
 var (DVPawn) const float 			StandardEyeHeight;
 
 var (DVPawn) const float			ZoomedGroundSpeed;
 var (DVPawn) const float			UnzoomedGroundSpeed;
+var (DVPawn) const float 			MaxWorldDisplacement;
 
 var (DVPawn) const float			SprintDamagePeriod;
 var (DVPawn) const float			SprintDamage;
@@ -70,6 +74,7 @@ var	DVWeapon						OldWeaponReference;
 var repnotify LinearColor			TeamLight;
 var repnotify class<DVWeapon> 		CurrentWeaponClass;
 
+var bool							bOverDisplaced;
 var bool							bRising;
 var bool							bRunning;
 var bool 							bWasHS;
@@ -79,6 +84,10 @@ var bool							bHasGotTeamColors;
 
 var string			 				KillerName;
 var string							UserName;
+
+var int								BadDisplacements;
+
+var vector							LastLocation;
 
 var float							FeignDeathStartTime;
 
@@ -93,7 +102,7 @@ var float 							CurrentRecoilOffset;
 replication
 {
 	if ( bNetDirty )
-		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight, KM, bJumping, bRunning;
+		CurrentWeaponClass, UserName, KillerName, bWasHS, TeamLight, KM, bJumping, bRunning, BadDisplacements;
 }
 
 simulated event ReplicatedEvent(name VarName)
@@ -191,6 +200,13 @@ simulated event PostInitAnimTree(SkeletalMeshComponent SkelComp)
 		LeftLegControl = SkelControlFootPlacement(Mesh.FindSkelControl(LeftFootControlName));
 		RightLegControl = SkelControlFootPlacement(Mesh.FindSkelControl(RightFootControlName));
 	}
+}
+
+
+/*--- Bumped ---*/
+event Bump(Actor Other, PrimitiveComponent OtherComp, Vector HitNormal)
+{
+	BadDisplacements = 0;
 }
 
 
@@ -387,7 +403,9 @@ reliable server function SetGroundSpeed(float NewSpeed)
 /*--- Pawn tick ---*/
 simulated function Tick(float DeltaTime)
 {
+	local Vector Temp;
 	local float Pitch;
+	local float Displacement;
 	local rotator RecoilOffset;
 
 	// Weapon adjustment
@@ -457,6 +475,26 @@ simulated function Tick(float DeltaTime)
 		SetRunning(false);
 	}
 	bIsWalking = bRunning;
+
+	// Displacement check
+	Temp = Location - LastLocation;
+	Temp.Z = 0;
+	Displacement = (VSize(Temp) / DeltaTime);
+
+	if (Displacement > MaxWorldDisplacement && bOverDisplaced)
+	{
+		if (BadDisplacements > 0)
+		{
+			`log("DVP > Bad displacement" @BadDisplacements @Displacement);
+		}
+		BadDisplacements++;
+		if (BadDisplacements > AllowedBadDisplacements)
+		{
+			KilledBy(self);
+		}
+	}
+	bOverDisplaced = (Displacement > MaxWorldDisplacement);
+	LastLocation = Location;
 }
 
 
@@ -722,6 +760,12 @@ simulated event TakeDamage(int Damage, Controller InstigatedBy, vector HitLocati
 			}
 			if (Attacker.Pawn != None)
 				Damage *= DVPawn(Attacker.Pawn).GetJumpingFactor();
+		}
+
+		// Team damage
+		if (GetTeamIndex() == Attacker.GetTeamIndex() && InstigatedBy != Controller)
+		{
+			Damage = int(TeamMultiplier * float(Damage));
 		}
 	}
 	if (Controller != None && UserName == "")
@@ -1008,6 +1052,7 @@ defaultproperties
 	BloodDecals(2)=MaterialInstanceConstant'DV_CoreEffects.Material.MI_Blood3'
 	
 	// Weapons
+	TeamMultiplier=0.2
 	EyeSocket=EyeSocket
 	WeaponSocket=WeaponPoint
 	WeaponSocket2=DualWeaponPoint
@@ -1021,6 +1066,8 @@ defaultproperties
 	RecoilOvershoot=1.5
 
 	// Gameplay
+	MaxWorldDisplacement=1200
+	AllowedBadDisplacements=5
 	bDVLog=false
 	bWasHS=false
 	bZoomed=false
