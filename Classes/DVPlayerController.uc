@@ -7,6 +7,7 @@
 
 class DVPlayerController extends UDKPlayerController;
 
+
 /*----------------------------------------------------------
 	Public attributes
 ----------------------------------------------------------*/
@@ -18,11 +19,14 @@ var (DVPC) Actor					TargetObject;
 var (DVPC) bool 					bAmIZoomed;
 
 var (DVPC) const float 				ScoreLength;
+var (DVPC) const float 				MaxWorldDisplacement;
+
 
 var (DVPC) const int 				TickDivisor;
 var (DVPC) const int 				LeaderBoardLength;
-var (DVPC) const int 				LocalLeaderBoardOffset;
 var (DVPC) const int				ObjectCheckDistance;
+var (DVPC) const int 				LocalLeaderBoardOffset;
+var (DVPC) const int 				AllowedBadDisplacements;
 
 
 /*----------------------------------------------------------
@@ -58,9 +62,11 @@ var DVLink							MasterServerLink;
 
 var int								MaxScore;
 var int								FrameCount;
+var int								BadDisplacements;
 
 var byte							WeaponListLength;
 
+var vector							LastLocation;
 var vector							CurrentAimWorld;
 var vector							CurrentAimLocation;
 
@@ -82,7 +88,7 @@ var array<string>					LeaderBoardStructure2;
 replication
 {
 	if ( bNetDirty )
-		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength, MaxScore;
+		UserChoiceWeapon, EnemyTeamInfo, bLocked, WeaponList, WeaponListLength, MaxScore, BadDisplacements;
 }
 
 
@@ -442,10 +448,11 @@ unreliable server function ServerSetAim(vector Target)
 event PlayerTick(float DeltaTime)
 {
 	// Data
-	local vector StartTrace, EndTrace, HitLocation, HitNormal;
+	local vector StartTrace, EndTrace, HitLocation, HitNormal, Temp;
 	local rotator TraceDir;
 	local DVPawn P;
 	local Actor Target;
+	local float Displacement;
 	FrameCount += 1;
 	
 	if (Pawn != None && Pawn.Weapon != None && FrameCount % TickDivisor == 0)
@@ -477,6 +484,33 @@ event PlayerTick(float DeltaTime)
 		{
 			CurrentAimWorld = Vect(0,0,0);
 		}
+
+		// Displacement check
+		Temp = Pawn.Location - LastLocation;
+		Temp.Z = 0;
+		Displacement = VSize(Temp);
+		if (Displacement > MaxWorldDisplacement)
+		{
+			if (BadDisplacements > 0)
+			{
+				`log("DVPC > Bad displacement" @BadDisplacements @Displacement);
+			}
+			BadDisplacements++;
+			if (BadDisplacements > AllowedBadDisplacements)
+			{
+				if (WorldInfo.NetMode != NM_DedicatedServer)
+				{
+					ConsoleCommand("quit");
+					BadDisplacements = 0;
+				}
+				else
+				{
+					Pawn.KilledBy(Pawn);
+					BadDisplacements = 0;
+				}
+			}
+		}
+		LastLocation = Pawn.Location;
 	}
 	super.PlayerTick(DeltaTime);
 }
@@ -867,6 +901,7 @@ unreliable client simulated function ShowKilledBy(string KillerName)
 	{
 		ShowGenericMessage(lKilledBy @ KillerName $ " !");
 	}
+	BadDisplacements = 0;
 }
 
 
@@ -893,7 +928,7 @@ reliable client simulated function ShowKilled(string KilledName, bool bTeamKill)
 }
 
 
-/*--- Show the killer message ---*/ 
+/*--- Show the empty ammo message ---*/
 unreliable client simulated function ShowEmptyAmmo()
 {
 	ShowGenericMessage(lEmptyWeapon);
@@ -939,6 +974,7 @@ reliable client simulated function RegisterDeath()
 	{
 		LocalStats.SetIntValue("Deaths" , LocalStats.Deaths + 1);
 	}
+	BadDisplacements = 0;
 }
 
 
@@ -1210,6 +1246,9 @@ defaultproperties
 {
 	bLocked=true
 	
+	MaxWorldDisplacement=50
+	AllowedBadDisplacements=5
+
 	TickDivisor=1
 	ScoreLength=4.0
 	LeaderBoardLength=10
