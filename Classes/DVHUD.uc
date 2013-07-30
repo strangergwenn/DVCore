@@ -170,6 +170,7 @@ simulated function OpenWeaponMenu()
 	local DVPlayerController PC;
 	`log("OpenWeaponMenu");
 	PC = DVPlayerController(PlayerOwner);
+	HudMovie.CloseChat();
 	HudMovie.PC = PC;
 	HudMovie.Scene.GotoAndPlayI(1);
 	HudMovie.InitParts();
@@ -179,6 +180,7 @@ simulated function OpenWeaponMenu()
 /*-- Close the weapon choice menu --*/
 simulated function HideWeaponMenu()
 {
+	HudMovie.CloseChat();
 	`log("HideWeaponMenu");
 }
 
@@ -221,6 +223,7 @@ simulated function ShutdownMessage()
 /*--- Weapon data ---*/
 reliable client simulated function OpenWeaponConfig()
 {
+	HudMovie.CloseChat();
 	HudMovie.OpenWeaponConfig();
 }
 

@@ -137,6 +137,7 @@ function PostBeginPlay()
 	super.PostBeginPlay();
 	ServerLogAction("IPOS");
 	SetTimer(1.0, true, 'LogPosition');
+	SetRunning(false);
 }
 
 
@@ -1066,8 +1067,8 @@ defaultproperties
 	RecoilOvershoot=1.5
 
 	// Gameplay
-	MaxWorldDisplacement=1200
-	AllowedBadDisplacements=5
+	MaxWorldDisplacement=2000
+	AllowedBadDisplacements=10
 	bDVLog=false
 	bWasHS=false
 	bZoomed=false

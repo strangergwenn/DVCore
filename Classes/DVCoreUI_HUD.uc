@@ -179,8 +179,10 @@ simulated function SendChatMessage()
 		
 		text = ChatTextMC.GetString("text");
 		if (text != "")
-			ConsoleCommand("Say"@text);
-		
+		{
+			`log("CoreUI > Say" @text);
+			ConsoleCommand("Say" @text);
+		}
 		ChatTextMC.SetString("text", "...");
 	}
 	CloseChat();

@@ -70,6 +70,8 @@ var bool							bShouldStop;
 var bool							bConfiguring;
 var bool							bMusicStarted;
 
+var float 							NextAdminCmdTime;
+
 var string							CurrentId;
 
 var array<string>					LeaderBoardStructure;
@@ -1200,6 +1202,176 @@ state RoundEnded
 	ignores KilledBy, Falling, TakeDamage, Suicide, DrawHud;
 	exec function ShowCommandMenu(){}
 	function PlayerMove(float DeltaTime){}
+}
+
+
+/*----------------------------------------------------------
+	Admin commands
+----------------------------------------------------------*/
+
+
+function bool AdminCmdOk()
+{
+	if (WorldInfo.NetMode == NM_ListenServer && LocalPlayer(Player) != None)
+	{
+		return true;
+	}
+
+	if (WorldInfo.TimeSeconds < NextAdminCmdTime)
+	{
+		return false;
+	}
+
+	NextAdminCmdTime = WorldInfo.TimeSeconds + 5.0;
+	return true;
+}
+
+
+exec function AdminLogin(string Password)
+{
+	if (Password != "" && AdminCmdOk() )
+	{
+		ServerAdminLogin(Password);
+	}
+}
+
+
+reliable server function ServerAdminLogin(string Password)
+{
+	if ( (WorldInfo.Game.AccessControl != none) && AdminCmdOk() )
+	{
+		if ( WorldInfo.Game.AccessControl.AdminLogin(self, Password) )
+		{
+			WorldInfo.Game.AccessControl.AdminEntered(Self);
+		}
+	}
+}
+
+
+exec function AdminLogOut()
+{
+	if ( AdminCmdOk() )
+	{
+		ServerAdminLogOut();
+	}
+}
+
+
+reliable server function ServerAdminLogOut()
+{
+	if ( WorldInfo.Game.AccessControl != none )
+	{
+		if ( WorldInfo.Game.AccessControl.AdminLogOut(self) )
+		{
+			WorldInfo.Game.AccessControl.AdminExited(Self);
+		}
+	}
+}
+
+
+exec function Admin( string CommandLine )
+{
+	if (PlayerReplicationInfo.bAdmin)
+	{
+		ServerAdmin(CommandLine);
+	}
+}
+
+
+reliable server function ServerAdmin( string CommandLine )
+{
+	local string Result;
+
+	if ( PlayerReplicationInfo.bAdmin )
+	{
+		Result = ConsoleCommand( CommandLine );
+		if( Result!="" )
+			ClientMessage( Result );
+	}
+}
+
+
+exec function AdminKickBan( string S )
+{
+	if (PlayerReplicationInfo.bAdmin)
+	{
+		ServerKickBan(S,true);
+	}
+}
+
+
+exec function AdminKick( string S )
+{
+	if ( PlayerReplicationInfo.bAdmin )
+	{
+		ServerKickBan(S,false);
+	}
+}
+
+
+exec function AdminPlayerList()
+{
+	local PlayerReplicationInfo PRI;
+
+	if (PlayerReplicationInfo.bAdmin)
+	{
+		ClientMessage("Player List:");
+		foreach DynamicActors(class'PlayerReplicationInfo', PRI)
+		{
+			ClientMessage(PRI.PlayerID$"."@PRI.PlayerName @ "Ping:" @ INT((float(PRI.Ping) / 250.0 * 1000.0)) $ "ms)");
+		}
+	}
+}
+
+
+exec function AdminRestartMap()
+{
+	if (PlayerReplicationInfo.bAdmin)
+	{
+		ServerRestartMap();
+	}
+}
+
+
+reliable server function ServerRestartMap()
+{
+	if ( PlayerReplicationInfo.bAdmin )
+	{
+		WorldInfo.ServerTravel("?restart", false);
+	}
+}
+
+exec function AdminChangeMap( string URL )
+{
+	if (PlayerReplicationInfo.bAdmin)
+	{
+		ServerChangeMap(URL);
+	}
+}
+
+
+reliable server function ServerChangeMap(string URL)
+{
+	if ( PlayerReplicationInfo.bAdmin )
+	{
+		WorldInfo.ServerTravel(URL);
+	}
+}
+
+
+reliable server function ServerKickBan(string PlayerToKick, bool bBan)
+{
+	if (PlayerReplicationInfo.bAdmin || LocalPlayer(Player) != none )
+	{
+		if (bBan)
+		{
+			WorldInfo.Game.AccessControl.KickBan(PlayerToKick);
+		}
+		else
+		{
+			WorldInfo.Game.AccessControl.Kick(PlayerToKick);
+		}
+	}
 }
 
 
