@@ -78,6 +78,10 @@ event InitGame( string Options, out string ErrorMessage )
 	if (InOpt != "")
 	{
 		ServerPassword = InOpt;
+		if (AccessControl != None)
+		{
+			AccessControl.SetAdminPassword(InOpt);
+		}
 	}
 	else
 	{

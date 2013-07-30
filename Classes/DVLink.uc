@@ -21,6 +21,9 @@ var (DVLink) const string 			MasterServerIP;
 
 var (DVLink) string					CurrentID;
 
+var (DVLink) string					Separator;
+var (DVLink) string					Escapement;
+
 var (DVLink) localized string 		lOK;
 var (DVLink) localized string 		lNOK;
 
@@ -61,8 +64,8 @@ simulated function ConnectToMaster(string Username, string Password)
 	local array<string> Params;
 	
 	`log("DVLINK > ConnectToMaster");
-	Params.AddItem(Username);
-	Params.AddItem(Password);
+	Params.AddItem(Repl(Username, Separator, Escapement));
+	Params.AddItem(Repl(Password, Separator, Escapement));
 	SendServerCommand("CONNECT", Params, false);
 }
 
@@ -73,9 +76,9 @@ simulated function ConnectToMaster(string Username, string Password)
 reliable client simulated function RegisterUser(string Username, string Email, string Password)
 {
 	local array<string> Params;
-	Params.AddItem(Username);
-	Params.AddItem(Email);
-	Params.AddItem(Password);
+	Params.AddItem(Repl(Username, Separator, Escapement));
+	Params.AddItem(Repl(Email, Separator, Escapement));
+	Params.AddItem(Repl(Password, Separator, Escapement));
 	SendServerCommand("REG_USER", Params, false);
 }
 
@@ -86,9 +89,9 @@ reliable client simulated function RegisterUser(string Username, string Email, s
 reliable server simulated function RegisterServer(string ServerName, string Email, string Password, bool bUsePassword)
 {
 	local array<string> Params;
-	Params.AddItem(ServerName);
+	Params.AddItem(Repl(ServerName, Separator, Escapement));
 	Params.AddItem(Email);
-	Params.AddItem(Password);
+	Params.AddItem(Repl(Password, Separator, Escapement));
 	Params.AddItem(bUsePassword ? "1":"0");
 	SendServerCommand("DEC_SERVER", Params, false);
 }
@@ -122,9 +125,9 @@ reliable client simulated function GetServers(optional string GameName, optional
 
 	`log("DVLINK > GetServers");
 	if (GameName != "")
-		Params.AddItem(GameName);
+		Params.AddItem(Repl(GameName, Separator, Escapement));
 	if (MapName != "")
-		Params.AddItem(MapName);
+		Params.AddItem(Repl(MapName, Separator, Escapement));
 	SendServerCommand("GET_SERVERS", Params, false);
 }
 
@@ -246,8 +249,8 @@ simulated function SendServerCommand(string Command, array<string> Params, bool 
 		if (Params.Length > 0)
 		{
 			`log("DVLINK > CMD >" @Command);
-			JoinArray(Params, ParamsString, ",");
-			Command $= ",";
+			JoinArray(Params, ParamsString, Separator);
+			Command $= Separator;
 			Command $= ParamsString;
 		}
 
@@ -270,7 +273,7 @@ simulated function WriteText(string data)
 		bSending = true;
 		SetTimer(TimeoutLength, false, 'SignalTimeout');
 		SendText(data $"\n");
-		ParseStringIntoArray(data, OutputArray, ",", false);
+		ParseStringIntoArray(data, OutputArray, Separator, false);
 		LastCommandSent = OutputArray[0];
 	}
 }
@@ -294,7 +297,7 @@ simulated function WriteTextOnBuffer()
 simulated function array<string> GetServerCommand(string Input)
 {
 	local array<string> OutputArray;
-	ParseStringIntoArray(Input, OutputArray, ",", false);
+	ParseStringIntoArray(Input, OutputArray, Separator, false);
 	return OutputArray;
 }
 
@@ -529,7 +532,10 @@ defaultproperties
 	bIsOpened=false
 	bIsConnected=false
 	
+	Separator=","
+	Escapement=""
 	CurrentID="0"
+
 	TimeoutLength=5.0
 	ServerListUpdateFrequency=5.0
 	LinkMode=MODE_Text
